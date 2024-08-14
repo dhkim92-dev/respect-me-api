@@ -27,10 +27,13 @@ java {
 }
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    api("org.springframework.boot:spring-boot-starter")
+    api("org.springframework.boot:spring-boot-starter-web")
+    api("org.springframework.boot:spring-boot-starter-validation")
+    api("com.auth0:java-jwt:4.4.0")
+    api("org.jetbrains.kotlin:kotlin-reflect")
+    api("org.springframework.cloud:spring-cloud-starter-openfeign:4.1.3")
+    implementation("org.springframework.boot:spring-boot-starter-security")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.9.1")
     testImplementation("io.kotest:kotest-runner-junit5-jvm:5.9.1")
@@ -39,10 +42,14 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
-tasks.withType<Jar> {
+tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
+    enabled = false
+}
+
+tasks.withType<org.gradle.api.tasks.bundling.Jar> {
     archiveBaseName.set("${rootProject.group}.common")
     archiveVersion.set("${version}")
-//    archiveVersion.set(version)
+    archiveClassifier.set("lib")
 }
 
 tasks.test {
