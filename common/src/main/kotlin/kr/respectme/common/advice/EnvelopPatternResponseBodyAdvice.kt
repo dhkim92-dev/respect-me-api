@@ -13,9 +13,11 @@ import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.http.server.ServerHttpRequest
 import org.springframework.http.server.ServerHttpResponse
+import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
 
 @Order(Ordered.LOWEST_PRECEDENCE)
+@ControllerAdvice
 class EnvelopPatternResponseBodyAdvice: ResponseBodyAdvice<Any> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -30,14 +32,11 @@ class EnvelopPatternResponseBodyAdvice: ResponseBodyAdvice<Any> {
     ): Any? {
         // supports를 통과했기 때문에 무조건 ApplicationResponse가 존재함
         val applicationResponse = returnType.getMethodAnnotation(ApplicationResponse::class.java)!!
-        val responseCode = applicationResponse.responseCode as ResponseCode
-        response.setStatusCode(responseCode.status)
 
         return ApiResult<Any?>(
             traceId = null, // TODO traceId 추가
-            status = responseCode.status.value(),
-            code = responseCode.code,
-            message = responseCode.message,
+            status = applicationResponse.status,
+            message = applicationResponse.message,
             data = body,
         )
     }

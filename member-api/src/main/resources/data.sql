@@ -1,0 +1,4 @@
+INSERT INTO MEMBER(id, nickname, email, password, role, is_blocked, block_reason, created_at, updated_at) VALUES ('cfe9f74d-c81b-48e0-ae9e-0c186d9914b6', 'admin', 'admin@respect-me.kr', '$2b$12$W73CKCBO927PQ/LOzVlX2uKwxJQsbHRbZwt7Y1f6miKfuAOThQrzG', 'ROLE_ADMIN', 0,  '', current_timestamp, current_timestamp);
+INSERT INTO MEMBER(id, nickname, email, password, role, is_blocked, block_reason, created_at, updated_at) VALUES ('d979ee1b-ff41-475d-a194-b435c3c2118f', 'member_service', 'member-service@respect-me.kr', '$2b$12$W73CKCBO927PQ/LOzVlX2uKwxJQsbHRbZwt7Y1f6miKfuAOThQrzG', 'ROLE_SERVICE', 0,  '', current_timestamp, current_timestamp);
+INSERT INTO MEMBER(id, nickname, email, password, role, is_blocked, block_reason, created_at, updated_at) VALUES ('296100bd-d505-4996-92b7-b782707aaa71', 'auth_service', 'auth-service@respect-me.kr', '$2b$12$W73CKCBO927PQ/LOzVlX2uKwxJQsbHRbZwt7Y1f6miKfuAOThQrzG', 'ROLE_SERVICE', 0,  '', current_timestamp, current_timestamp);
+
