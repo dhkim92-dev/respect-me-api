@@ -27,13 +27,16 @@ java {
 }
 
 dependencies {
+    api("io.netty:netty-resolver-dns-native-macos:4.1.105.Final:osx-aarch_64")
     api("org.springframework.boot:spring-boot-starter")
     api("org.springframework.boot:spring-boot-starter-web")
+    api("org.springframework.boot:spring-boot-starter-webflux")
     api("org.springframework.boot:spring-boot-starter-validation")
     api("com.auth0:java-jwt:4.4.0")
     api("org.jetbrains.kotlin:kotlin-reflect")
     api("org.springframework.cloud:spring-cloud-starter-openfeign:4.1.3")
-    implementation("org.springframework.boot:spring-boot-starter-security")
+    api("org.springframework.boot:spring-boot-starter-security")
+    api("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.9.1")
     testImplementation("io.kotest:kotest-runner-junit5-jvm:5.9.1")

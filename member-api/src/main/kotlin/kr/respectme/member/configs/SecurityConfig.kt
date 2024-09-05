@@ -5,7 +5,10 @@ import kr.respectme.common.security.handler.EntrypointUnauthorizedHandler
 import kr.respectme.common.security.handler.JwtAccessDeniedHandler
 import kr.respectme.common.security.jwt.JwtAuthenticationFilter
 import kr.respectme.common.security.jwt.JwtAuthenticationProvider
+import kr.respectme.common.security.jwt.adapter.RestJwtAuthenticationAdapter
+import kr.respectme.common.security.jwt.port.JwtAuthenticationPort
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -20,16 +23,25 @@ import org.springframework.security.web.util.matcher.RequestMatcher
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
+    @Value("\${respect-me.msa.auth-api.url}")
+    private val authUrl: String,
     private val objectMapper: ObjectMapper,
-    private val jwtAuthenticationProvider: JwtAuthenticationProvider
 ) {
-//    private val WHITELIST_STATIC = arrayOf("/static/css/**", "/static/js/**", "*.ico", "/error")
-//    private val WHITELIST_SWAGGER = arrayOf("/swagger-ui", "/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs", "/api-docs", "/api-docs/**")
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    @Bean
+    fun jwtAuthenticationPort(): JwtAuthenticationPort {
+        return RestJwtAuthenticationAdapter("${authUrl}/api/v1/auth/jwt/verify")
+    }
+
+    @Bean
+    fun jwtAuthenticationProvider(): JwtAuthenticationProvider {
+        return JwtAuthenticationProvider(jwtAuthenticationPort(), objectMapper)
+    }
 
     fun excludePathMatcher(): RequestMatcher {
         val pathMatchers = listOf(
-            AntPathRequestMatcher("/api/v1/members/sign-in", "POST"),
+            AntPathRequestMatcher("/api/v1/members", "POST"),
             AntPathRequestMatcher("/static/**"),
             AntPathRequestMatcher("/swagger-ui/**"),
             AntPathRequestMatcher("/v3/**"),
@@ -39,7 +51,7 @@ class SecurityConfig(
     }
 
     fun jwtAuthenticationFilter(): JwtAuthenticationFilter {
-        return JwtAuthenticationFilter(excludePathMatcher(), jwtAuthenticationProvider, objectMapper)
+        return JwtAuthenticationFilter(excludePathMatcher(), jwtAuthenticationProvider(), objectMapper)
     }
 //
     @Bean
@@ -54,6 +66,7 @@ class SecurityConfig(
 
     @Bean
     fun httpSecurity(http: HttpSecurity): SecurityFilterChain {
+        logger.debug("httpSecurity called.")
         return http.httpBasic { it.disable() }
             .csrf { it.disable() }
             .formLogin { it.disable() }

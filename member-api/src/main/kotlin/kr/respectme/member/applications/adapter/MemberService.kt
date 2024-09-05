@@ -3,6 +3,7 @@ package kr.respectme.member.applications.adapter
 import kr.respectme.common.error.ConflictException
 import kr.respectme.common.error.ForbiddenException
 import kr.respectme.common.error.NotFoundException
+import kr.respectme.common.utility.UUIDV7Generator
 import kr.respectme.member.applications.dto.CreateMemberCommand
 import kr.respectme.member.applications.dto.LoginCommand
 import kr.respectme.member.applications.dto.ModifyNicknameCommand
@@ -13,11 +14,12 @@ import kr.respectme.member.domain.dto.MemberDto
 import kr.respectme.member.domain.mapper.MemberMapper
 import kr.respectme.member.domain.model.Member
 import kr.respectme.member.domain.model.MemberRole
-import kr.respectme.member.infrastructures.port.MemberLoadPort
-import kr.respectme.member.infrastructures.port.MemberSavePort
+import kr.respectme.member.infrastructures.persistence.port.MemberLoadPort
+import kr.respectme.member.infrastructures.persistence.port.MemberSavePort
+import org.slf4j.LoggerFactory
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.*
 
 @Service
@@ -28,11 +30,16 @@ class MemberService(
     private val memberMapper: MemberMapper
 ): MemberUseCase {
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     override fun login(command: LoginCommand): MemberDto {
         val member = memberLoadPort.getMemberByEmail(command.email)
             ?: throw NotFoundException(MEMBER_NOT_FOUND)
 
-        if(!passwordEncoder.matches(command.password, member.password)) throw ForbiddenException(PASSWORD_MISMATCH)
+        if(!passwordEncoder.matches(command.password, member.password)) {
+            logger.debug("password mismatching")
+            throw ForbiddenException(PASSWORD_MISMATCH)
+        }
 
         return memberMapper.memberToMemberDto(member)
     }
@@ -44,14 +51,14 @@ class MemberService(
 
         val member = memberSavePort.save(
             Member(
-                id = UUID.randomUUID(),
+                id = UUIDV7Generator.generate(),
                 nickname = command.nickname,
                 email = command.email,
                 password = passwordEncoder.encode(command.password),
                 role = MemberRole.ROLE_MEMBER,
                 isBlocked = false,
                 blockReason = "",
-                createdAt = LocalDateTime.now()
+                createdAt = Instant.now()
             )
         )
 

@@ -22,7 +22,7 @@ fun createJwtConfigs(
     )
 }
 
-fun createAccessToken(member: Member, configs: JwtConfigs, timestamp: Long = 360000): String {
+fun createAccessToken(member: Member, configs: JwtConfigs, timestamp: Long = 360000, permanent: Boolean = false): String {
     return JWT.create()
         .withIssuer(configs.issuer)
         .withClaim("id", member.id.toString())
@@ -31,7 +31,7 @@ fun createAccessToken(member: Member, configs: JwtConfigs, timestamp: Long = 360
         .sign(Algorithm.HMAC512(configs.accessTokenSecretKey))
 }
 
-fun createRefreshToken(member: Member, configs: JwtConfigs, timestamp: Long = 360000): String {
+fun createRefreshToken(member: Member, configs: JwtConfigs, timestamp: Long = 360000, permanent: Boolean = false): String {
     return JWT.create()
         .withIssuer(configs.issuer)
         .withClaim("id", member.id.toString())

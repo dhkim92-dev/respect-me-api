@@ -2,7 +2,7 @@ package kr.respectme.member.domain.mapper
 
 import kr.respectme.member.domain.dto.MemberDto
 import kr.respectme.member.domain.model.Member
-import kr.respectme.member.domain.model.JpaMemberEntity
+import kr.respectme.member.infrastructures.persistence.jpa.JpaMemberEntity
 import org.springframework.stereotype.Component
 
 @Component

@@ -7,6 +7,8 @@ import kr.respectme.member.applications.port.MemberUseCase
 import kr.respectme.member.interfaces.dto.LoginRequest
 import kr.respectme.member.interfaces.dto.MemberResponse
 import kr.respectme.member.interfaces.port.InternalQueryPort
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.OK
 import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
@@ -15,7 +17,7 @@ import java.util.UUID
 class RestInternalAdapter(private val memberUseCase: MemberUseCase): InternalQueryPort {
 
     @PostMapping("/login")
-    @ApplicationResponse(status=200, message = "login success.")
+    @ApplicationResponse(status=OK, message = "login success.")
     override fun getMemberWithPassword(
         @ServiceAccount serviceAccountId: UUID,
         @RequestBody request: LoginRequest)
@@ -24,7 +26,7 @@ class RestInternalAdapter(private val memberUseCase: MemberUseCase): InternalQue
     }
 
     @GetMapping("/{memberId}")
-    @ApplicationResponse(status = 200, message = "get member success.")
+    @ApplicationResponse(status = OK, message = "get member success.")
     override fun getMember(
         @ServiceAccount serviceAccountId: UUID,
         @PathVariable memberId: UUID

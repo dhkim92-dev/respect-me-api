@@ -4,7 +4,7 @@ import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import kr.respectme.member.domain.dto.MemberDto
 import kr.respectme.member.domain.mapper.MemberMapper
-import kr.respectme.member.domain.model.JpaMemberEntity
+import kr.respectme.member.infrastructures.persistence.jpa.JpaMemberEntity
 import kr.respectme.member.domain.model.Member
 import kr.respectme.member.support.createJpaMember
 import kr.respectme.member.support.createMember

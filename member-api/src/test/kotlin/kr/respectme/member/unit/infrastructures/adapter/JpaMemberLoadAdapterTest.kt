@@ -8,8 +8,8 @@ import io.mockk.every
 import io.mockk.mockk
 import kr.respectme.member.domain.mapper.MemberMapper
 import kr.respectme.member.domain.model.Member
-import kr.respectme.member.infrastructures.adapter.JpaMemberLoadAdapter
-import kr.respectme.member.infrastructures.adapter.jpa.JpaMemberRepository
+import kr.respectme.member.infrastructures.persistence.adapter.JpaMemberLoadAdapter
+import kr.respectme.member.infrastructures.persistence.adapter.jpa.JpaMemberRepository
 import kr.respectme.member.support.createMember
 import kr.respectme.member.support.createMembers
 import org.springframework.data.repository.findByIdOrNull
@@ -17,7 +17,7 @@ import org.springframework.data.repository.findByIdOrNull
 internal class JpaMemberLoadAdapterTest: BehaviorSpec({
 
     lateinit var jpaMemberRepository: JpaMemberRepository
-    lateinit var jpaMemberLoadAdapter:JpaMemberLoadAdapter
+    lateinit var jpaMemberLoadAdapter: JpaMemberLoadAdapter
     val memberMapper = MemberMapper()
 
     beforeSpec {

@@ -16,8 +16,8 @@ import java.util.*
 interface RestMemberLoadAdapter : MemberLoadPort {
 
     @GetMapping(value = ["/internal/api/v1/members/login"], consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
-    override fun getMemberByEmailAndPassword(@RequestBody request: LoginRequest): ApiResult<Member?>
+    override fun loadMemberByEmailAndPassword(@RequestBody request: LoginRequest): ApiResult<Member?>
 
     @GetMapping(value = ["/internal/api/v1/members/{memberId}"], consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
-    override fun getMemberById(@PathVariable memberId: UUID): ApiResult<Member?>
+    override fun loadMemberById(@PathVariable memberId: UUID): ApiResult<Member?>
 }

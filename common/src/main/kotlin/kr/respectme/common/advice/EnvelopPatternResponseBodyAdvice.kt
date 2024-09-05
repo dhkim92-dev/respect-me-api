@@ -2,6 +2,7 @@ package kr.respectme.common.advice
 
 import kr.respectme.common.annotation.ApplicationResponse
 import kr.respectme.common.response.ApiResult
+import kr.respectme.common.response.CursorList
 import kr.respectme.common.response.ResponseCode
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -32,10 +33,11 @@ class EnvelopPatternResponseBodyAdvice: ResponseBodyAdvice<Any> {
     ): Any? {
         // supports를 통과했기 때문에 무조건 ApplicationResponse가 존재함
         val applicationResponse = returnType.getMethodAnnotation(ApplicationResponse::class.java)!!
+        response.setStatusCode(applicationResponse.status)
 
         return ApiResult<Any?>(
             traceId = null, // TODO traceId 추가
-            status = applicationResponse.status,
+            status = applicationResponse.status.value(),
             message = applicationResponse.message,
             data = body,
         )

@@ -13,7 +13,7 @@ import org.springframework.security.core.AuthenticationException
 class EntrypointUnauthorizedHandler(): AuthenticationEntryPoint {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val objectMapper = ObjectMapper()
+//    private val objectMapper = ObjectMapper()
 
     companion object {
         private val DEFAULT_UNAUTHORIZED_EXCEPTION = ObjectMapper().writeValueAsString(
@@ -29,9 +29,9 @@ class EntrypointUnauthorizedHandler(): AuthenticationEntryPoint {
         logger.error("Unauthorized Error, ${authException.message}")
         val message = when(authException) {
             is JwtAuthenticationException -> authException.message
-            else -> objectMapper.writeValueAsString(DEFAULT_UNAUTHORIZED_EXCEPTION)
+            else -> DEFAULT_UNAUTHORIZED_EXCEPTION
         }
-        response?.contentType = "application/json; charset=utf-8"
+        response.contentType = "application/json;charset=UTF-8"
         response.status = HttpServletResponse.SC_UNAUTHORIZED
         response.writer.write(message)
         response.writer.flush()

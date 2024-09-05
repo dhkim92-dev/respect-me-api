@@ -3,6 +3,7 @@ package kr.respectme.common.advice
 import kr.respectme.common.annotation.CursorPagination
 import kr.respectme.common.annotation.CursorParam
 import kr.respectme.common.utility.PaginationUtility
+import org.slf4j.LoggerFactory
 import org.springframework.core.MethodParameter
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -21,6 +22,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
 @ControllerAdvice
 class CursorPaginationAdvice: ResponseBodyAdvice<Any?> {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     override fun beforeBodyWrite(
         body: Any?,
         returnType: MethodParameter,
@@ -29,14 +32,16 @@ class CursorPaginationAdvice: ResponseBodyAdvice<Any?> {
         request: ServerHttpRequest,
         response: ServerHttpResponse
     ): Any? {
+        logger.debug("cursor pagination advice beforeBodyWrite")
         val servletRequestAttributes = RequestContextHolder.getRequestAttributes()
                 as? ServletRequestAttributes
         val handler = servletRequestAttributes?.getAttribute("org.springframework.web.servlet.HandlerMapping.bestMatchingHandler", 0)
                 as? HandlerMethod
-        val params = handler?.methodParameters
+        val params = handler?.methodParameters?.filter { it.hasParameterAnnotation(CursorParam::class.java) }
         val queryMap = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes)
             .request
             .parameterMap
+        logger.debug(params?.map{it.parameterName}.toString())
 
         return if (body is List<*>) {
             params?.let { PaginationUtility.toCursorList(body, params.toList(), queryMap) }

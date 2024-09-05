@@ -1,8 +1,8 @@
 package kr.respectme.common.utility
 
-import jakarta.servlet.http.HttpServletRequest
 import kr.respectme.common.annotation.CursorParam
 import kr.respectme.common.response.CursorList
+import org.slf4j.LoggerFactory
 import org.springframework.core.MethodParameter
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
@@ -13,11 +13,15 @@ import kotlin.reflect.jvm.isAccessible
 
 class PaginationUtility {
 
+
     companion object {
 
-        private fun getHost(): String {
+        private val logger = LoggerFactory.getLogger(javaClass)
+
+        private fun getRequestUrl(): String {
             val request = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
             val url = request.requestURL.toString()
+            logger.debug("string url : ${url}")
 
             return when {
                 url.startsWith("https:") -> url
@@ -32,15 +36,19 @@ class PaginationUtility {
             parameters: List<MethodParameter>,
             queryMap: Map<String, Array<String>>
         ): CursorList<Any?> {
-            val paramMap = parameters.filter { param -> param.hasMethodAnnotation(CursorParam::class.java) }
+            val paramMap = parameters.filter { param -> param.hasParameterAnnotation(CursorParam::class.java) }
                 .map{param ->  param.parameterName!! to param.getParameterAnnotation(CursorParam::class.java)!! }
                 .toMap()
             val lastElement = data.lastOrNull()
-            val uriBuilder = UriComponentsBuilder.fromOriginHeader(getHost())
+            val url = getRequestUrl()
+            logger.debug("getRequestUrl : ${url}")
+//            val uriBuilder = UriComponentsBuilder.fromOriginHeader(getRequestUrl())
+            val uriBuilder = UriComponentsBuilder.fromHttpUrl(url)
 
             for(param in paramMap) {
                 val queryKey = param.key
                 val path = param.value.key
+                logger.debug("queryKey : ${queryKey} path : ${path}")
                 if(param.value.inherit) {
                     uriBuilder.queryParam(queryKey, queryMap[queryKey])
                 }
@@ -48,12 +56,15 @@ class PaginationUtility {
                     uriBuilder.queryParam(queryKey, obj.toString())
                 }
             }
-            val uri = uriBuilder.toUriString()
+
             val pageSize = queryMap["size"]
                 ?.takeIf { it.isNotEmpty() }
                 ?.firstOrNull()
                 ?.toIntOrNull()
-                ?: 40
+                ?: 20
+
+            val uri = uriBuilder.queryParam("size", pageSize).toUriString()
+            logger.debug("""uri : ${uri}""")
 
             return CursorList.of(data, uri, pageSize)
         }

@@ -33,12 +33,15 @@ java {
 }
 
 dependencies {
+//    runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.112.Final")
     implementation(project(":common"))
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+
+//    implementation("org.springframework.boot:spring-boot-starter-security")
+//    implementation("org.springframework.boot:spring-boot-starter-validation")
     runtimeOnly("org.flywaydb:flyway-database-postgresql:10.8.1")
     implementation("org.mapstruct:mapstruct:1.5.3.Final")
     kapt("org.mapstruct:mapstruct-processor:1.5.2.Final")

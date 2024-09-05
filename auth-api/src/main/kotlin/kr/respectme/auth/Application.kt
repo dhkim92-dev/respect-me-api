@@ -7,8 +7,9 @@ import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.ComponentScans
 
 @SpringBootApplication
-@EnableFeignClients(basePackages = ["kr.respectme.common.security.jwt.adapter", "kr.respectme.auth"])
-@ComponentScans(value=[ComponentScan("kr.respectme.common"), ComponentScan("kr.respectme.auth")])
+//@EnableFeignClients(basePackages = ["kr.respectme.common.security.jwt.adapter", "kr.respectme.auth"])
+//@ComponentScans(value=[ComponentScan("kr.respectme.common"), ComponentScan("kr.respectme.auth")])
+@EnableFeignClients
 class Application {
 }
 

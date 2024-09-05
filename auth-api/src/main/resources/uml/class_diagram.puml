@@ -1,0 +1,46 @@
+@startuml
+
+
+interface MemberLoadPort {
+    + loadMemberById(memberId: UUID): ApiResult<Member?>
+    + loadMemberByEmail(email: String): ApiResult<Member?>
+}
+
+interface AuthenticationUseCase {
+    + login(loginRequest: LoginRequest): AuthenticationResult
+    + validateToken(token: String): TokenValidationResult
+    + refreshAccessToken(refreshToken: String): AuthenticationResult
+}
+
+interface AuthServicePort {
+    + login(loginRequest: LoginRequest): LoginResponse
+    + verifyAccessToken(request: VerifyAccessTokenRequest): VerifyAccessTokenResponse
+    + reissueAccessToken(request: RefreshAccessTokenRequest): LoginResponse
+}
+
+class RestMemberLoadAdapter {
+    - feignClient: FeignClient
+    +loadMemberById(memberId: UUID): ApiResult<Member?>
+    +loadMemberByEmail(email: String): ApiResult<Member?>
+}
+
+class AuthenticationService {
+    - memberLoadPort: MemberLoadPort
+    + (loginRequest: LoginRequest): AuthenticationResult
+    + validateToken(token: String): TokenValidationResult
+    + refreshAccessToken(refreshToken: String): AuthenticationResult
+}
+
+class RestAuthServiceAdapter {
+    - authenticationUseCase: AuthenticationUseCase
+    + login(loginRequest: LoginRequest): LoginResponse
+    + verifyAccessToken(request: VerifyAccessTokenRequest): VerifyAccessTokenResponse
+    + reissueAccessToken(request: RefreshAccessTokenRequest): LoginResponse
+}
+
+AuthServicePort <|-- RestAuthServiceAdapter
+MemberLoadPort <|-- RestMemberLoadAdapter
+AuthenticationUseCase <|-- AuthenticationService
+AuthenticationService -> MemberLoadPort: <<use>>
+RestAuthServiceAdapter -> AuthenticationUseCase: <<use>>
+@enduml

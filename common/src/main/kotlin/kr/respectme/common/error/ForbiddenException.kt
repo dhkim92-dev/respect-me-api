@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus
 class ForbiddenException(
     override val code: String,
     override val message: String
-): BusinessException(HttpStatus.UNAUTHORIZED, code, message) {
+): BusinessException(status = HttpStatus.FORBIDDEN, code = code, message = message) {
 
     constructor(errorCode: ErrorCode): this(message = errorCode.message, code = errorCode.code)
 }
