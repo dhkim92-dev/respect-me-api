@@ -19,6 +19,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.security.web.util.matcher.OrRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebSecurity
@@ -26,8 +29,15 @@ class SecurityConfig(
     @Value("\${respect-me.msa.auth-api.url}")
     private val authUrl: String,
     private val objectMapper: ObjectMapper,
+    @Value("\${server.cors.allowed-origins}")
+    private val allowedOriginsString: String
 ) {
+
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    private val allowedOrigins: List<String> by lazy {
+        allowedOriginsString.split(",")
+    }
 
     @Bean
     fun jwtAuthenticationPort(): JwtAuthenticationPort {
@@ -43,9 +53,10 @@ class SecurityConfig(
         val pathMatchers = listOf(
             AntPathRequestMatcher("/api/v1/members", "POST"),
             AntPathRequestMatcher("/static/**"),
-            AntPathRequestMatcher("/swagger-ui/**"),
-            AntPathRequestMatcher("/v3/**"),
-            AntPathRequestMatcher("/api-docs/**"),
+            AntPathRequestMatcher("/members/swagger-ui.html"),
+            AntPathRequestMatcher("/members/v3/api-docs"),
+//            AntPathRequestMatcher("/v3/**"),
+//            AntPathRequestMatcher("/api-docs/**"),
         )
         return OrRequestMatcher(*pathMatchers.toTypedArray())
     }
@@ -65,6 +76,22 @@ class SecurityConfig(
     }
 
     @Bean
+    fun corsConfig(): CorsConfiguration {
+        val config = CorsConfiguration()
+        config.allowedOrigins = allowedOrigins
+        config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        config.allowedHeaders = listOf("*")
+        return config
+    }
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", corsConfig())
+        return source
+    }
+
+    @Bean
     fun httpSecurity(http: HttpSecurity): SecurityFilterChain {
         logger.debug("httpSecurity called.")
         return http.httpBasic { it.disable() }
@@ -77,8 +104,10 @@ class SecurityConfig(
                 it.authenticationEntryPoint(unauthorizedEntryPoint())
             }
             .authorizeHttpRequests {
+                it.requestMatchers("/members/swagger-ui.html", "/members/v3/api-docs", "/members/swagger-ui/**", "/members/v3/api-docs/**").permitAll()
                 it.requestMatchers("/internal/api/v1/members/**").hasRole("SERVICE")
-                it.anyRequest().permitAll()
+                it.requestMatchers("/api/v1/members", "POST").permitAll()
+                it.anyRequest().authenticated()
             }
             .build()
     }

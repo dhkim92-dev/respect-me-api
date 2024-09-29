@@ -25,6 +25,9 @@ import org.springframework.security.web.header.writers.frameoptions.XFrameOption
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.security.web.util.matcher.OrRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
@@ -33,9 +36,15 @@ class SecurityConfig(
     @Value("\${respect-me.msa.auth-api.url}")
     private val authUrl: String,
     private val objectMapper: ObjectMapper,
+    @Value("\${server.cors.allowed-origins}")
+    private val allowedOriginsString: String
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    private val allowedOrigins: List<String> by lazy {
+        allowedOriginsString.split(",")
+    }
 
     @Bean
     fun jwtAuthenticationPort(): JwtAuthenticationPort {
@@ -79,6 +88,21 @@ class SecurityConfig(
         return WebSecurityCustomizer { web -> web.ignoring().requestMatchers(PathRequest.toH2Console()) }
     }
 
+    @Bean
+    fun corsConfig(): CorsConfiguration {
+        val config = CorsConfiguration()
+        config.allowedOrigins = allowedOrigins;
+        config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS");
+        config.allowedHeaders = listOf("*");
+        return config;
+    }
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", corsConfig())
+        return source
+    }
 
     @Bean
     fun httpSecurity(http: HttpSecurity): SecurityFilterChain {
@@ -93,6 +117,10 @@ class SecurityConfig(
                 it.authenticationEntryPoint(unauthorizedEntryPoint())
             }
             .authorizeHttpRequests {
+                it.requestMatchers("/notification-groups/swagger-ui.html",
+                    "/notification-groups/v3/api-docs", "/notification-groups/swagger-ui/**",
+                    "/notification-groups/v3/api-docs/**"
+                ).permitAll()
                 it.requestMatchers("/internal/**").hasRole("SERVICE")
                 it.requestMatchers("/api/v1/**").hasAnyRole("MEMBER", "ADMIN", "SERVICE")
                 it.anyRequest().permitAll()
