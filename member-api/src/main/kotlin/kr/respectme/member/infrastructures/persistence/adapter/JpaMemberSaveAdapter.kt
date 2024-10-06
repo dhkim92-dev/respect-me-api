@@ -3,7 +3,8 @@ package kr.respectme.member.infrastructures.persistence.adapter
 import kr.respectme.member.infrastructures.persistence.adapter.jpa.JpaMemberRepository
 import kr.respectme.member.domain.mapper.MemberMapper
 import kr.respectme.member.domain.model.Member
-import kr.respectme.member.infrastructures.persistence.port.MemberSavePort
+import kr.respectme.member.infrastructures.persistence.port.command.MemberSavePort
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -12,12 +13,15 @@ class JpaMemberSaveAdapter(
     private val memberMapper: MemberMapper
 ): MemberSavePort {
 
-    override fun save(UUID: Member): Member {
-        val jpaEntity = jpaMemberRepository.save(memberMapper.toJpaEntity(UUID))
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    override fun save(member: Member): Member {
+        logger.debug("member save adapter save")
+        val jpaEntity = jpaMemberRepository.save(memberMapper.toJpaEntity(member))
         return memberMapper.toDomainEntity(jpaEntity)
     }
 
-    override fun delete(UUID: Member): Unit {
-        return jpaMemberRepository.deleteById(UUID.id)
+    override fun delete(member: Member): Unit {
+        return jpaMemberRepository.deleteById(member.id)
     }
 }

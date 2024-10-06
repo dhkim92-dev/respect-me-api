@@ -7,11 +7,14 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kr.respectme.common.annotation.ApplicationResponse
+import kr.respectme.common.annotation.CursorPagination
 import kr.respectme.common.annotation.LoginMember
 import kr.respectme.member.applications.dto.CreateMemberCommand
 import kr.respectme.member.applications.dto.ModifyNicknameCommand
 import kr.respectme.member.applications.dto.ModifyPasswordCommand
-import kr.respectme.member.applications.port.MemberUseCase
+import kr.respectme.member.applications.dto.RegisterDeviceTokenCommand
+import kr.respectme.member.applications.port.command.DeviceTokenCommandUseCase
+import kr.respectme.member.applications.port.command.MemberCommandUseCase
 import kr.respectme.member.interfaces.dto.*
 import kr.respectme.member.interfaces.port.MemberCommandPort
 import kr.respectme.member.interfaces.port.MemberQueryPort
@@ -32,7 +35,8 @@ import java.util.*
 @Tag(name = "Member", description = "회원 API")
 @SecurityRequirement(name = "bearer-jwt")
 class RestMemberAdapter(
-    private val memberUseCase: MemberUseCase
+    private val memberUseCase: MemberCommandUseCase,
+    private val deviceTokenUseCase: DeviceTokenCommandUseCase
 ): MemberQueryPort, MemberCommandPort {
 
 //    @PostMapping("/login")
@@ -123,5 +127,44 @@ class RestMemberAdapter(
     ): List<MemberResponse> {
         return memberUseCase.getMembers(loginId, request.memberIds)
             .map { memberDto -> MemberResponse.of(memberDto)}
+    }
+
+//    @Operation(summary = "회원의 알람 수신 디바이스 토큰 목록 조회", description = "회원의 알람 수신 디바이스 토큰 목록 조회")
+//    @ApiResponses(value = [
+//        ApiResponse(responseCode = "200", description = "디바이스 목록 조회 성공"),
+//    ])
+//    @GetMapping("/{memberId}/device-tokens")
+//    @ApplicationResponse(OK, "get device tokens success")
+//    @CursorPagination
+//    fun getDeviceTokens(@LoginMember loginId: UUID,
+//                        @PathVariable memberId: UUID,
+//                        ): List<DeviceTokenResponse> {
+//        return deviceTokenUseCase.retrieveDeviceTokens(loginId, memberId)
+//            .map { DeviceTokenResponse.of(it) }
+//    }
+
+    @Operation(summary = "회원 알람 수신 디바이스 토큰 삭제", description = "회원 알람 수신 디바이스 삭제")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "디바이스 삭제 성공"),
+    ])
+    @DeleteMapping("/{memberId}/device-tokens/{tokenId}")
+    fun deleteDeviceToken(@LoginMember loginId: UUID,
+                          @PathVariable memberId: UUID,
+                          @PathVariable tokenId: UUID) {
+        return deviceTokenUseCase.deleteDeviceToken(loginId, memberId, tokenId)
+    }
+
+    @Operation(summary = "회원 알람 수신 디바이스 토큰 등록", description = "회원 알람 수신 디바이스 토큰 등록")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "201", description = "디바이스 토큰 등록 성공"),
+    ])
+    @PostMapping("/{memberId}/device-tokens")
+    @ApplicationResponse(CREATED, "register device token success")
+    fun refreshDeviceToken(@LoginMember loginId: UUID,
+                           @PathVariable memberId: UUID,
+                           @RequestBody @Valid request: RegisterDeviceTokenRequest): DeviceTokenResponse {
+        return DeviceTokenResponse.of(
+            deviceTokenUseCase.registerDeviceToken(loginId, memberId, RegisterDeviceTokenCommand.of(request))
+        )
     }
 }

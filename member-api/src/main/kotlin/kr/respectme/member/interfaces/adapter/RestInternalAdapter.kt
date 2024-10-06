@@ -3,18 +3,17 @@ package kr.respectme.member.interfaces.adapter
 import kr.respectme.common.annotation.ApplicationResponse
 import kr.respectme.common.annotation.ServiceAccount
 import kr.respectme.member.applications.dto.LoginCommand
-import kr.respectme.member.applications.port.MemberUseCase
+import kr.respectme.member.applications.port.command.MemberCommandUseCase
 import kr.respectme.member.interfaces.dto.LoginRequest
 import kr.respectme.member.interfaces.dto.MemberResponse
 import kr.respectme.member.interfaces.port.InternalQueryPort
-import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.OK
 import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
 @RestController
 @RequestMapping("/internal/api/v1/members")
-class RestInternalAdapter(private val memberUseCase: MemberUseCase): InternalQueryPort {
+class RestInternalAdapter(private val memberUseCase: MemberCommandUseCase): InternalQueryPort {
 
     @PostMapping("/login")
     @ApplicationResponse(status=OK, message = "login success.")

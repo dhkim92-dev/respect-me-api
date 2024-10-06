@@ -21,7 +21,12 @@ class JpaMemberEntity(
     @Column
     var isBlocked: Boolean = false,
     @Column
-    var blockReason: String = ""
+    var blockReason: String = "",
+    @OneToMany(mappedBy = "member",
+        cascade = [CascadeType.ALL],
+        fetch = FetchType.LAZY,
+        orphanRemoval = true)
+    var deviceTokens: MutableSet<JpaDeviceTokenEntity> = mutableSetOf()
 ): CreatedAtUpdatedAtEntity() {
 
 }

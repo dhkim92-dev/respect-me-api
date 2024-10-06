@@ -12,3 +12,5 @@ INSERT INTO MEMBER(id, nickname, email, password, role, is_blocked, block_reason
 INSERT INTO MEMBER(id, nickname, email, password, role, is_blocked, block_reason, created_at, updated_at) VALUES ('01918050-b415-7b50-b5e1-bde5b7873811', 'member9', 'member9@respect-me.kr', '$2b$12$W73CKCBO927PQ/LOzVlX2uKwxJQsbHRbZwt7Y1f6miKfuAOThQrzG', 3, 0,  '', current_timestamp, current_timestamp);
 INSERT INTO MEMBER(id, nickname, email, password, role, is_blocked, block_reason, created_at, updated_at) VALUES ('01918050-b60f-713a-aa40-2690654ae405', 'member10', 'member10@respect-me.kr', '$2b$12$W73CKCBO927PQ/LOzVlX2uKwxJQsbHRbZwt7Y1f6miKfuAOThQrzG', 3, 0,  '', current_timestamp, current_timestamp);
 
+INSERT INTO DEVICE_TOKEN(id, member_id, type, token, created_at, updated_at, last_used_at, is_activated) VALUES ('019255f4-4b88-7732-a182-da6fbf175d72', '01917f7a-aeeb-7d60-893b-e4c7c60ff9b9', 1, 'predefined_token', current_timestamp, current_timestamp, current_timestamp, 1);
+

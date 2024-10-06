@@ -9,10 +9,13 @@ import kr.respectme.common.security.jwt.adapter.RestJwtAuthenticationAdapter
 import kr.respectme.common.security.jwt.port.JwtAuthenticationPort
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
@@ -92,6 +95,15 @@ class SecurityConfig(
     }
 
     @Bean
+    @ConditionalOnProperty(name = ["spring.h2.console.enabled"], havingValue = "true")
+    fun ignoringWebSecurityCustomizer(): WebSecurityCustomizer {
+        return WebSecurityCustomizer {
+            it -> it.ignoring()
+            .requestMatchers(PathRequest.toH2Console())
+        }
+    }
+
+    @Bean
     fun httpSecurity(http: HttpSecurity): SecurityFilterChain {
         logger.debug("httpSecurity called.")
         return http.httpBasic { it.disable() }
@@ -107,7 +119,8 @@ class SecurityConfig(
                 it.requestMatchers("/members/swagger-ui.html", "/members/v3/api-docs", "/members/swagger-ui/**", "/members/v3/api-docs/**").permitAll()
                 it.requestMatchers("/internal/api/v1/members/**").hasRole("SERVICE")
                 it.requestMatchers("/api/v1/members", "POST").permitAll()
-                it.anyRequest().authenticated()
+                it.requestMatchers("/api/v1/**").hasAnyRole("MEMBER", "ADMIN", "SERVICE")
+                it.anyRequest().permitAll()
             }
             .build()
     }

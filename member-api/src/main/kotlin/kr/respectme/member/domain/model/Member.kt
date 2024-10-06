@@ -1,6 +1,8 @@
 package kr.respectme.member.domain.model
 
 import kr.respectme.common.error.BadRequestException
+import kr.respectme.common.error.NotFoundException
+import kr.respectme.member.common.code.MemberServiceErrorCode
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.Instant
 import java.util.UUID
@@ -34,15 +36,27 @@ class Member(
     var blockReason: String = blockReason
         private set
 
-    private val deviceTokens: MutableSet<DeviceToken> = deviceTokens
+    val deviceTokens: MutableSet<DeviceToken> = deviceTokens
 
     fun registerDeviceToken(token: DeviceToken) {
-        if(token.memberId != this.id) { throw IllegalStateException("Not your device token.") }
+        if(token.memberId != this.id) {
+            println("token member id : ${token.memberId} this.id : ${id}")
+            throw IllegalStateException("Not your device token.")
+        }
+
+        if( !deviceTokens.contains(token)  && deviceTokens.size > 3) {
+            throw BadRequestException(MemberServiceErrorCode.EXCEEDED_DEVICE_TOKEN_LIMIT)
+        }
+        token.useToken()
         deviceTokens.add(token)
     }
 
-    fun removeDeviceToken(token: DeviceToken) {
-        deviceTokens.remove(token)
+    fun removeDeviceToken(token: DeviceToken?): Boolean {
+        token?.let {
+            return deviceTokens.remove(token)
+        }
+
+        return true
     }
 
     fun changePassword(encoder: PasswordEncoder, password: String?) {

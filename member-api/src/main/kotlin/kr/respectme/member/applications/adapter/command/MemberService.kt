@@ -1,4 +1,4 @@
-package kr.respectme.member.applications.adapter
+package kr.respectme.member.applications.adapter.command
 
 import kr.respectme.common.error.ConflictException
 import kr.respectme.common.error.ForbiddenException
@@ -8,14 +8,14 @@ import kr.respectme.member.applications.dto.CreateMemberCommand
 import kr.respectme.member.applications.dto.LoginCommand
 import kr.respectme.member.applications.dto.ModifyNicknameCommand
 import kr.respectme.member.applications.dto.ModifyPasswordCommand
-import kr.respectme.member.applications.port.MemberUseCase
+import kr.respectme.member.applications.port.command.MemberCommandUseCase
 import kr.respectme.member.common.code.MemberServiceErrorCode.*
 import kr.respectme.member.domain.dto.MemberDto
 import kr.respectme.member.domain.mapper.MemberMapper
 import kr.respectme.member.domain.model.Member
 import kr.respectme.member.domain.model.MemberRole
-import kr.respectme.member.infrastructures.persistence.port.MemberLoadPort
-import kr.respectme.member.infrastructures.persistence.port.MemberSavePort
+import kr.respectme.member.infrastructures.persistence.port.command.MemberLoadPort
+import kr.respectme.member.infrastructures.persistence.port.command.MemberSavePort
 import org.slf4j.LoggerFactory
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -28,7 +28,7 @@ class MemberService(
     private val memberLoadPort: MemberLoadPort,
     private val passwordEncoder: PasswordEncoder,
     private val memberMapper: MemberMapper
-): MemberUseCase {
+): MemberCommandUseCase {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 

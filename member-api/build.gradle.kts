@@ -8,7 +8,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.6"
 }
 
-version = "0.0.1"
+version = "0.0.2"
 
 repositories {
     mavenCentral()
@@ -48,6 +48,7 @@ dependencies {
     kaptTest("org.mapstruct:mapstruct-processor:1.5.2.Final")
     implementation("com.h2database:h2:2.1.214")
     implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
+    implementation("com.google.firebase:firebase-admin:9.3.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("com.h2database:h2:2.1.214")

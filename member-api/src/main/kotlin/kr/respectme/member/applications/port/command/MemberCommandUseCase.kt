@@ -1,4 +1,4 @@
-package kr.respectme.member.applications.port
+package kr.respectme.member.applications.port.command
 
 import kr.respectme.member.applications.dto.CreateMemberCommand
 import kr.respectme.member.applications.dto.LoginCommand
@@ -7,7 +7,7 @@ import kr.respectme.member.applications.dto.ModifyPasswordCommand
 import kr.respectme.member.domain.dto.MemberDto
 import java.util.UUID
 
-interface MemberUseCase {
+interface MemberCommandUseCase {
 
     fun login(command: LoginCommand): MemberDto
 

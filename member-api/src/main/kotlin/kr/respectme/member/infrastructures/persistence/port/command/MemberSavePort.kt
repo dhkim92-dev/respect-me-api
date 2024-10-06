@@ -1,4 +1,4 @@
-package kr.respectme.member.infrastructures.persistence.port
+package kr.respectme.member.infrastructures.persistence.port.command
 
 import kr.respectme.member.domain.model.Member
 
