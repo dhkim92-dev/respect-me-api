@@ -12,6 +12,7 @@ import java.util.UUID
 class DeviceTokenQueryAdapter(
     private val deviceTokenQueryRepository: DeviceTokenQueryRepository
 ): DeviceTokenQueryUseCase {
+
     override fun retrieveDeviceTokens(loginId: UUID, memberId: UUID): List<DeviceTokenDto> {
         if(loginId != memberId) {
             throw ForbiddenException(MemberServiceErrorCode.RESOURCE_OWNERSHIP_VIOLATION)

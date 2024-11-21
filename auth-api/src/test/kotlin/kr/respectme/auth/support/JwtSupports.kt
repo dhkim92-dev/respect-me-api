@@ -9,9 +9,9 @@ import java.util.*
 fun createJwtConfigs(
     accessTokenExpiry : Long = 0,
     refreshTokenExpiry : Long = 0,
-    issuer : String = "https://identifier.respect-me.kr",
-    accessTokenSecret : String = "test-access-secret",
-    refreshTokenSecret : String = "test-refresh-secret"
+    issuer : String = "https://identification.respect-me.kr",
+    accessTokenSecret : String = "local-test-access-secret",
+    refreshTokenSecret : String = "local-test-refresh-secret"
 ): JwtConfigs {
     return JwtConfigs(
         accessTokenExpiry = accessTokenExpiry,

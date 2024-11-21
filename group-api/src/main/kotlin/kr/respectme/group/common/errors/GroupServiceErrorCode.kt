@@ -11,7 +11,7 @@ enum class GroupServiceErrorCode(
 
     GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "GRP-001", "Group not found"),
     GROUP_ALREADY_EXISTS(HttpStatus.CONFLICT, "GRP-G002", "Group already exists"),
-    GROUP_OWNER_CANT_LEAVE(HttpStatus.BAD_REQUEST, "GRP-003", "Group notification type is empty"),
+    GROUP_OWNER_CANT_LEAVE(HttpStatus.BAD_REQUEST, "GRP-003", "Group owner can't remove if there are at least one member in group."),
     GROUP_PASSWORD_MISMATCH(HttpStatus.FORBIDDEN, "GRP-004", "Group password mismatch"),
 
     GROUP_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "GRPM-001", "Group member not found"),
@@ -30,4 +30,5 @@ enum class GroupServiceErrorCode(
     GROUP_NOTIFICATION_SENDER_MISMATCH(HttpStatus.FORBIDDEN, "GRPN-007", "Group notification sender mismatch"),
     GROUP_NOTIFICATION_INVALID_TYPE(HttpStatus.BAD_REQUEST, "GRPN-008", "Group notification type is invalid"),
     GROUP_NOTIFICATION_RESERVED_AT_INVALID(HttpStatus.BAD_REQUEST, "GRPN-009", "ReservedAt must be future time"),
+    GROUP_NOTIFICATION_NOT_EXISTS(HttpStatus.NOT_FOUND, "GRPN-010", "Group notification not exists"),
 }

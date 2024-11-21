@@ -1,0 +1,8 @@
+@startuml
+actor User
+
+User -> Client : 1. 앱 실행
+Client --> MemberAPI : 2. 디바이스 토큰 등록 요청\nPOST /api/v1/members/{memberId}/device-tokens
+MemberAPI --> Client : 3. 디바이스 토큰 등록 응답
+
+@enduml

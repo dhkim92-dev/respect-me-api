@@ -28,6 +28,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.springframework.web.filter.CorsFilter
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
@@ -48,6 +49,7 @@ class SecurityConfig(
 
     @Bean
     fun jwtAuthenticationPort(): JwtAuthenticationPort {
+        logger.info("Respect Me Authentication URL : ${authUrl}")
         return RestJwtAuthenticationAdapter("${authUrl}/api/v1/auth/jwt/verify")
     }
 
@@ -84,8 +86,10 @@ class SecurityConfig(
 
     @Bean
     @ConditionalOnProperty(name = ["spring.h2.console.enabled"],havingValue = "true")
-    fun configureH2ConsoleEnable(): WebSecurityCustomizer {
-        return WebSecurityCustomizer { web -> web.ignoring().requestMatchers(PathRequest.toH2Console()) }
+    fun ignoringWebSecurityCustomizer(): WebSecurityCustomizer {
+        return WebSecurityCustomizer {
+            it.ignoring().requestMatchers(PathRequest.toH2Console())
+        }
     }
 
     @Bean
@@ -105,11 +109,17 @@ class SecurityConfig(
     }
 
     @Bean
+    fun corsFilter(): CorsFilter {
+        return CorsFilter(corsConfigurationSource())
+    }
+
+    @Bean
     fun httpSecurity(http: HttpSecurity): SecurityFilterChain {
         logger.debug("httpSecurity called.")
         return http.httpBasic { it.disable() }
             .csrf { it.disable() }
             .formLogin { it.disable() }
+            .cors{ it -> it.configurationSource(corsConfigurationSource()) }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .addFilterAfter(jwtAuthenticationFilter(), ExceptionTranslationFilter::class.java)
             .exceptionHandling{ it ->

@@ -27,8 +27,9 @@ class JwtAuthenticationProvider(
         logger.debug("JwtAuthenticationProvider.authenticate")
         if(authentication == null) return null
         val request = JwtValidateRequest("Bearer", authentication.principal as String)
+        logger.info("JwtAuthenticaitonProvider request body : ${request}")
         val response = jwtAuthenticationPort.validate(request)
-        logger.debug("${response}")
+        logger.info("Jwt Authentication Response : ${objectMapper.writeValueAsString(response)}")
 //        val jwtAuthentication = objectMapper.convertValue(response, JwtAuthentication::class.java)
         val jwtAuthentication = convertToJwtAuthentication(response.data)
         logger.debug("${jwtAuthentication}")

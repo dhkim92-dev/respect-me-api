@@ -1,0 +1,10 @@
+@startuml
+
+actor User
+
+User -> Client: 1. 그룹 생성 버튼 클릭
+User -> Client: 2. 그룹 생성 폼 입력 및 확인 버튼 클릭
+Client --> GroupAPI: 3. 요청 전송 \nPOST /api/v1/notification-groups\nAuthorization: Bearer {JWT Access Token}
+GroupAPI --> Client: 4. 그룹 생성 결과 반환
+Client -> User: 5. 그룹 생성 결과 렌더링
+@enduml

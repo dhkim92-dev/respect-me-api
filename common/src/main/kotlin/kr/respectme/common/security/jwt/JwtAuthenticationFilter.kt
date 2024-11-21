@@ -39,6 +39,7 @@ class JwtAuthenticationFilter(
         token?.let{
             try {
                 val jwtAuthentication = jwtAuthenticationProvider.authenticate(JwtAuthenticationToken(token))
+
                 jwtAuthentication?.let { SecurityContextHolder.getContext().authentication = jwtAuthentication }
             } catch(e: JwtAuthenticationException) {
                 logger.error("Exception occur in authentication filter, ${e.message}")

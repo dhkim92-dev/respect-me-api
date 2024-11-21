@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.springframework.web.filter.CorsFilter
 
 @Configuration
 @EnableWebSecurity
@@ -33,6 +34,7 @@ class SecurityConfig(
         config.allowedOrigins = allowedOrigins
         config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         config.allowedHeaders = listOf("*")
+        config.allowCredentials = true
         return config
     }
 
@@ -41,6 +43,11 @@ class SecurityConfig(
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", corsConfig())
         return source
+    }
+
+    @Bean
+    fun corsFilter(): CorsFilter {
+        return CorsFilter(corsConfigurationSource())
     }
 
     @Bean

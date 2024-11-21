@@ -29,4 +29,7 @@ class JpaImmediateNotification(
     content = content,
 ) {
 
+    override fun toString(): String {
+        return super.toString()
+    }
 }

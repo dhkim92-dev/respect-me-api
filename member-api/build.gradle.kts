@@ -1,3 +1,5 @@
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -6,9 +8,10 @@ plugins {
     kotlin("plugin.spring") version "1.9.24"
     id("org.springframework.boot") version "3.3.2"
     id("io.spring.dependency-management") version "1.1.6"
+    id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.0.2"
+version = "0.0.3"
 
 repositories {
     mavenCentral()
@@ -40,12 +43,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
-//    implementation("org.springframework.boot:spring-boot-starter-security")
-//    implementation("org.springframework.boot:spring-boot-starter-validation")
-    runtimeOnly("org.flywaydb:flyway-database-postgresql:10.8.1")
-    implementation("org.mapstruct:mapstruct:1.5.3.Final")
-    kapt("org.mapstruct:mapstruct-processor:1.5.2.Final")
-    kaptTest("org.mapstruct:mapstruct-processor:1.5.2.Final")
+    implementation("org.postgresql:postgresql:42.5.4")
+    implementation("org.flywaydb:flyway-core:9.16.3")
     implementation("com.h2database:h2:2.1.214")
     implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
     implementation("com.google.firebase:firebase-admin:9.3.0")
@@ -64,11 +63,29 @@ kapt {
     correctErrorTypes = true
 }
 
+tasks.register<DockerBuildImage>("buildTestImage") {
+    buildArgs.put("SPRING_PROFILES_ACTIVE", "test")
+    dependsOn("bootJar")
+    inputDir.set(file(".")) // Dockerfile이 위치한 경로 (프로젝트 root 경로)
+    images.add("elensar92/respect-me-member-api:${version}-test")
+    group = "docker"
+}
+
+tasks.register<DockerPushImage>("pushTestImage") {
+    dependsOn("buildTestImage")
+    images.add("elensar92/respect-me-member-api:${version}-test")
+    group = "docker"
+}
+
+tasks.named("build") {
+}
+
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
     archiveBaseName.set("${rootProject.group}.member-api")
-    archiveVersion.set("${version}")
+    archiveVersion.set("latest")
 }
 
 tasks.test {
     useJUnitPlatform()
 }
+

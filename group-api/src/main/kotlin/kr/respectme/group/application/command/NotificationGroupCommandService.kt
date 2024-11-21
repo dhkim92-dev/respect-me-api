@@ -17,7 +17,7 @@ import kr.respectme.group.common.errors.GroupServiceErrorCode.*
 import kr.respectme.group.domain.GroupMember
 import kr.respectme.group.domain.GroupMemberRole
 import kr.respectme.group.domain.NotificationGroup
-import kr.respectme.group.domain.event.NotificationSentEvent
+import kr.respectme.group.domain.event.NotificationCreateEvent
 import kr.respectme.group.domain.notifications.*
 import kr.respectme.group.domain.notifications.factory.ImmediateNotificationFactory
 import kr.respectme.group.domain.notifications.factory.NotificationFactory
@@ -122,14 +122,21 @@ class NotificationGroupCommandService(
     @Transactional
     override fun createNotification(loginId: UUID, groupId: UUID, command: NotificationCreateCommand)
     : NotificationCreateResult {
-        logger.info("create Notification Request: ${command}")
-        val group = loadGroupPort.loadGroup(groupId) ?: throw NotFoundException(GROUP_NOT_FOUND)
+        logger.info("create Notification Request: ${command}\n" +
+                "loginId : ${loginId.toString()}" +
+                "groupId : ${groupId.toString()}"
+        )
+        val group = loadGroupPort.loadGroup(groupId)
+            ?: throw NotFoundException(GROUP_NOT_FOUND)
+
+
         val notificationFactory = getNotificationFactory(command.type)
         val notification = notificationFactory.build(command)
-        logger.info("notification created. notification : ${notification.content}")
+//        logger.info("notification created. notification : ${notification.content}")
         group.addNotification(loginId, notification)
-        logger.info("notification added.")
+//        logger.info("notification added.")
         val savedGroup = saveGroupPort.save(group)
+
         publishNotificationSentEvent(savedGroup, notification)
         return NotificationCreateResult.valueOf(notification)
     }
@@ -185,16 +192,17 @@ class NotificationGroupCommandService(
         if(notification.type != NotificationType.IMMEDIATE) return
 
         val receivers = group.members.filter { it.memberId != notification.senderId }
-        val event = NotificationSentEvent(
+        val event = NotificationCreateEvent(
+            groupId = notification.groupId,
+            groupName = group.name,
             notificationId = notification.id,
             contents = notification.content,
             createdAt = notification.createdAt,
-            groupId = group.id,
             receiverIds = receivers.map { it.memberId },
             senderId = notification.senderId
         )
 
-        eventPublishPort.publish(NotificationSentEvent.name, event)
+        eventPublishPort.publish(NotificationCreateEvent.eventName, event)
     }
 
     private fun getNotificationFactory(type: NotificationType): NotificationFactory {

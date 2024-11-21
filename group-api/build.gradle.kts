@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 
 plugins {
     kotlin("jvm") version "1.9.24"
@@ -6,9 +8,10 @@ plugins {
     kotlin("plugin.spring") version "1.9.24"
     id("org.springframework.boot") version "3.3.2"
     id("io.spring.dependency-management") version "1.1.6"
+    id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.0.1"
+version = "0.0.6"
 
 repositories {
     mavenCentral()
@@ -39,7 +42,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("com.h2database:h2:2.1.214")
+    implementation("org.springframework.kafka:spring-kafka")
+    implementation("org.postgresql:postgresql:42.5.4")
+    implementation("org.flywaydb:flyway-core:9.16.3")
 
     // query dsl
     implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
@@ -48,6 +53,7 @@ dependencies {
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("com.h2database:h2:2.1.214")
     testImplementation("io.kotest:kotest-runner-junit5:4.4.3")
     testImplementation("io.kotest:kotest-assertions-core:4.4.3")
     testImplementation("io.kotest:kotest-extensions-spring:4.4.3")
@@ -62,9 +68,23 @@ kapt {
     }
 }
 
+tasks.register<DockerBuildImage>("buildTestImage") {
+    buildArgs.put("SPRING_PROFILES_ACTIVE", "test")
+    dependsOn("bootJar")
+    inputDir.set(file(".")) // Dockerfile이 위치한 경로 (프로젝트 root 경로)
+    images.add("elensar92/respect-me-group-api:${version}-test")
+    group = "docker"
+}
+
+tasks.register<DockerPushImage>("pushTestImage") {
+    dependsOn("buildTestImage")
+    images.add("elensar92/respect-me-group-api:${version}-test")
+    group = "docker"
+}
+
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
     archiveBaseName.set("${rootProject.group}.group-api")
-    archiveVersion.set("${version}")
+    archiveVersion.set("latest")
 }
 
 tasks.test {

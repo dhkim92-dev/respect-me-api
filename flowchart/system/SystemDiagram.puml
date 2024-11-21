@@ -1,0 +1,50 @@
+@startuml
+
+left to right direction
+node "Kubernetes" as k8s{
+    rectangle "WebServer Nodes" as webserver_nodes {
+        node "Nginx" as nginx
+    }
+
+    rectangle "API Nodes" as api_nodes {
+        node "Auth API" as auth_api
+        node "Group API" as group_api
+        node "Member API" as member_api
+        node "Message API" as message_api
+
+        ' 내부 배치용 가상 연결
+        auth_api -[hidden]right-> member_api
+        auth_api -[hidden]down-> message_api
+        message_api -[hidden]right-> group_api
+
+    }
+
+    rectangle "Infra Nodes" as infra_nodes {
+        database "Kafka" as kafka
+    }
+
+    rectangle "DB Nodes" as db_nodes {
+        database "GroupDB" as group_db
+        database "MemberDB" as member_db
+
+        group_db-[hidden]up-> member_db
+    }
+
+    webserver_nodes-[hidden]down->api_nodes
+    api_nodes-[hidden]up->webserver_nodes
+    api_nodes-[hidden]right->db_nodes
+    api_nodes-[hidden]up->infra_nodes
+}
+
+node "Google Firebase" as google_firebase{
+    node "FCM" as fcm
+}
+
+'google_firebase-[hidden]down->k8s
+member_api<->member_db
+group_api<->group_db
+api_nodes <-> infra_nodes
+webserver_nodes <-> api_nodes
+message_api -> fcm
+
+@enduml

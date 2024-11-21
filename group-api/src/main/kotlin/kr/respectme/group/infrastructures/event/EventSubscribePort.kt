@@ -1,8 +1,8 @@
 package kr.respectme.group.infrastructures.event
 
-import java.beans.EventHandler
+import kr.respectme.group.infrastructures.event.dto.NotificationSentEvent
 
 interface EventSubscribePort {
 
-    fun handleNotificationCompleteEvent(data: String)
+    fun onReceiveNotificationSent(event: NotificationSentEvent)
 }

@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory
 import kr.respectme.group.application.dto.group.NotificationGroupDto
 import kr.respectme.group.application.dto.member.GroupMemberDto
 import kr.respectme.group.application.dto.notification.NotificationDto
+import kr.respectme.group.domain.GroupType
 import kr.respectme.group.domain.mapper.NotificationMapper
 import kr.respectme.group.domain.notifications.NotificationStatus
 import kr.respectme.group.infrastructures.persistence.jpa.entity.QJpaGroupMember
@@ -139,6 +140,27 @@ class JpaQueryGroupAdapter(
             .distinct()
             .orderBy(member.pk.groupId.desc())
 //            .orderBy(group.createdAt.desc())
+            .fetch()
+    }
+
+    override fun getAllGroups(cursor: UUID?, size: Int?): List<NotificationGroupDto> {
+        val group = QJpaNotificationGroup.jpaNotificationGroup
+
+        return qf.select(
+            Projections.constructor(
+                NotificationGroupDto::class.java,
+                group.id,
+                group.name,
+                group.ownerId,
+                group.description,
+                group.createdAt,
+                Expressions.nullExpression(String::class.java),
+                group.type,
+                group.members.size().intValue()
+            ))
+            .from(group)
+            .orderBy(group.id.desc())
+            .limit(size?.toLong() ?: 20)
             .fetch()
     }
 

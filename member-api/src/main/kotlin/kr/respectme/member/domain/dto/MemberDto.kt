@@ -11,7 +11,8 @@ class MemberDto(
     val role: MemberRole,
     val createdAt: Instant,
     val isBlocked: Boolean,
-    val blockReason: String
+    val blockReason: String,
+    val deviceTokens: List<String>
 ) {
 
 }

@@ -33,10 +33,17 @@ class GroupMapper(
         domainGroup.members.forEach { groupMember ->
             group.members.add(GroupMemberMapper.mapToJpaEntity(groupMember, group))
         }
+//
+//        domainGroup.notifications.forEach { notification ->
+//            group.notifications.add(NotificationMapper.mapToJpaNotification(notification, group))
+//        }
 
-        domainGroup.notifications.forEach { notification ->
-            group.notifications.add(NotificationMapper.mapToJpaNotification(notification, group))
+        val notifications = domainGroup.notifications.map { notification ->
+            NotificationMapper.mapToJpaNotification(notification, group)
         }
+
+        group.notifications.clear()
+        group.notifications.addAll(notifications)
 
         return group
     }

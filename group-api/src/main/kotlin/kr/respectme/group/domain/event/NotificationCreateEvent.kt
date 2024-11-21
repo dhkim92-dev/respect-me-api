@@ -1,18 +1,19 @@
 package kr.respectme.group.domain.event
 
 import java.time.Instant
-import java.time.LocalDateTime
 import java.util.UUID
 
-data class NotificationSentEvent(
+data class NotificationCreateEvent(
     val notificationId: UUID,
     val groupId: UUID,
+    val groupName: String,
     val senderId: UUID,
     val receiverIds: List<UUID>,
     val contents: String,
     val createdAt: Instant
 ) {
+
     companion object {
-        val name: String = "notification-sent-event"
+        val eventName = "notification-create-event"
     }
 }

@@ -1,0 +1,9 @@
+@startuml
+actor User
+
+User -> Client : 1. 이메일 패스워드 입력
+Client --> AuthAPI : 2. 로그인 요청 POST /api/v1/auth/jwt
+AuthAPI --> Client : 3. 로그인 요청 처리 응답
+Client -> Client : 4. Refresh Token 및 Access Token 저장
+
+@enduml

@@ -1,0 +1,10 @@
+@startuml
+actor User
+
+User -> Client: 1. 내 그룹 목록 조회 버튼 클릭
+Client --> GroupAPI: 2. 내 그룹 목록 조회 요청\nGET /api/v1/group-members/me/notification-groups\nAuthorization: Bearer {JWT Access Token}
+GroupAPI -> GroupAPI: 3. 회원 그룹 조회
+GroupAPI --> Client: 4. 내 그룹 목록 반환
+Client -> User: 5. 그룹 목록 렌더링
+
+@enduml

@@ -51,6 +51,9 @@ abstract class Notification(
     fun updateStatus(status: NotificationStatus?) {
         status?.takeIf { it != this.status } ?: return
         this.status = status
+        if(status == NotificationStatus.PUBLISHED) {
+            this.lastSentAt = Instant.now()
+        }
         updateTime()
     }
 
@@ -90,5 +93,9 @@ abstract class Notification(
         var result = groupId.hashCode()
         result = 31 * result + senderId.hashCode()
         return result
+    }
+
+    override fun toString(): String {
+        return "Notification(id=$id, groupId=$groupId, senderId=$senderId, content='$content', status=$status, type=$type, createdAt=$createdAt, updatedAt=$updatedAt, lastSentAt=$lastSentAt)"
     }
 }

@@ -72,4 +72,9 @@ class NotificationGroupQueryService(
             .sortedBy { it.id }
             .reversed()
     }
+
+    @Transactional(readOnly = true)
+    override fun retrieveAllGroups(loginId: UUID, cursorGroupId: UUID?, size: Int?): List<NotificationGroupDto> {
+        return queryGroupPort.getAllGroups(cursorGroupId, size?:20)
+    }
 }

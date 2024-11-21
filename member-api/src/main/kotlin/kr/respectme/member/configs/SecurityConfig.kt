@@ -98,8 +98,7 @@ class SecurityConfig(
     @ConditionalOnProperty(name = ["spring.h2.console.enabled"], havingValue = "true")
     fun ignoringWebSecurityCustomizer(): WebSecurityCustomizer {
         return WebSecurityCustomizer {
-            it -> it.ignoring()
-            .requestMatchers(PathRequest.toH2Console())
+            it.ignoring().requestMatchers(PathRequest.toH2Console())
         }
     }
 
@@ -107,6 +106,7 @@ class SecurityConfig(
     fun httpSecurity(http: HttpSecurity): SecurityFilterChain {
         logger.debug("httpSecurity called.")
         return http.httpBasic { it.disable() }
+            .cors{ it.configurationSource(corsConfigurationSource()) }
             .csrf { it.disable() }
             .formLogin { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }

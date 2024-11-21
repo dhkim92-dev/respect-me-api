@@ -23,6 +23,7 @@ class JpaSaveGroupAdapter(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun save(group: NotificationGroup): NotificationGroup {
+        logger.debug("entity save")
         val jpaGroup = groupMapper.mapToJpaEntity(group)
         return groupMapper.mapToDomainEntity(groupRepository.save(jpaGroup))
     }

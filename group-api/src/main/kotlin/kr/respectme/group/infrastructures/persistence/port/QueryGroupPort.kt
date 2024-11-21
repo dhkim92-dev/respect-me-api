@@ -55,4 +55,12 @@ interface QueryGroupPort {
      * @return NotificationDto
      */
     fun getNotification(groupId: UUID, notificationId: UUID): NotificationDto?
+
+    /**
+     * Get all groups that group type is public
+     * @param cursor group id for pagination
+     * @param size size for pagination
+     * @return List<NotificationGroupDto>
+     */
+    fun getAllGroups(cursor: UUID?, size: Int?): List<NotificationGroupDto>
 }

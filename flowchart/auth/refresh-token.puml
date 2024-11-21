@@ -1,0 +1,10 @@
+@startuml
+actor User
+
+User -> Client : Any Action
+Client -> API : Request with JWT Access Token
+API --> Client : 401 Unauthorized (Expired JWT Token)
+Client -> API : POST /api/v1/auth/jwt/reissue
+API --> Client : Return new JWT Access Token
+
+@enduml

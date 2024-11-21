@@ -113,12 +113,20 @@ class NotificationGroup(
             throw ForbiddenException(GroupServiceErrorCode.GROUP_MEMBER_NOT_ENOUGH_PERMISSION)
         }
 
+        if(notifications.contains(notification)) {
+            logger.debug("already exists notification, it's content will be updated")
+            notifications.remove(notification)
+        }
+
         notification.validate()
         notifications.add(notification)
     }
 
     fun addMember(member: GroupMember) {
 //        members.forEach { println("member nickname : ${it.nickname} role : ${it.memberRole}") }
+        if(members.contains(member)) {
+            members.remove(member)
+        }
         members.add(member)
     }
 
@@ -145,7 +153,7 @@ class NotificationGroup(
             }
             members.remove(targetMember)
         } else {
-            if(targetMember.isGroupOwner()) {
+            if(targetMember.isGroupOwner() && members.size > 1) {
                 throw BadRequestException(GroupServiceErrorCode.GROUP_OWNER_CANT_LEAVE)
             }
             members.remove(targetMember)

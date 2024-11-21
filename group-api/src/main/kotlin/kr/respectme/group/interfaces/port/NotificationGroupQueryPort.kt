@@ -18,4 +18,6 @@ interface NotificationGroupQueryPort {
     fun getMember(loginId: UUID, groupId: UUID, memberId: UUID): GroupMemberVo
 
     fun getMyGroups(loginId: UUID, cursor: UUID?, size: Int?): List<NotificationGroupVo>
+
+    fun getAllGroups(loginId: UUID, groupId: UUID?, size: Int?): List<NotificationGroupVo>
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 
 //@Profile("local")
 // TODO : @Profile("local") 어노테이션을 사용하여 로컬 환경에서만 사용하도록 설정
-@Component
+//@Component
 class LocalEventPublishAdapter(private val objectMapper: ObjectMapper) : EventPublishPort {
 
     private val logger = LoggerFactory.getLogger(javaClass)

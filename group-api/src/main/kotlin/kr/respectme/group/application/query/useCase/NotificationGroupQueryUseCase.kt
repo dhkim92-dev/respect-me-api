@@ -55,4 +55,15 @@ interface NotificationGroupQueryUseCase {
      * @return List<NotificationGroupDto>
      */
     fun retrieveMemberGroups(loginId: UUID): List<NotificationGroupDto>
+
+    /**
+     * retrieve all groups that group type is public.
+     * @param loginId login user id
+     * @param cursorGroupId cursor group id for pagination
+     * @param size size for pagination
+     * @return List<NotificationGroupDto>
+     */
+    fun retrieveAllGroups(loginId: UUID,
+                          cursorGroupId: UUID?,
+                          size: Int?): List<NotificationGroupDto>
 }

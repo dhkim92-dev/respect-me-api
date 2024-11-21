@@ -12,7 +12,8 @@ data class MemberResponse(
     val role: MemberRole,
     val isBlocked: Boolean,
     val createdAt: Instant,
-    val blockReason: String
+    val blockReason: String,
+    val deviceTokens: List<String> = emptyList()
 ) {
 
     companion object {
@@ -24,7 +25,8 @@ data class MemberResponse(
                 role = memberDto.role,
                 isBlocked = memberDto.isBlocked,
                 createdAt = memberDto.createdAt,
-                blockReason = memberDto.blockReason
+                blockReason = memberDto.blockReason,
+                deviceTokens = memberDto.deviceTokens
             )
         }
     }

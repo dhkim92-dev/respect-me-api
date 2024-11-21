@@ -15,7 +15,7 @@ class JpaMemberLoadAdapter(
 ): MemberLoadPort {
 
 
-    override fun getMemberById(id: java.util.UUID): Member? {
+    override fun getMemberById(id: UUID): Member? {
         return jpaMemberRepository.findByIdOrNull(id)
             ?.let { memberMapper.toDomainEntity(it) }
     }
@@ -25,8 +25,8 @@ class JpaMemberLoadAdapter(
             ?.let { memberMapper.toDomainEntity(it) }
     }
 
-    override fun getMembersInList(UUIDIds: List<java.util.UUID>): List<Member> {
-        return jpaMemberRepository.findAllById(UUIDIds)
+    override fun getMembersInList(memberIds: List<UUID>): List<Member> {
+        return jpaMemberRepository.findAllById(memberIds)
             .map{ memberMapper.toDomainEntity(it) }
     }
 

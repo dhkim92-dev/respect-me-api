@@ -67,6 +67,7 @@ class AuthService(
             )
 
         } catch (e: Exception) {
+            logger.error("{}",e.message)
             when (e) {
                 is TokenExpiredException -> throw UnauthorizedException(AuthenticationErrorCode.EXPIRED_ACCESS_TOKEN)
                 else -> throw UnauthorizedException(AuthenticationErrorCode.INVALID_ACCESS_TOKEN)

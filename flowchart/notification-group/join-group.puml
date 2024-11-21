@@ -1,0 +1,12 @@
+@startuml
+actor User
+
+User -> Client: 1. 그룹 검색 버튼 클릭
+Client -> User: 2. 그룹 검색 폼 렌더링(그룹 ID 입력/가입 버튼)
+User -> Client: 3. 그룹 ID 입력 및 가입 버튼 클릭
+Client --> API : 4. 그룹 가입 요청\nPOST /api/v1/notification-groups/{group-id}/group-members\nAuthorization: Bearer {JWT Access Token}
+API -> API: 5. 그룹 가입 요청 처리
+API --> Client: 6. 그룹 가입 요청 처리 결과 반환
+Client -> User: 7. 그룹 가입 요청 결과 렌더링
+
+@enduml

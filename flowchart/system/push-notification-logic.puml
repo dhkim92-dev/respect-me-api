@@ -1,0 +1,31 @@
+@startuml
+
+
+actor User as user
+
+left to right direction
+
+node Kafka as kafka
+node GroupService as group_service
+node MemberService as member_service
+node MessageService as message_service
+node FCM as fcm
+
+'user -[hidden]right-> group_service
+'user -[hidden]right-> fcm
+'kafka -[hidden]left-> message_service
+'message_service-[hidden]up->group_service
+'member_service-[hidden]right->message_service
+'message_service-[hidden]left-member_service
+'fcm -[hidden]down-> message_service
+'fcm -[hidden]right-user
+
+user <--> group_service: 1. 알림 생성 요청/응답
+group_service -.-> kafka: 2. 알림 생성 이벤트 발행
+message_service <-.- kafka: 3. 알림 생성 이벤트 수신
+message_service <-> member_service: 4. 그룹 사용자 Device Token 목록 요청/응답
+message_service <-.-> fcm: 5. Push Notification 전송 요청/응답
+message_service -.-> kafka: 6. Push Notification 전송 완료 이벤트 발행
+group_service <-.- kafka: 7. Push Notification 전송 완료 이벤트 수신
+group_service  -> group_service: 8. Notification 전송 완료 처리
+@enduml

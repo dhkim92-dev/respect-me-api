@@ -87,4 +87,16 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
             queryUseCase.retrieveGroup(loginId, groupId)
         )
     }
+
+    @GetMapping("notification-groups")
+    @ApplicationResponse(status = HttpStatus.OK, message = "all groups retrieved.")
+    @CursorPagination
+    override fun getAllGroups(
+        @LoginMember loginId: UUID,
+        @CursorParam(key="groupId") @RequestParam(required = false) groupId: UUID?,
+        @RequestParam(required = false, defaultValue = "20") size: Int?
+    ): List<NotificationGroupVo> {
+        return queryUseCase.retrieveAllGroups(loginId, groupId, size)
+            .map { it -> NotificationGroupVo.valueOf(it) }
+    }
 }

@@ -30,4 +30,19 @@ class ImmediateNotification(
             throw IllegalArgumentException("Notification type is not immediate")
         }
     }
+
+    override fun toString(): String {
+        return """
+            ImmediateNotification
+            id: $id,
+            groupId: $groupId,
+            senderId: $senderId,
+            content: $content,
+            status: $status,
+            type: $type,
+            createdAt: $createdAt,
+            updatedAt: $updatedAt,
+            lastSentAt: $lastSentAt 
+        """.trimIndent()
+    }
 }

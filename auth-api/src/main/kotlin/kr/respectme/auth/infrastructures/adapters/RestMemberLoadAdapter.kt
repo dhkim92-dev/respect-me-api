@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import java.util.*
 
-@FeignClient(name = "member-feign-client", url = "\${msa.member-api.url}")
+@FeignClient(name = "member-feign-client", url = "\${respect-me.msa.member-api.url}")
 interface RestMemberLoadAdapter : MemberLoadPort {
 
     @GetMapping(value = ["/internal/api/v1/members/login"], consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])

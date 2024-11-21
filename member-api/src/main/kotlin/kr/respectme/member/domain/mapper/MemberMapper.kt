@@ -21,6 +21,9 @@ class MemberMapper(
         isBlocked = member.isBlocked,
         createdAt = member.createdAt,
         blockReason = member.blockReason,
+        deviceTokens = member.deviceTokens
+            .map { it->it.token }
+            .toList()
     )
 
     fun toDomainEntity(jpaMemberEntity: JpaMemberEntity) = Member(

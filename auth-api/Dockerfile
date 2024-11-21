@@ -1,3 +1,3 @@
 FROM openjdk:17.0.1-jdk-slim
-COPY build/libs/kr.respectme.auth-api-0.0.1.jar /app.jar
+COPY build/libs/kr.respectme.auth-api-latest.jar /app.jar
 CMD ["java", "-jar", "/app.jar"]
