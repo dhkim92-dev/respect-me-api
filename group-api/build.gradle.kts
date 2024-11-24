@@ -11,7 +11,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.0.6"
+version = "0.0.10"
 
 repositories {
     mavenCentral()

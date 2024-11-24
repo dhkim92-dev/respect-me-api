@@ -115,7 +115,10 @@ class NotificationGroupCommandService(
     @Transactional
     override fun removeMember(loginId: UUID, groupId: UUID, memberIdToRemove: UUID) {
         val group = loadGroupPort.loadGroup(groupId) ?: throw NotFoundException(GROUP_NOT_FOUND)
+        logger.info("member ${memberIdToRemove} will be removed from group ${groupId}")
+//        logger.debug("member count : ${group.members.size}")
         group.removeMember(loginId, memberIdToRemove)
+//        logger.debug("member count after remove : ${group.members.size}")
         saveGroupPort.save(group)
     }
 

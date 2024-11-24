@@ -25,6 +25,12 @@ class JpaSaveGroupAdapter(
     override fun save(group: NotificationGroup): NotificationGroup {
         logger.debug("entity save")
         val jpaGroup = groupMapper.mapToJpaEntity(group)
+
+        if(jpaGroup.members.isEmpty()) {
+            groupRepository.delete(jpaGroup)
+            return groupMapper.mapToDomainEntity(jpaGroup)
+        }
+
         return groupMapper.mapToDomainEntity(groupRepository.save(jpaGroup))
     }
 

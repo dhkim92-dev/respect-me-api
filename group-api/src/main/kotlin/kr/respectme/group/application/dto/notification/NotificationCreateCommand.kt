@@ -14,7 +14,7 @@ data class NotificationCreateCommand(
     val content: String,
     val type: NotificationType,
     val scheduledAt: Instant?,
-    val triggerTime: OffsetTime?,
+//    val triggerTime: OffsetTime?,
     val dayOfWeeks: List<DayOfWeek>?,
     val dayInterval: Int?
 ) {
@@ -30,7 +30,7 @@ data class NotificationCreateCommand(
                 scheduledAt = request.scheduledAt,
                 dayOfWeeks = request.dayOfWeeks,
                 dayInterval = request.dayInterval,
-                triggerTime = request.triggerTime?.let{ it.withOffsetSameInstant(ZoneOffset.UTC) }
+//                triggerTime = request.triggerTime?.let{ it.withOffsetSameInstant(ZoneOffset.UTC) }
             )
         }
     }

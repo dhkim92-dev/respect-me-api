@@ -29,7 +29,7 @@ class GroupMapper(
             this.ownerId = domainGroup.ownerId
             this.password= domainGroup.password
         } ?: createJpaGroup(domainGroup)
-
+        group.members.clear()
         domainGroup.members.forEach { groupMember ->
             group.members.add(GroupMemberMapper.mapToJpaEntity(groupMember, group))
         }

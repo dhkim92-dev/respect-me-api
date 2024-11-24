@@ -4,6 +4,7 @@ import feign.RequestInterceptor
 import jakarta.servlet.http.HttpServletResponse
 import kr.respectme.common.annotation.ServiceAccount
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.cloud.openfeign.FeignClientFactory
 import org.springframework.cloud.openfeign.FeignClientProperties
 import org.springframework.context.annotation.Bean
@@ -14,16 +15,16 @@ import org.springframework.web.context.request.ServletRequestAttributes
 
 @Configuration
 class FeignClientConfig(private val serviceConfig: ServiceConfig) {
-
-    @Bean
-    fun feignClientFactory(): FeignClientFactory {
-        return FeignClientFactory()
-    }
-
-    @Bean
-    fun feignClientProperties(): FeignClientProperties {
-        return FeignClientProperties()
-    }
+//
+//    @Bean
+//    fun feignClientFactory(): FeignClientFactory {
+//        return FeignClientFactory()
+//    }
+//
+//    @Bean
+//    fun feignClientProperties(): FeignClientProperties {
+//        return FeignClientProperties()
+//    }
 
     @Bean
     fun headerInterceptor(): RequestInterceptor {
@@ -31,7 +32,7 @@ class FeignClientConfig(private val serviceConfig: ServiceConfig) {
         return RequestInterceptor { template ->
             if(template.url().startsWith("/internal/api/**")) {
                 template.header("Authorization", "Bearer ${serviceConfig.accessToken}")
-            } else {
+            } else if(template.url().startsWith("/api/**")) {
                 (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes)
                 .request
                 .getHeader("Authorization")

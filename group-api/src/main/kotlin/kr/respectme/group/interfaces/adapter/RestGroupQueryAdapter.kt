@@ -1,5 +1,8 @@
 package kr.respectme.group.interfaces.adapter
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.respectme.common.annotation.ApplicationResponse
@@ -28,6 +31,9 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
 : NotificationGroupQueryPort {
 
     @GetMapping("notification-groups/{groupId}/members")
+    @Operation(summary = "지정된 Group 의 회원 목록을 반환.", description = "지정된 Group 의 회원 목록을 CursorList 타입으로 래핑하여 반환합니다." +
+            "<br/> CursorList 는 다음 페이지가 존재하면 next 필드에 다음 페이지의 URL을 포함합니다." +
+            "<br/> 제공된 Access Token의 MemberId(sub)가 Group에 존재하지 않으면 403 Forbidden을 반환합니다.")
     @ApplicationResponse(status = HttpStatus.OK, message = "group members retrieved.")
     @CursorPagination
     override fun getGroupMembers(
@@ -41,6 +47,9 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
     }
 
     @GetMapping("notification-groups/{groupId}/notifications")
+    @Operation(summary = "지정된 Group 의 알림 목록을 반환.", description = "지정된 Group 의 알림 목록을 CursorList 타입으로 래핑하여 반환합니다." +
+            "<br/> CursorList 는 다음 페이지가 존재하면 next 필드에 다음 페이지의 URL을 포함합니다." +
+            "<br/> 제공된 Access Token의 MemberId(sub)가 Group에 존재하지 않으면 403 Forbidden을 반환합니다.")
     @ApplicationResponse(status = HttpStatus.OK, message = "group notifications retrieved.")
     @CursorPagination
     override fun getGroupNotifications(
@@ -55,6 +64,8 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
 
     @GetMapping("notification-groups/{groupId}/members/{memberId}")
     @ApplicationResponse(status = HttpStatus.OK, message = "group member retrieved.")
+    @Operation(summary = "지정된 Group 의 회원을 반환.", description = "지정된 Group 의 회원 정보를 반환합니다." +
+            "<br/> 제공된 Access Token의 MemberId(sub)가 Group에 존재해야 하며 그렇지 않을 경우 403 Forbidden이 반환됩니다.")
     override fun getMember(
         @LoginMember loginId: UUID,
         @PathVariable groupId: UUID,
@@ -66,6 +77,9 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
     }
 
     @GetMapping("group-members/me/notification-groups")
+    @Operation(summary = "내가 속한 그룹 목록을 반환.", description = "내가 속한 그룹 목록을 CursorList 타입으로 래핑하여 반환합니다." +
+            "<br/> CursorList 는 다음 페이지가 있는지 여부와 다음 페이지의 Cursor(next) 를 포함합니다." +
+            "<br/> 제공된 Access Token의 MemberId(sub)가 Group에 존재하지 않으면 403 Forbidden을 반환합니다.")
     @CursorPagination
     @ApplicationResponse(status = HttpStatus.OK, message = "my groups retrieved.")
     override fun getMyGroups(
@@ -78,6 +92,8 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
     }
 
     @GetMapping("notification-groups/{groupId}")
+    @Operation(summary = "지정된 Group 의 정보를 반환.", description = "지정된 Group 의 정보를 반환합니다." +
+            "<br/> 제공된 Access Token의 MemberId(sub)가 Group에 존재하지 않으면 403 Forbidden을 반환합니다.")
     @ApplicationResponse(status = HttpStatus.OK, message = "group retrieved.")
     override fun getNotificationGroup(
         @LoginMember loginId: UUID,
@@ -89,14 +105,16 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
     }
 
     @GetMapping("notification-groups")
+    @Operation(summary = "모든 그룹 목록을 반환.", description = "모든 그룹 목록을 CursorList 타입으로 래핑하여 반환합니다." +
+            "<br/> CursorList 는 다음 페이지가 있을 경우 next 필드에 다음 페이지 조회 URL을 포함합니다.")
     @ApplicationResponse(status = HttpStatus.OK, message = "all groups retrieved.")
     @CursorPagination
     override fun getAllGroups(
         @LoginMember loginId: UUID,
-        @CursorParam(key="groupId") @RequestParam(required = false) groupId: UUID?,
+        @CursorParam(key="id") @RequestParam(required = false) cursor: UUID?,
         @RequestParam(required = false, defaultValue = "20") size: Int?
     ): List<NotificationGroupVo> {
-        return queryUseCase.retrieveAllGroups(loginId, groupId, size)
+        return queryUseCase.retrieveAllGroups(loginId, cursor, size)
             .map { it -> NotificationGroupVo.valueOf(it) }
     }
 }

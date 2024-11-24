@@ -46,6 +46,7 @@ class AuthService(
 
         return AuthenticationResult(
             type = "Bearer",
+            memberId = member.id,
             refreshToken = refreshToken,
             accessToken = accessToken,
         )
@@ -83,6 +84,7 @@ class AuthService(
                 ?: throw NotFoundException(AuthenticationErrorCode.INVALID_REFRESH_TOKEN)
             return AuthenticationResult(
                 type = "Bearer",
+                memberId = member.id,
                 refreshToken = refreshToken,
                 accessToken = createAccessToken(member)
             )

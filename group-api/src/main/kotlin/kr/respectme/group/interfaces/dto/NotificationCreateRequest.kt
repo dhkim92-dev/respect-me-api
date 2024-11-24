@@ -22,8 +22,8 @@ data class NotificationCreateRequest(
     val type: NotificationType,
     @Schema(required = false, example = "2021-08-01T00:00:00Z", description = "예약 알람 시간, 타입이 SCHEDULED 일 때 필수")
     val scheduledAt: Instant? = null,
-    @Schema(required = false, example = "12:00:00Z", description = "반복 알람 시간, 타입이 REPEATED_WEEKLY 또는 REPEATED_INTERVAL 일 때 필수")
-    val triggerTime: OffsetTime? = null,
+//    @Schema(required = false, example = "12:00:00Z", description = "반복 알람 시간, 타입이 REPEATED_WEEKLY 또는 REPEATED_INTERVAL 일 때 필수")
+//    val triggerTime: OffsetTime? = null,
     @Schema(required = false, example = "[MONDAY, TUESDAY]", description = "반복 알람 요일, 타입이 REPEATED_WEEKLY 일 때 필수")
     val dayOfWeeks: List<DayOfWeek>? = null,
     @Schema(required = false, example = "1", description = "반복 알람 일 간격, 타입이 REPEATED_DAY_INTERVAL 일 때 필수")

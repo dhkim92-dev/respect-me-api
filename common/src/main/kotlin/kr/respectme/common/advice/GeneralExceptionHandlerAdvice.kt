@@ -6,6 +6,7 @@ import feign.FeignException.FeignClientException
 import jakarta.validation.ConstraintViolationException
 import kr.respectme.common.error.BusinessException
 import kr.respectme.common.error.GlobalErrorCode
+import kr.respectme.common.error.exporter.ErrorExporter
 import kr.respectme.common.response.ErrorResponse
 import kr.respectme.common.security.jwt.JwtAuthenticationException
 import org.slf4j.LoggerFactory
@@ -16,20 +17,27 @@ import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingRequestCookieException
 import org.springframework.web.bind.MissingServletRequestParameterException
-import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.multipart.support.MissingServletRequestPartException
 
 @RestControllerAdvice
-class GeneralExceptionHandlerAdvice(private val objectMapper: ObjectMapper){
+class GeneralExceptionHandlerAdvice(
+    private val objectMapper: ObjectMapper,
+    private val messageExporter: ErrorExporter? = null
+){
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    private fun exportMessage() {
+
+    }
 
     @ExceptionHandler(value = [BusinessException::class])
     fun handleBusinessException(e: BusinessException): ResponseEntity<ErrorResponse> {
         logger.error("BusinessException occured: ${e.message}")
+        exportMessage()
         return ResponseEntity.status(e.status).body(ErrorResponse.of(status = e.status, code = e.code, message = e.message))
     }
 
