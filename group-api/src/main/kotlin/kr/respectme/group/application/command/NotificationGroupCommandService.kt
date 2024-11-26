@@ -70,6 +70,13 @@ class NotificationGroupCommandService(
         group.changeGroupType(command.type)
         group.changeGroupDescription(command.description)
         command.ownerId?.let {
+            // TODO 일관성이 깨질 수 있는 부분이라, Lock 적용 필요.
+            // 예. 1. owner A가 어드민 B에게 그룹 소유 권한을 넘기려는 작업 수행
+            //        a. A가 소유 권한 변경 요청을 보냄
+            //        b. 동시에 B가 회원 탈퇴 요청을 보냄
+            //        c. a의 트랜잭션이 완료되기 전, b 트랜잭션에서 사용자 B의 권한 체크가 이미 완료
+            //        d. a 트랜잭션 완료 이후 b 트랜잭션이 완료되면, Group의 소유자가 존재하지 않게 되어버림. 도메인 규칙 위반
+            // 해결 방안. 그룹 사용자의 탈퇴 및 권한 변경의 경우 Lock을 걸어야 함.
             group.changeGroupOwner(loginId, command.ownerId)
         }
         group.changePassword(passwordEncoder, command.password)
@@ -114,6 +121,7 @@ class NotificationGroupCommandService(
 
     @Transactional
     override fun removeMember(loginId: UUID, groupId: UUID, memberIdToRemove: UUID) {
+        // TODO Redis Lock 적용 필요
         val group = loadGroupPort.loadGroup(groupId) ?: throw NotFoundException(GROUP_NOT_FOUND)
         logger.info("member ${memberIdToRemove} will be removed from group ${groupId}")
 //        logger.debug("member count : ${group.members.size}")

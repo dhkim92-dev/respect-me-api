@@ -11,7 +11,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.0.3"
+version = "0.0.5"
 
 repositories {
     mavenCentral()
@@ -45,7 +45,7 @@ dependencies {
 
     implementation("org.postgresql:postgresql:42.5.4")
     implementation("org.flywaydb:flyway-core:9.16.3")
-    implementation("com.h2database:h2:2.1.214")
+//    implementation("com.h2database:h2:2.1.214")
     implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
     implementation("com.google.firebase:firebase-admin:9.3.0")
 
