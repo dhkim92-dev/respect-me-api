@@ -21,6 +21,7 @@ object GroupMemberMapper {
             memberId = groupMember.memberId,
             groupId = groupMember.groupId
         )
+
         return jpaGroup.members.find { it.pk == pk }?.apply {
             this.nickname = groupMember.nickname
             this.memberRole = groupMember.memberRole

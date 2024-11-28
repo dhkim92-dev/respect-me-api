@@ -26,6 +26,7 @@ class JpaLoadGroupAdapter(
         groupRepository.findByIdWithMembers(groupId) // members join fetch
         groupRepository.findByIdWithNotifications(groupId) // notifications join fetch
 //        group?.members?.forEach { logger.debug("member nickname : ${it.nickname} role : ${it.memberRole}") }
+        logger.debug("load group : ${group?.id}")
         return group?.let { groupMapper.mapToDomainEntity(group) }
     }
 }

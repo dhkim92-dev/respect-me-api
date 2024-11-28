@@ -85,13 +85,14 @@ abstract class Notification(
 
         if (groupId != other.groupId) return false
         if (senderId != other.senderId) return false
+        if (id != other.id) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = groupId.hashCode()
-        result = 31 * result + senderId.hashCode()
+        var result = id.hashCode()
+        result = 31 * result + id.hashCode()
         return result
     }
 

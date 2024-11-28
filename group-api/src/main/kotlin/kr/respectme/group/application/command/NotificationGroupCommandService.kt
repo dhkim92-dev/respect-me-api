@@ -143,9 +143,10 @@ class NotificationGroupCommandService(
 
         val notificationFactory = getNotificationFactory(command.type)
         val notification = notificationFactory.build(command)
-//        logger.info("notification created. notification : ${notification.content}")
+        logger.debug("before add new domain notification : ${group.notifications.size} ")
+        logger.info("notification created. notification : ${notification.content}")
         group.addNotification(loginId, notification)
-//        logger.info("notification added.")
+        logger.debug("after add new domain notification : ${group.notifications.size} ")
         val savedGroup = saveGroupPort.save(group)
 
         publishNotificationSentEvent(savedGroup, notification)
