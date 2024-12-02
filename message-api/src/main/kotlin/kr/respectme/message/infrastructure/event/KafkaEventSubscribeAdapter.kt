@@ -25,15 +25,13 @@ class KafkaEventSubscribeAdapter(
 
     @KafkaListener(topics = ["notification-create-event"], groupId = "respect-me")
     override fun onNotificationCreateEvent(event: NotificationCreateEvent): Boolean {
-        logger.info("event received. ${objectMapper.writeValueAsString(event)}")
         val response = memberQueryPort.loadMembers(MemberQueryRequest(event.receiverIds))
-        logger.info("member query response : ${objectMapper.writeValueAsString(response)}")
-        logger.info("receiver count : ${response.data.count}")
         val deviceTokens: MutableList<String> = mutableListOf()
         response.data.data.filter { member -> member.blocked.not() }
             .forEach { member -> deviceTokens.addAll(member.deviceTokens) }
-        deviceTokens.forEach { logger.info("message will be sent to device id : ${it}") }
+        logger.info("FCM Message sent to group members in ${event.groupId}:${event.groupName}")
         messageSender.sendGroupMessage(createGroupMessage(event, deviceTokens))
+
 
         return true
     }

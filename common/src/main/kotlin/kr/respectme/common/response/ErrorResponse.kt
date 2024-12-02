@@ -2,19 +2,19 @@ package kr.respectme.common.response
 
 import jakarta.validation.ConstraintViolation
 import kr.respectme.common.error.ErrorCode
-import kr.respectme.common.error.GlobalErrorCode
 import kr.respectme.common.error.GlobalErrorCode.INVALID_INPUT_VALUE
+import org.slf4j.MDC
 import org.springframework.http.HttpStatus
 import org.springframework.validation.BindingResult
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 
 class ErrorResponse(
+    val traceId: String? = MDC.get("traceId"),
     override val status: HttpStatus = HttpStatus.OK,
     override val code: String = "",
     override val message: String? = null,
     var errors: List<FieldError> = listOf()
-) : ResponseCode{
-
+) : ResponseCode {
 
     companion object {
 
@@ -39,7 +39,7 @@ class ErrorResponse(
         fun of(e: MethodArgumentTypeMismatchException): ErrorResponse {
             val value = e.value?.toString() ?: ""
             val errors = FieldError.of(e.name, value, e.errorCode);
-            return ErrorResponse(status=INVALID_INPUT_VALUE.status, code=INVALID_INPUT_VALUE.code, message = e.value?.toString(), errors);
+            return ErrorResponse(status=INVALID_INPUT_VALUE.status, code=INVALID_INPUT_VALUE.code, message = e.value?.toString(), errors=errors);
         }
     }
 

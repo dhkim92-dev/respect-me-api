@@ -11,7 +11,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.0.12"
+version = "0.0.13"
 
 repositories {
     mavenCentral()
@@ -45,6 +45,11 @@ dependencies {
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.postgresql:postgresql:42.5.4")
     implementation("org.flywaydb:flyway-core:9.16.3")
+
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    // B3 Propagation 구현 라이브러리
+    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
     // query dsl
     implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")

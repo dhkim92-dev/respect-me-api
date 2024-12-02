@@ -36,7 +36,6 @@ class EnvelopPatternResponseBodyAdvice: ResponseBodyAdvice<Any> {
         response.setStatusCode(applicationResponse.status)
 
         return ApiResult<Any?>(
-            traceId = null, // TODO traceId 추가
             status = applicationResponse.status.value(),
             message = applicationResponse.message,
             data = body,

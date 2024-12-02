@@ -26,13 +26,6 @@ class TestEnvLoggingFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        if (!pathMatcher.match("/api/**", request.requestURI)) {
-            logger.debug("request uri mismatched. ${request.requestURI}")
-            filterChain.doFilter(request, response)
-            return
-        }
-
-        logger.debug("request&response wrapped. ${request.requestURI}")
         val wrappedRequest = ContentCachingRequestWrapper(request)
         val wrappedResponse = ContentCachingResponseWrapper(response)
 
@@ -41,6 +34,7 @@ class TestEnvLoggingFilter(
         } finally {
             logRequestAndResponse(wrappedRequest, wrappedResponse)
             wrappedResponse.copyBodyToResponse()
+
         }
     }
 
@@ -48,7 +42,10 @@ class TestEnvLoggingFilter(
         request: ContentCachingRequestWrapper,
         response: ContentCachingResponseWrapper,
     ) {
-        if(response.status >= 400) {
+        logger.info("request\nuri : ${request.requestURI}\nauthorization: ${request.getHeader("Authorization")}\nbody : ${request.contentAsByteArray.toString(Charsets.UTF_8)}")
+        logger.info("response body : ${response.contentAsByteArray.toString(Charsets.UTF_8)}")
+
+        if(pathMatcher.match("/api/**", request.requestURI) && response.status >= 400) {
             messageExporter.export(request, response)
         }
     }

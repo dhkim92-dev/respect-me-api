@@ -1,21 +1,26 @@
 package kr.respectme.message.configs
 
 import feign.RequestInterceptor
+import io.micrometer.tracing.Tracer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
 class FeignConfig(
-    @Value("\${respect-me.service-account.token}")
-    val accessToken: String
-) {
+    @Value("\${respect-me.service-account.token}") val serviceToken: String,
+    private val tracer: Tracer,
+){
 
     @Bean
     fun feignInterceptor(): RequestInterceptor {
         return RequestInterceptor { template ->
-            println("request body : ${template.body()?.let{String(it)}}")
-            template.header("Authorization", "Bearer ${accessToken}")
+            val span = tracer.currentSpan()
+            span?.let {
+                template.header("X-B3-TraceId", it.context().traceId())
+                template.header("X-B3-SpanId", it.context().spanId())
+            }
+            template.header("Authorization", "Bearer ${serviceToken}")
         }
     }
 }
