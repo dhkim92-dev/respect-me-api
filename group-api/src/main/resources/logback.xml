@@ -16,7 +16,7 @@
 
     <springProfile name="local">
         <root level="DEBUG">
-            <appender-ref ref = "LOGSTASH-TEST"/>
+            <appender-ref ref = "CONSOLE"/>
         </root>
     </springProfile>
 

@@ -8,6 +8,7 @@ data class NotificationCreateEvent(
     val groupId: UUID,
     val groupName: String,
     val senderId: UUID,
+    val title: String? = null,
     val receiverIds: List<UUID>,
     val contents: String,
     val createdAt: Instant

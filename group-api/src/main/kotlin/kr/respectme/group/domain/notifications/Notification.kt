@@ -18,7 +18,6 @@ abstract class Notification(
     updatedAt: Instant? = null,
     lastSentAt: Instant? = null
 ){
-
     var status: NotificationStatus = status
         private set
 

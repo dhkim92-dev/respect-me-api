@@ -47,7 +47,6 @@ class JpaGroupNotification(
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "group_id", referencedColumnName = "id", insertable = false, updatable = false)
     var group: JpaNotificationGroup = group
-
     @Column
     var content: String = content
     @Convert(converter = NotificationTypeConverter::class)

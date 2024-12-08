@@ -45,7 +45,7 @@ data class NotificationResponse(
                 scheduledAt = result.scheduledAt,
                 dayOfWeeks = result.dayOfWeeks?.let{DayOfWeek.toList(it)},
                 dayInterval = result.dayInterval,
-                content = result.content,
+                content = result.content
             )
         }
     }

@@ -4,12 +4,12 @@ import java.util.*
 
 class GroupMessage(
     val groupId: UUID = UUID.randomUUID(),
-    val groupName: String = "",
-    val notificationId: UUID = UUID.randomUUID(),
+    val groupImageUrl : String? = null,
     val senderId: UUID = UUID.randomUUID(),
-    val targets: List<String> = listOf(),
+    val notificationId: UUID = UUID.randomUUID(),
     val title: String = "",
-    val body: String = ""
+    val contents: String = "",
+    val groupName: String = ""
 ) {
 
 }

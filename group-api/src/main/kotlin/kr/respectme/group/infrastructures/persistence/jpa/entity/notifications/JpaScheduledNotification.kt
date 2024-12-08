@@ -20,7 +20,14 @@ class JpaScheduledNotification(
     status: NotificationStatus = NotificationStatus.PENDING,
     lastSentAt: Instant? = null,
     scheduledAt : Instant = Instant.now(),
-): JpaGroupNotification(id, member, group, content, NotificationType.SCHEDULED, status, lastSentAt) {
+): JpaGroupNotification(
+    id = id,
+    member = member,
+    group = group,
+    content = content,
+    type = NotificationType.SCHEDULED,
+    status = status,
+    lastSentAt = lastSentAt) {
 
     var scheduledAt: Instant = scheduledAt
 }

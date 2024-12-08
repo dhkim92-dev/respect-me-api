@@ -10,7 +10,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.0.3"
+version = "0.0.5"
 
 repositories {
     mavenCentral()
@@ -32,6 +32,17 @@ java {
 dependencies {
     implementation(project(":common"))
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+
+    // B3 Propagation 구현 라이브러리
+    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+
+    // zipkin은 추후 적용
+    //implementation("io.zipkin.reporter2:zipkin-reporter-brave")
+
+    // Logstash
+    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.kotest:kotest-runner-junit5:4.4.3")
     testImplementation("io.kotest:kotest-assertions-core:4.4.3")

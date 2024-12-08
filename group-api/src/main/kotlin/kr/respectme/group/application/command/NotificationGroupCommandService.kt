@@ -47,6 +47,8 @@ class NotificationGroupCommandService(
             ownerId = loginId,
             name = command.groupName,
             description = command.groupDescription,
+            type = command.groupType,
+            password = command.groupPassword
         )
         logger.info("group create request member : ${loginId}\n command : $command")
         group.changePassword(passwordEncoder, command.groupPassword)
@@ -89,6 +91,7 @@ class NotificationGroupCommandService(
     : GroupMemberDto {
         val group = loadGroupPort.loadGroup(groupId)
             ?: throw NotFoundException(GROUP_NOT_FOUND)
+
         val member = group.members.find { it.memberId == loginId }
         if(member != null) {
             throw ConflictException(GROUP_MEMBER_ALREADY_EXISTS)
@@ -97,6 +100,9 @@ class NotificationGroupCommandService(
         if(group.password != null && !passwordEncoder.matches(command.password, group.password)) {
             throw ForbiddenException(GROUP_PASSWORD_MISMATCH)
         }
+
+        // TODO Redis Lock 적용 필요
+        // 사용자 가입 요청 처리 중 사용자가 플랫폼에서 탈퇴한다면 유령 회원이 생긴다.
 
         val newMember = GroupMember(
             memberId = loginId,
@@ -143,10 +149,9 @@ class NotificationGroupCommandService(
 
         val notificationFactory = getNotificationFactory(command.type)
         val notification = notificationFactory.build(command)
-        logger.debug("before add new domain notification : ${group.notifications.size} ")
-        logger.info("notification created. notification : ${notification.content}")
+
+        logger.debug("notification : ${notification}")
         group.addNotification(loginId, notification)
-        logger.debug("after add new domain notification : ${group.notifications.size} ")
         val savedGroup = saveGroupPort.save(group)
 
         publishNotificationSentEvent(savedGroup, notification)
@@ -208,11 +213,12 @@ class NotificationGroupCommandService(
             groupId = notification.groupId,
             groupName = group.name,
             notificationId = notification.id,
-            contents = notification.content,
+            contents = notification.content.take(100),
             createdAt = notification.createdAt,
             receiverIds = receivers.map { it.memberId },
             senderId = notification.senderId
         )
+        logger.debug("publish event : ${event}")
 
         eventPublishPort.publish(NotificationCreateEvent.eventName, event)
     }

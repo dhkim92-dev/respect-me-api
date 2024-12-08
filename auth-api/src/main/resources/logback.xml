@@ -9,7 +9,7 @@
 
     <springProfile name="local">
         <root level="DEBUG">
-            <appender-ref ref = "CONSOLE"/>
+           <appender-ref ref = "CONSOLE"/>
         </root>
     </springProfile>
 
@@ -18,11 +18,11 @@
             <appender-ref ref = "LOGSTASH-TEST"/>
         </root>
     </springProfile>
-    <!---->
-    <!--    <springProfile name="prod">-->
-    <!--        <property name="APP_ENV" value="prod"/>-->
-    <!--        <root level="INFO">-->
-    <!--            <appender-ref ref = "LOGSTASH-PROD"/>-->
-    <!--        </root>-->
-    <!--    </springProfile>-->
+<!---->
+<!--    <springProfile name="prod">-->
+<!--        <property name="APP_ENV" value="prod"/>-->
+<!--        <root level="INFO">-->
+<!--            <appender-ref ref = "LOGSTASH-PROD"/>-->
+<!--        </root>-->
+<!--    </springProfile>-->
 </configuration>

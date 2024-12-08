@@ -1,0 +1,356 @@
+@startuml
+' ================================= 커맨드 관련 클래스 다이어그램 =================================
+' Inbound Port 정의부
+interface NotificationGroupCommandPort {
+   + createNotificationGroup(loginId: UUID, request: GroupCreateRequest): NotificationGroupResponse
+   + updateNotificationGroup(loginId: UUID, request: GroupUpdateRequest): NotificationGroupResponse
+   + addGroupMember(loginId: UUID, request: GroupMemberAddRequest): GroupMemberResponse
+   + removeGroupMember(loginId: UUID, groupId: UUID, memberId: UUID)
+   + deleteNotificationGroup(loginId: UUID, groupId: UUID)
+   + createNotification(loginId: UUID, groupId: UUID, request: NotificationCreateRequest): NotificationResponse
+}
+
+class RestGroupCommandAdapter {
+  - notificationGroupUseCase: NotificationGroupUseCase
+}
+
+
+
+interface NotificationGroupUseCase {
+    + createNotificationGroup(loginId: UUID, command: GroupCreateCommand): NotificationGroupDto
+    + updateNotificationGroup(loginId: UUID, command: GroupUpdateCommand): NotificationGroupDto
+    + addMember(loginId: UUID, groupId, command: GroupMemberCreateCommand): GroupMemberDto
+    + removeMember(loginId: UUID, groupId: UUID, memberId: UUID)
+    + deleteNotificationGroup(loginId: UUID, groupId: UUID)
+    + deleteNotificationGroup(loginId: UUID, groupId: UUID)
+    + createNotification(loginId: UUID, groupId: UUID, command: NotificationCreateCommand): NotificationCreateResult
+    + modifyNotificationContents(loginId: UUID, command: NotificationCreateCommand): NotificationCreateResult
+    + modifyNotificationType(loginId: UUID, command: NotificationCreateCommand): NotificationCreateResult
+}
+
+class NotificationGroupCommandService {
+    - eventPublishPort: EventPublishPort
+    - saveGroupPort: SaveGroupPort
+    - loadGroupPort: LoadGroupPort
+    - passwordEncoder: PasswordEncoder
+    - getNotificationFactory(type: NotificationType): NotificationFactory
+    - switchNotificationType(notification: Notification, command: NotificationModifyCommand)
+    - publishNotificationSentEvent(groupEntity: NotificationGroup, notification: Notification)
+}
+
+interface EventSubscribePort {
+    + onReceiveNotificationSent(event: NotificationSentEvent)
+}
+
+' ------------------ Outbound Port 정의부 --------------------
+
+' Event Outbound Port
+interface EventPublishPort {
+    + publish(eventName: String, message: Any)
+}
+
+' Persistent Outbound port
+interface LoadGroupPort {
+    + loadGroup(groupId: UUID): NotificationGroup
+}
+
+interface SaveGroupPort {
+    + save(group: NotificationGroup)
+    + delete(group: NotificationGroup)
+    + deleteById(groupId: UUID)
+}
+
+interface JpaGroupRepository {
+    + save(group: JpaNotificationGroup)
+    + findById(id: UUID): JpaNotificationGroup?
+    + findByOwnerId(ownerId: UUID): List<JpaNotificationGroup>
+    + deleteById(id: UUID)
+    + delete(group: JpaNotificationGroup)
+    + findByIdWithMembers(groupId: UUID): JpaNotificationGroup?
+    + findByIdWithNotifications(groupId: UUID): JpaNotificationGroup?
+}
+
+class JpaLoadGroupAdapter {
+    - groupRepository: JpaGroupRepository
+    - groupMapper: GroupMapper
+}
+
+class JpaSaveGroupAdapter {
+    - groupRepository: JpaGroupRepository
+    - groupMapper: GroupMapper
+}
+
+class NotificationMapper {
+    + mapToDomainEntity(jpaNotification: JpaNotification): Notification
+    + mapToJpaEntity(domainNotification: Notification, jpaGroup: JpaNotificationGroup): JpaNotification
+    - createJpaNotification(notification: Notification, jpaGroup: JpaNotificationGroup): JpaNotification
+    - createJpaImmediateNotification(notification: ImmediateNotification, jpaGroup: JpaNotificationGroup): JpaImmediateNotification
+    - createJpaScheduledNotification(notification: ScheduledNotification, jpaGroup: JpaNotificationGroup): JpaScheduledNotification
+    - castToJpaEntity(notification: Notification, jpaNotification: JpaGroupNotification): JpaGroupNotification
+    - castToJpaImmediateNotification(notification: ImmediateNotification, jpaNotification: JpaGroupNotification): JpaImmediateNotification
+    - castToJpaScheduledNotification(notification: ScheduledNotification, jpaNotification: JpaGroupNotification): JpaScheduledNotification
+    - castToImmediateNotification(jpaNotification: JpaImmediateNotification): ImmediateNotification
+    - castToScheduledNotification(jpaNotification: JpaScheduledNotification): ScheduledNotification
+}
+
+class GroupMemberMapper {
+    + mapToDomainEntity(jpaGroupMember: JpaGroupMember): GroupMember
+    + mapToJpaEntity(domainGroupMember: GroupMember, jpaGroup: JpaNotificationGroup): JpaGroupMember
+}
+
+class GroupMapper{
+    - groupRepository: JpaGroupRepository
+
+    + mapToJpaEntity(domainGroup: NotificationGroup): JpaNotificationGroup
+    + mapToDomainEntity(jpaGroup: JpaNotificationGroup): NotificationGroup
+    - createJpaGroup(domainGroup: NotificationGroup): JpaNotificationGroup
+    - remappingMembers(jpaGroup: JpaNotificationGroup, domainGroup: NotificationGroup)
+    - getRemovedMembers(jpaGroup: JpaNotificationGroup, domainGroup: NotificationGroup)): Set<JpaGroupMember>
+    - getNewMembers(jpaGroup: JpaNotificationGroup, domainGroup: NotificationGroup): Set<JpaGroupMember>
+    - updateMembers(jpaGroup: JpaNotificationGroup, domainGroup: NotificationGroup)
+    - remappingNotifications(jpaGroup: JpaNotificationGroup, domainGroup: NotificationGroup)
+    - updateNotifications(jpaGroup: JpaNotificationGroup, domainGroup: NotificationGroup)
+    - getRemovedNotifications(jpaGroup: JpaNotificationGroup, domainGroup: NotificationGroup): Set<JpaNotification>
+    - getAddedNotifications(jpaGroup: JpaNotificationGroup, domainGroup: NotificationGroup): Set<JpaNotification>)
+}
+
+' ----------------------- Persistent Entity 정의 ---------------------------
+class JpaNotificationGroup {
+    - name: String
+    - description: String
+    - type: GroupType
+    - ownerId: UUID
+    - members: MutableSet<JpaGroupMember>
+    - notifications: MutableSet<JpaGroupNotification>
+    - password: String?
+}
+
+class JpaGroupMember {
+    - pk: Pk(groupId: UUID, memberId: UUID)
+    - nickname: String
+    - profileImageUrl: String?
+    - group: JpaNotificationGroup
+}
+
+abstract class JpaGroupNotification {
+    - member: JpaGroupMember
+    - group: JpaNotificationGroup
+    - content: String
+    - type: NotificationGroup
+    - status: NotificationStatus
+    - lastSentAt: Instant? = null
+}
+
+class JpaImmediateNotification {
+}
+
+class JpaScheduledNotification {
+    - scheduledAt: Instant
+}
+
+abstract class CreatedAtUpdatedAtEntity {
+    + createdAt: Instant
+    + updatedAt: Instant
+    + updateLastModifiedDate()
+}
+
+abstract class UUIDPkEntity {
+    + id: UUID
+    - _isNew: Boolean
+    + UUIDPkEntity(id: UUID)
+    + isNew(): Boolean
+    - getIdentifier(obj: Any): Serializable
+    # markNotNew()
+    + equals(other: Any?): Boolean
+    + hashCode(): Int
+}
+
+' ----------------------- Domain Entity 정의 ------------------------------------
+
+abstract class Notification {
+    + id: UUID
+    + groupId: UUID
+    + senderId: UUID
+    + type: NotificationType
+    + contents: String
+    + createdAt: Instant
+    + updatedAt: Instant?
+    + lastSentAt: Instant?
+    + changeContents(contents: String)
+    + updateStatus(status: NotificationStatus)
+    + switchType(type: NotificationType)
+    # updateTime()
+    + validate()
+    - validateContent()
+    + abstract validateType()
+    + equals(obj: Any?)
+    + hashCode(): Int
+}
+
+class ImmediateNotification {
+    + validateType()
+}
+
+class ScheduledNotification {
+    + scheduleAt: Instant
+    + setScheduleAt(scheduleAt: Instant)
+    + validateType()
+}
+
+class NotificationGroup {
+    + id: UUID
+    + name: String
+    + password: String
+    + ownerId: UUID
+    + type: GroupType
+    + description: String
+    + members: List<GroupMember>
+    + notifications: List<Notification>
+    + createdAt: Instant
+    + updatedAt: Instant
+    + changeGroupType(groupType: GroupType?)
+    + changeGroupName(name: String?)
+    + changeGroupDescription(description: String?)
+    + isPrivate(): Boolean
+    + changeGroupOwner(requestMemberId: UUID, newOwnerId: UUID)
+    + changePassword(passwordEncoder: PasswordEncoder, rawPassword: String?)
+    + addNotification(requestMemberId: UUID, notification: Notification)
+    + addMember(member: GroupMember)
+    + removeMember(memberId: UUID)
+}
+
+class GroupMember {
+    + memberId: UUID,
+    + groupId: UUID,
+    + nickname: String,
+    + memberRole: GroupMemberRole,
+    + profileImageUrl: String
+    + createdAt: Instant
+    + NotificationGroupMember(memberId, groupId, nickname, memberRole, profileImageUrl)
+    + changeNickname(nickname: String)
+    + changeProfileImageUrl(profileImageUrl: String)
+    + isGroupMember(): Boolean
+    + isGroupOwner(): Boolean
+    + isGroupAdmin(): Boolean
+    + isSameMember(memberId: UUID): Boolean
+}
+
+
+
+class KafkaEventPublishAdapter {
+    - kafkaTemplate: KafkaTemplate<String, String>
+    - objectMapper: ObjectMapper
+}
+
+class KafkaEventSubscribeAdapter {
+    - saveGroupPort: SaveGroupPort
+    - loadGroupPort: LoadGroupPort
+    - objectMapper: ObjectMapper
+}
+
+' In Port - In Adapter 의존 관계 정의
+NotificationGroupCommandPort <|.. RestGroupCommandAdapter
+NotificationGroupUseCase <|.. NotificationGroupCommandService
+RestGroupCommandAdapter --> NotificationGroupUseCase : use
+
+' NotificationGroupCommandService 관계 정의
+NotificationGroupCommandService --> EventPublishPort : use
+NotificationGroupCommandService --> LoadGroupPort : use
+NotificationGroupCommandService --> SaveGroupPort : use
+NotificationGroupCommandService ..> NotificationGroup : manipulate
+
+
+' Domain Entity 간 관계 정의
+ImmediateNotification --|> Notification
+ScheduledNotification --|>  Notification
+NotificationGroup -- "0..*" Notification : contains
+NotificationGroup -- "1..*" GroupMember : contains
+
+' Event Pub/Sub 관계 정의
+EventPublishPort <|-- KafkaEventPublishAdapter
+EventSubscribePort <|-- KafkaEventSubscribeAdapter
+KafkaEventSubscribeAdapter --> LoadGroupPort : use
+KafkaEventSubscribeAdapter --> SaveGroupPort : use
+
+' Persistent Entity 간 관계 정의
+UUIDPkEntity --|> CreatedAtUpdatedAtEntity
+JpaNotificationGroup --|> UUIDPkEntity
+JpaNotificationGroup -- "1..*" JpaGroupMember
+JpaNotificationGroup -- "0..*" JpaGroupNotification
+JpaGroupNotification <|-- JpaImmediateNotification
+JpaGroupNotification <|-- JpaScheduledNotification
+
+' Persistent Layer Out Port / Out Adapter 관계 정의
+LoadGroupPort -[hidden]left- SaveGroupPort
+LoadGroupPort <|.. JpaLoadGroupAdapter
+SaveGroupPort <|.. JpaSaveGroupAdapter
+JpaLoadGroupAdapter --> JpaGroupRepository : use
+JpaSaveGroupAdapter --> JpaGroupRepository : use
+JpaLoadGroupAdapter --> GroupMapper : use
+JpaSaveGroupAdapter --> GroupMapper : use
+
+' Mapper간 관계 정의
+GroupMapper ..> GroupMemberMapper
+GroupMapper ..> NotificationMapper
+GroupMapper --> JpaGroupRepository
+
+' Mapper와 엔티티간 관계 정의
+GroupMapper ..> NotificationGroup : convert
+GroupMapper ..> JpaNotificationGroup : convert
+GroupMemberMapper ..> GroupMember : convert
+GroupMemberMapper ..> JpaNotificationGroup
+NotificationMapper ..> Notification : convert
+NotificationMapper ..> JpaGroupNotification : convert
+NotificationMapper ..> JpaNotificationGroup
+
+
+' ===================================================== 여기서부터 Query 관련 클래스 다이어그램 =====================================================
+' Inbound Port 정의
+
+interface NotificationGroupQueryPort {
+   + getNotificationGroup(loginId: UUID, groupId: UUID): NotificationGroupResponse
+   + getNotificationGroups(loginId: UUID): List<NotificationGroupResponse>
+   + getGroupMembers(loginId: UUID, groupId: UUID): List<GroupMemberResponse>
+   + getNotification(loginId: UUID, groupId: UUID, notificationId: UUID): NotificationResponse
+   + getNotifications(loginId: UUID, groupId: UUID): List<NotificationResponse>
+}
+
+class RestGroupQueryAdapter {
+   - notificationGroupQueryUseCase: NotificationGroupQueryUseCase
+}
+
+interface NotificationGroupQueryUseCase {
+    + retrieveGroupMember((loginId: UUID, groupId: UUID, memberId: UUID): GroupMemberDto
+    + retrieveGroupMembers(loginId: UUID, groupId: UUID): List<GroupMemberDto
+    + retrieveNotifications(loginId: UUID, groupId: UUID, notificationId: UUID): NotificationDto
+    + retrieveGroup(loginId: UUID, groupId: UUID): NotificationGroupDto
+    + retrieveMemberGroups(loginId: UUID): List<NotificationGroupDto>
+    + retrieveAllGroups(loginId: UUID, cursorGroupId: UUID?, size: Int?): List<NotificationGroupDto>
+}
+
+class NotificationGroupQueryService {
+    - queryGroupPort: QueryGroupPort
+}
+
+interface QueryGroupPort {
+    + getGroup(groupId: UUID): NotificationGroupDto?
+    + getMemberGroups(memberId: UUID): List<NotificationGroupDto>
+    + getGroupMember(groupId: UUID, memberId: UUID): GroupMemberDto?
+    + getGroupMembers(groupId: UUID): List<GroupMemberDto>
+    + getPublishedNotifications(groupId: UUID, cursor: UUID?, size: Int): List<NotificationDto>
+    + getNotification(groupId: UUID, notificationId: UUID): NotificationDto?
+    + getAllGroups(cursor: UUID?, size: Int?): List<NotificationGroupDto>
+}
+
+class JpaQueryGroupAdapter {
+    - qf: JpaQueryFactory
+    - gtCursor(cursor: UUID?): BooleanExpression
+}
+
+NotificationGroupQueryService ..|> NotificationGroupQueryUseCase
+NotificationGroupQueryPort <|.. RestGroupQueryAdapter
+RestGroupQueryAdapter --> NotificationGroupQueryUseCase : use
+QueryGroupPort <|.. JpaQueryGroupAdapter
+NotificationGroupQueryService --> QueryGroupPort : use
+
+@enduml

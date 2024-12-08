@@ -23,6 +23,13 @@ class NotificationGroupQueryService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+//    @Transactional(readOnly = true)
+//    fun retrieveMemberNotifications(loginId: UUID, cursor: UUID?, size: Int): List<NotificationDto> {
+//        return queryGroupPort.getMemberNotifications(loginId, cursor, size+1)
+//            .sortedBy { it.notificationId }
+//            .reversed()
+//    }
+
     @Transactional(readOnly = true)
     override fun retrieveGroupNotifications(
         loginId: UUID,

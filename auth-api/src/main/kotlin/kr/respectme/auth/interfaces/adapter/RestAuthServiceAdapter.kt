@@ -1,5 +1,6 @@
 package kr.respectme.auth.interfaces.adapter
 
+import io.micrometer.tracing.Tracer
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
@@ -13,6 +14,8 @@ import kr.respectme.auth.interfaces.dto.VerifyAccessTokenRequest
 import kr.respectme.auth.interfaces.dto.VerifyAccessTokenResponse
 import kr.respectme.auth.interfaces.port.AuthServicePort
 import kr.respectme.common.annotation.ApplicationResponse
+import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.HttpStatus.OK
@@ -25,6 +28,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/auth")
 @Tag(name = "Auth", description = "인증 API")
 class RestAuthServiceAdapter(private val authUseCase: AuthUseCase): AuthServicePort {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Operation(summary = "JWT Refresh Token과 Access Token 발급", description = "이메일/패스워드를 통한 토큰 획득")
     @ApiResponses(value = [
