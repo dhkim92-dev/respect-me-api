@@ -117,4 +117,31 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
         return queryUseCase.retrieveAllGroups(loginId, cursor, size)
             .map { it -> NotificationGroupVo.valueOf(it) }
     }
+
+    @GetMapping("notification-groups/{groupId}/notifications/{notificationId}")
+    @Operation(summary = "그룹의 단일 노티피케이션을 상세 조회합니다.", description = "이 API를 사용해서 조회하는 경우 content 필드가 요약되지 않고 전체 내용을 포함합니다")
+    @ApplicationResponse(status = HttpStatus.OK, message = "group notification retrieved.")
+    override fun getNotification(
+        @LoginMember loginId: UUID,
+        @PathVariable groupId: UUID,
+        @PathVariable notificationId: UUID
+    ): GroupNotificationVo {
+        return GroupNotificationVo.valueOf(
+            queryUseCase.retrieveNotification(loginId, groupId, notificationId)
+        )
+    }
+
+    @GetMapping("group-members/me/notifications")
+    @Operation(summary = "내가 속한 그룹의 모든 알림을 조회합니다.", description = "내가 속한 그룹의 모든 알림을 조회합니다.")
+    @ApplicationResponse(status = HttpStatus.OK, message = "member notifications retrieved.")
+    @CursorPagination
+    override fun getMemberNotifications(
+        @LoginMember loginId: UUID,
+        @CursorParam(key = "notificationId") cursor: UUID?,
+        @RequestParam(defaultValue = "20") size : Int?
+    ): List<GroupNotificationVo> {
+        return queryUseCase.retrieveMemberNotifications(loginId, cursor, size?:20)
+            .map { it -> GroupNotificationVo.valueOf(it) }
+            .toList()
+    }
 }

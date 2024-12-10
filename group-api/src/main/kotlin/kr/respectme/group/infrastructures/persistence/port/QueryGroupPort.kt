@@ -63,4 +63,13 @@ interface QueryGroupPort {
      * @return List<NotificationGroupDto>
      */
     fun getAllGroups(cursor: UUID?, size: Int?): List<NotificationGroupDto>
+
+    /**
+     * return all notifications that login user is member of group
+     * @param loginId login user ID
+     * @param cursor cursor for pagination
+     * @param size size for pagination
+     * @return List<NotificationDto>
+     */
+    fun getMemberNotifications(loginId: UUID, cursor: UUID?, size: Int): List<NotificationDto>
 }

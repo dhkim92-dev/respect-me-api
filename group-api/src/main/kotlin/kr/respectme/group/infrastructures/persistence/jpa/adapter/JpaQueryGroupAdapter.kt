@@ -1,6 +1,8 @@
 package kr.respectme.group.infrastructures.persistence.jpa.adapter
 
+import com.querydsl.core.types.NullExpression
 import com.querydsl.core.types.Projections
+import com.querydsl.core.types.dsl.CaseBuilder
 import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.jpa.impl.JPAQueryFactory
 import kr.respectme.group.application.dto.group.NotificationGroupDto
@@ -9,14 +11,19 @@ import kr.respectme.group.application.dto.notification.NotificationDto
 import kr.respectme.group.domain.GroupType
 import kr.respectme.group.domain.mapper.NotificationMapper
 import kr.respectme.group.domain.notifications.NotificationStatus
+import kr.respectme.group.domain.notifications.NotificationType
 import kr.respectme.group.infrastructures.persistence.jpa.entity.QJpaGroupMember
 import kr.respectme.group.infrastructures.persistence.jpa.entity.QJpaNotificationGroup
 import kr.respectme.group.infrastructures.persistence.jpa.entity.notifications.JpaImmediateNotification
 import kr.respectme.group.infrastructures.persistence.jpa.entity.notifications.JpaScheduledNotification
 import kr.respectme.group.infrastructures.persistence.jpa.entity.notifications.QJpaGroupNotification
+import kr.respectme.group.infrastructures.persistence.jpa.entity.notifications.QJpaImmediateNotification
+import kr.respectme.group.infrastructures.persistence.jpa.entity.notifications.QJpaScheduledNotification
 import kr.respectme.group.infrastructures.persistence.port.QueryGroupPort
+import org.aspectj.weaver.ast.Expr
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
+import java.time.Instant
 import java.util.*
 
 @Repository
@@ -161,6 +168,48 @@ class JpaQueryGroupAdapter(
             .from(group)
             .orderBy(group.id.desc())
             .limit(size?.toLong() ?: 20)
+            .fetch()
+    }
+
+    override fun getMemberNotifications(loginId: UUID, cursor: UUID?, size: Int): List<NotificationDto> {
+        val notification = QJpaGroupNotification.jpaGroupNotification
+        val immediateNotification = QJpaImmediateNotification.jpaImmediateNotification
+        val scheduledNotification = QJpaScheduledNotification.jpaScheduledNotification
+        val group = QJpaNotificationGroup.jpaNotificationGroup
+        val groupMember = QJpaGroupMember.jpaGroupMember
+
+        // 1. 사용자가 가입한 그룹 목록을 먼저 조회
+        val groupList = qf.select(group.id)
+            .from(group)
+            .join(group.members, groupMember)
+            .where(QJpaGroupMember.jpaGroupMember.pk.memberId.eq(loginId))
+            .fetch()
+
+        // 2. 사용자가 가입한 그룹의 알림 목록을 조회
+        return qf.select(
+            Projections.constructor(
+                NotificationDto::class.java,
+                notification.id,
+                notification.member.pk.groupId,
+                notification.content,
+                notification.type,
+                notification.status,
+                // ScheduledNotification 타입인 경우 scheduledAt을 수동으로 참조
+                Expressions.cases()
+                    .`when`(notification.type.eq(NotificationType.SCHEDULED))
+                    .then(scheduledNotification.scheduledAt)
+                    .otherwise(NullExpression(Instant::class.java)),
+                Expressions.nullExpression(Int::class.java),
+                Expressions.nullExpression(Int::class.java),
+                notification.createdAt,
+                notification.updatedAt,
+                notification.lastSentAt
+            ))
+            .from(notification)
+            .leftJoin(scheduledNotification).on(notification.id.eq(scheduledNotification.id))
+            .where(notification.group.id.`in`(groupList))
+            .orderBy(notification.id.desc())
+            .limit(size.toLong())
             .fetch()
     }
 
