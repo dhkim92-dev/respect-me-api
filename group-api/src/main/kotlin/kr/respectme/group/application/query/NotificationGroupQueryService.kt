@@ -84,4 +84,18 @@ class NotificationGroupQueryService(
     override fun retrieveAllGroups(loginId: UUID, cursorGroupId: UUID?, size: Int?): List<NotificationGroupDto> {
         return queryGroupPort.getAllGroups(cursorGroupId, size ?: 21)
     }
+
+    @Transactional(readOnly = true)
+    override fun retrieveMemberNotifications(loginId: UUID, cursor: UUID?, size: Int): List<NotificationDto> {
+        return queryGroupPort.getMemberNotifications(loginId, cursor, size+1)
+    }
+
+    @Transactional(readOnly = true)
+    override fun retrieveNotification(loginId: UUID, groupId: UUID, notificationId: UUID): NotificationDto {
+        val groupMember = queryGroupPort.getGroupMember(groupId, loginId)
+            ?: throw ForbiddenException(GROUP_MEMBER_NOT_MEMBER)
+        val notification = queryGroupPort.getNotification(groupId, notificationId)
+            ?: throw NotFoundException(GroupServiceErrorCode.GROUP_NOTIFICATION_NOT_EXISTS)
+        return notification
+    }
 }

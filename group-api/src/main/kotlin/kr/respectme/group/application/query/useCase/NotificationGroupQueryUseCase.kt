@@ -66,4 +66,22 @@ interface NotificationGroupQueryUseCase {
     fun retrieveAllGroups(loginId: UUID,
                           cursorGroupId: UUID?,
                           size: Int?): List<NotificationGroupDto>
+
+    /**
+     * 특정 멤버가 속한 그룹의 모든 알림을 조회한다.
+     * @param loginId 로그인한 사용자의 ID
+     * @param cursor 페이징을 위한 커서
+     * @param size 페이징을 위한 사이즈
+     * @return List<NotificationDto>
+     */
+    fun retrieveMemberNotifications(loginId: UUID, cursor: UUID?, size: Int): List<NotificationDto>
+
+    /**
+     * 특정 알림을 상세 조회한다.
+     * @param loginId 로그인한 사용자의 ID
+     * @param groupId 그룹 ID
+     * @param notificationId 알림 ID
+     * @return NotificationDto
+     */
+    fun retrieveNotification(loginId: UUID, groupId: UUID, notificationId: UUID): NotificationDto
 }
