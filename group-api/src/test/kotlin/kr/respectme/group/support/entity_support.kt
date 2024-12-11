@@ -1,8 +1,8 @@
 package kr.respectme.group.support
 
 import kr.respectme.common.utility.UUIDV7Generator
+import kr.respectme.group.adapter.out.persistence.entity.JpaNotificationGroup
 import kr.respectme.group.domain.GroupType
-import kr.respectme.group.infrastructures.persistence.jpa.entity.JpaNotificationGroup
 //import kr.respectme.group.domain.jpa.JpaGroupMemberEntity
 import java.util.*
 
@@ -12,7 +12,10 @@ fun createJpaGroup(size: Int): List<JpaNotificationGroup> {
         val entity = JpaNotificationGroup(
             name = "group-name-${it}",
             description = "group-description-${it}",
-            groupOwner = UUID.randomUUID(),
+            type = GroupType.GROUP_PRIVATE,
+            password = null,
+            ownerId = UUID.randomUUID(),
+            id = groupId
         )
         entity.description = "group-description-${entity.id}"
         entity.name = "group-name-${entity.id}"

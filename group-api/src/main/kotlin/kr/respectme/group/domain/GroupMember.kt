@@ -15,7 +15,8 @@ class GroupMember(
     memberRole: GroupMemberRole = GroupMemberRole.MEMBER,
     profileImageUrl : String? = null,
     val createdAt: Instant = Instant.now()
-){
+): BaseDomainEntity() {
+
     var nickname: String = nickname
         private set
 
@@ -44,12 +45,14 @@ class GroupMember(
     fun changeMemberRole(role: GroupMemberRole?) {
         role?.let{
             this.memberRole = role
+            updated()
         }
     }
 
     fun changeNickname(nickname: String?) {
         nickname?.let{
             this.nickname = nickname
+            updated()
         }
     }
 

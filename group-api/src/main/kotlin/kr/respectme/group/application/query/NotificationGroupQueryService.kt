@@ -10,7 +10,7 @@ import kr.respectme.group.common.errors.GroupServiceErrorCode
 import kr.respectme.group.common.errors.GroupServiceErrorCode.GROUP_MEMBER_NOT_MEMBER
 import kr.respectme.group.common.errors.GroupServiceErrorCode.GROUP_NOT_FOUND
 import kr.respectme.group.domain.GroupType
-import kr.respectme.group.infrastructures.persistence.port.QueryGroupPort
+import kr.respectme.group.port.out.persistence.QueryGroupPort
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

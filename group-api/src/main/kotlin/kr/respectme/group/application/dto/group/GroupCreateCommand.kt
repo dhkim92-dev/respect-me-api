@@ -1,7 +1,7 @@
 package kr.respectme.group.application.dto.group
 
 import kr.respectme.group.domain.GroupType
-import kr.respectme.group.interfaces.dto.GroupCreateRequest
+import kr.respectme.group.port.`in`.interfaces.dto.GroupCreateRequest
 
 data class GroupCreateCommand(
     val groupType: GroupType,

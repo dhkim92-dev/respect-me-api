@@ -17,14 +17,14 @@ import kr.respectme.group.common.errors.GroupServiceErrorCode.*
 import kr.respectme.group.domain.GroupMember
 import kr.respectme.group.domain.GroupMemberRole
 import kr.respectme.group.domain.NotificationGroup
-import kr.respectme.group.domain.event.NotificationCreateEvent
+import kr.respectme.group.port.out.event.dto.NotificationCreateEvent
 import kr.respectme.group.domain.notifications.*
 import kr.respectme.group.domain.notifications.factory.ImmediateNotificationFactory
 import kr.respectme.group.domain.notifications.factory.NotificationFactory
 import kr.respectme.group.domain.notifications.factory.ScheduledNotificationFactory
-import kr.respectme.group.infrastructures.event.EventPublishPort
-import kr.respectme.group.infrastructures.persistence.port.LoadGroupPort
-import kr.respectme.group.infrastructures.persistence.port.SaveGroupPort
+import kr.respectme.group.port.out.event.EventPublishPort
+import kr.respectme.group.port.out.persistence.LoadGroupPort
+import kr.respectme.group.port.out.persistence.SaveGroupPort
 import org.slf4j.LoggerFactory
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -50,38 +50,34 @@ class NotificationGroupCommandService(
             type = command.groupType,
             password = command.groupPassword
         )
-        logger.info("group create request member : ${loginId}\n command : $command")
+        logger.info("[GroupCreateEvent] group create request member : ${loginId}\n command : $command")
         group.changePassword(passwordEncoder, command.groupPassword)
         group.addMember(GroupMember(loginId, group.id, "group-owner", GroupMemberRole.OWNER))
         val savedGroup = saveGroupPort.save(group)
-        logger.info("platform user : ${loginId} created new group : ${savedGroup.id} groupName: ${savedGroup.name}")
+        logger.info("[GroupCreateEvent] platform member : ${loginId} created new group : ${savedGroup.id} group name: ${savedGroup.name}")
         return NotificationGroupDto.valueOf(savedGroup)
     }
 
     @Transactional
     override fun updateNotificationGroup(loginId: UUID, groupId: UUID, command: GroupModifyCommand): NotificationGroupDto {
-        val group = loadGroupPort.loadGroup(groupId)
-            ?: throw NotFoundException(GROUP_NOT_FOUND)
+        val group = loadGroupPort.loadGroup(
+            groupId = groupId,
+            memberIds = listOf(loginId)
+        ) ?: throw NotFoundException(GROUP_NOT_FOUND)
+        logger.info("[GroupModifyEvent] group modify request member : ${loginId}\n command : $command")
         val member = group.members.find { it.memberId == loginId } ?: throw NotFoundException(GROUP_MEMBER_NOT_FOUND)
 
         if(member.isGroupMember()) {
+            logger.info("[GroupModifyEvent] group modify request rejected, member : ${loginId} is not group owner or admin.")
             throw ForbiddenException(GROUP_MEMBER_NOT_ENOUGH_PERMISSION)
         }
 
         group.changeGroupName(command.name)
         group.changeGroupType(command.type)
         group.changeGroupDescription(command.description)
-        command.ownerId?.let {
-            // TODO 일관성이 깨질 수 있는 부분이라, Lock 적용 필요.
-            // 예. 1. owner A가 어드민 B에게 그룹 소유 권한을 넘기려는 작업 수행
-            //        a. A가 소유 권한 변경 요청을 보냄
-            //        b. 동시에 B가 회원 탈퇴 요청을 보냄
-            //        c. a의 트랜잭션이 완료되기 전, b 트랜잭션에서 사용자 B의 권한 체크가 이미 완료
-            //        d. a 트랜잭션 완료 이후 b 트랜잭션이 완료되면, Group의 소유자가 존재하지 않게 되어버림. 도메인 규칙 위반
-            // 해결 방안. 그룹 사용자의 탈퇴 및 권한 변경의 경우 Lock을 걸어야 함.
-            group.changeGroupOwner(loginId, command.ownerId)
-        }
         group.changePassword(passwordEncoder, command.password)
+        logger.info("[GroupModifyEvent] group modify request accepted, modified by member : ${loginId}" +
+                "group name : ${group.name} group type : ${group.type} group description : ${group.description}")
 
         return NotificationGroupDto.valueOf(saveGroupPort.save(group))
     }
@@ -89,15 +85,20 @@ class NotificationGroupCommandService(
     @Transactional
     override fun addMember(loginId: UUID, groupId: UUID, command: GroupMemberCreateCommand)
     : GroupMemberDto {
-        val group = loadGroupPort.loadGroup(groupId)
-            ?: throw NotFoundException(GROUP_NOT_FOUND)
+        logger.info("[GroupMemberAddEvent] group member add request member : ${loginId}\n command : $command")
+        val group = loadGroupPort.loadGroup(
+            groupId = groupId,
+            memberIds = listOf(loginId)
+        ) ?: throw NotFoundException(GROUP_NOT_FOUND)
 
         val member = group.members.find { it.memberId == loginId }
         if(member != null) {
+            logger.error("[GroupMemberAddEvent] group member add request rejected, member : ${loginId} already exists in group.")
             throw ConflictException(GROUP_MEMBER_ALREADY_EXISTS)
         }
 
         if(group.password != null && !passwordEncoder.matches(command.password, group.password)) {
+            logger.error("[GroupMemberAddEvent] group member add request rejected, member : ${loginId} password mismatch.")
             throw ForbiddenException(GROUP_PASSWORD_MISMATCH)
         }
 
@@ -111,50 +112,46 @@ class NotificationGroupCommandService(
         )
         group.addMember(newMember)
         saveGroupPort.save(group)
+        logger.info("[GroupMemberAddEvent] group member add request accepted, member : ${loginId} added to group ${groupId} group name : ${group.name}.")
         return GroupMemberDto.valueOf(newMember)
     }
 
     @Transactional
-    override fun deleteNotificationGroup(memberId: UUID, groupId: UUID) {
+    override fun deleteNotificationGroup(loginId: UUID, groupId: UUID) {
+        logger.info("[GroupDeleteEvent] group delete request member : ${loginId} group id : ${groupId}")
         val group = loadGroupPort.loadGroup(groupId)
             ?: throw NotFoundException(GROUP_NOT_FOUND)
-        val member = group.members.find { it.memberId == memberId }
-            ?: throw NotFoundException(GROUP_MEMBER_NOT_FOUND)
-        if(!member.isGroupOwner()) throw ForbiddenException(GROUP_MEMBER_NOT_OWNER)
-
+        if(group.ownerId != loginId) {
+            logger.error("[GroupDeleteEvent] group delete request rejected, member : ${loginId} is not group owner.")
+            throw ForbiddenException(GROUP_MEMBER_NOT_OWNER)
+        }
         saveGroupPort.delete(group)
+        logger.info("[GroupDeleteEvent] group delete request accepted, member : ${loginId} deleted group ${groupId} group name : ${group.name}.")
     }
 
     @Transactional
     override fun removeMember(loginId: UUID, groupId: UUID, memberIdToRemove: UUID) {
+        logger.info("[GroupMemberRemoveEvent] group member remove request member : ${loginId} group id : ${groupId} target member id : ${memberIdToRemove}")
         // TODO Redis Lock 적용 필요
-        val group = loadGroupPort.loadGroup(groupId) ?: throw NotFoundException(GROUP_NOT_FOUND)
-        logger.info("member ${memberIdToRemove} will be removed from group ${groupId}")
-//        logger.debug("member count : ${group.members.size}")
+        val group = loadGroupPort.loadGroup(groupId, listOf(loginId, memberIdToRemove)) ?: throw NotFoundException(GROUP_NOT_FOUND)
         group.removeMember(loginId, memberIdToRemove)
-//        logger.debug("member count after remove : ${group.members.size}")
+        logger.info("[GroupMemberRemoveEvent] group member remove request accepted, member : ${loginId} removed member : ${memberIdToRemove} from group ${groupId} group name : ${group.name}.")
         saveGroupPort.save(group)
     }
 
     @Transactional
     override fun createNotification(loginId: UUID, groupId: UUID, command: NotificationCreateCommand)
     : NotificationCreateResult {
-        logger.info("create Notification Request: ${command}\n" +
-                "loginId : ${loginId.toString()}" +
-                "groupId : ${groupId.toString()}"
-        )
-        val group = loadGroupPort.loadGroup(groupId)
+        logger.info("[NotificationCreateEvent] notification create request member : ${loginId} group id : ${groupId} command : $command")
+        val group = loadGroupPort.loadGroup(groupId, listOf(loginId))
             ?: throw NotFoundException(GROUP_NOT_FOUND)
-
-
         val notificationFactory = getNotificationFactory(command.type)
         val notification = notificationFactory.build(command)
-
-        logger.debug("notification : ${notification}")
         group.addNotification(loginId, notification)
         val savedGroup = saveGroupPort.save(group)
-
         publishNotificationSentEvent(savedGroup, notification)
+
+        logger.info("[NotificationCreateEvent] notification create request accepted, member : ${loginId} created notification : ${notification.id} in group ${groupId} group name : ${group.name}.")
         return NotificationCreateResult.valueOf(notification)
     }
 
@@ -164,7 +161,12 @@ class NotificationGroupCommandService(
         groupId: UUID,
         command: NotificationModifyCommand
     ): NotificationCreateResult {
-        val group = loadGroupPort.loadGroup(groupId) ?: throw NotFoundException(GROUP_NOT_FOUND)
+        logger.info("[NotificationModifyContentsEvent] notification modify request member : ${loginId} group id : ${groupId} command : $command")
+        val group = loadGroupPort.loadGroup(
+            groupId = groupId,
+            memberIds = listOf(loginId),
+            notificationIds = listOf(command.notificationId)
+        ) ?: throw NotFoundException(GROUP_NOT_FOUND)
         val member = group.members.find { it.memberId == loginId }
             ?: throw NotFoundException(GROUP_MEMBER_NOT_FOUND)
 
@@ -178,6 +180,7 @@ class NotificationGroupCommandService(
         notification.updateContent(command.contents)
         notification.validate()
         saveGroupPort.save(group)
+        logger.info("[NotificationModifyContentsEvent] notification modify request accepted, member : ${loginId} modified notification : ${notification.id} in group ${groupId} group name : ${group.name}.")
         return NotificationCreateResult.valueOf(notification)
     }
 
@@ -188,19 +191,26 @@ class NotificationGroupCommandService(
         notificationId: UUID,
         command: NotificationModifyCommand
     ): NotificationCreateResult {
-        val group = loadGroupPort.loadGroup(groupId) ?: throw NotFoundException(GROUP_NOT_FOUND)
+        logger.info("[NotificationModifyTypeEvent] notification modify request member : ${loginId} group id : ${groupId} command : $command")
+        val group = loadGroupPort.loadGroup(
+            groupId = groupId,
+            memberIds = listOf(loginId),
+            notificationIds = listOf(notificationId)
+        ) ?: throw NotFoundException(GROUP_NOT_FOUND)
         val member = group.members.find { it.memberId == loginId }
             ?: throw NotFoundException(GROUP_MEMBER_NOT_FOUND)
         val notification = group.notifications.find { it.id == command.notificationId }
             ?: throw NotFoundException(GROUP_NOTIFICATION_CONTENTS_EMPTY)
 
         if(!member.isGroupOwner() && !member.isGroupAdmin()) {
+            logger.error("[NotificationModifyTypeEvent] notification modify request rejected, member : ${loginId} is not group owner or admin.")
             throw ForbiddenException(GROUP_MEMBER_NOT_ENOUGH_PERMISSION)
         }
 
         switchNotificationType(notification, command)
         notification.validate()
         saveGroupPort.save(group)
+        logger.info("[NotificationModifyTypeEvent] notification modify request accepted, member : ${loginId} modified notification : ${notification.id} in group ${groupId} group name : ${group.name}.")
         return NotificationCreateResult.valueOf(notification)
     }
 
@@ -218,9 +228,13 @@ class NotificationGroupCommandService(
             receiverIds = receivers.map { it.memberId },
             senderId = notification.senderId
         )
-        logger.debug("publish event : ${event}")
 
-        eventPublishPort.publish(NotificationCreateEvent.eventName, event)
+        try {
+            eventPublishPort.publish(NotificationCreateEvent.eventName, event)
+        } catch(e: Exception) {
+            // TODO 재전송 로직 필요.
+            logger.error("[NotificationCreateEvent] failed to publish event, event : $event")
+        }
     }
 
     private fun getNotificationFactory(type: NotificationType): NotificationFactory {
