@@ -29,15 +29,15 @@ import java.util.*
  */
 class NotificationGroup(
     val id: UUID = UUIDV7Generator.generate(),
-    val members: MutableSet<GroupMember> =  mutableSetOf(),
-    val notifications: MutableSet<Notification> = mutableSetOf<Notification>(),
-    val createdAt: Instant = Instant.now(),
+    private val _members: MutableSet<GroupMember> =  mutableSetOf(),
+    private val _notifications: MutableSet<Notification> = mutableSetOf<Notification>(),
+    createdAt: Instant = Instant.now(),
     name: String,
     description: String,
     ownerId: UUID,
     password: String? = null,
     type: GroupType = GroupType.GROUP_PRIVATE,
-) {
+): BaseDomainEntity() {
 
     var name: String = name
         private set
@@ -54,18 +54,35 @@ class NotificationGroup(
     var password: String? = password
         private set
 
+    val members: Set<GroupMember>
+        get() = this._members.toSet()
+
+    val notifications: Set<Notification>
+        get() = this._notifications.toSet()
+
+    val createdAt: Instant = createdAt
+
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun changeGroupType(groupType: GroupType?) {
-        groupType?.let { this.type = groupType }
+        groupType?.let {
+            this.type = groupType
+            updated()
+        }
     }
 
     fun changeGroupName(name: String?) {
-        name?.let {this.name = it}
+        name?.let {
+            this.name = it
+            updated()
+        }
     }
 
     fun changeGroupDescription(description: String?) {
-        description?.let {this.description = it}
+        description?.let {
+            this.description = it
+            updated()
+        }
     }
 
     fun isPrivate(): Boolean {
@@ -89,10 +106,30 @@ class NotificationGroup(
 
         member.changeMemberRole(GroupMemberRole.OWNER)
         owner.changeMemberRole(GroupMemberRole.MEMBER)
+        ownerId = newOwnerId
+        updated()
     }
 
     fun changePassword(passwordEncoder: PasswordEncoder, password: String?) {
-        password?.let{ this.password = passwordEncoder.encode(password) }
+        password?.let{
+            this.password = passwordEncoder.encode(password)
+            updated()
+        }
+    }
+
+    fun removeNotification(requestMemberId: UUID, notificationId: UUID) {
+        val member = _members.find { it.memberId == requestMemberId }
+            ?: throw NotFoundException(GroupServiceErrorCode.GROUP_MEMBER_NOT_FOUND)
+        val notification = _notifications.find{ it.id == notificationId }
+            ?: throw NotFoundException(GroupServiceErrorCode.GROUP_NOTIFICATION_NOT_EXISTS)
+
+        if(notification.groupId == id && (member.memberId == notification.senderId || member.isGroupOwner())) {
+            throw ForbiddenException(GroupServiceErrorCode.GROUP_MEMBER_NOT_ENOUGH_PERMISSION)
+        }
+
+        if(notifications.contains(notification)) {
+            notification.removed()
+        }
     }
 
     /**
@@ -101,7 +138,6 @@ class NotificationGroup(
      * @param notification notification to make
      */
     fun addNotification(requestMemberId: UUID, notification: Notification) {
-        logger.debug("this group id : ${id}, notification group id : ${notification.groupId}")
         if(notification.groupId != id) {
             throw ForbiddenException(GroupServiceErrorCode.GROUP_NOTIFICATION_GROUP_ID_MISMATCH)
         }
@@ -114,20 +150,20 @@ class NotificationGroup(
         }
 
         if(notifications.contains(notification)) {
-            logger.debug("already exists notification, it's content will be updated")
-            notifications.remove(notification)
+            _notifications.remove(notification)
+            notification.validate()
+            notification.updated()
         }
 
-        notification.validate()
-        notifications.add(notification)
+        _notifications.add(notification)
     }
 
     fun addMember(member: GroupMember) {
-//        members.forEach { println("member nickname : ${it.nickname} role : ${it.memberRole}") }
         if(members.contains(member)) {
-            members.remove(member)
+            _members.remove(member)
+            member.updated()
         }
-        members.add(member)
+        _members.add(member)
     }
 
     /**
@@ -144,20 +180,15 @@ class NotificationGroup(
         val targetMember = members.find { it.memberId == targetMemberId }
             ?: throw NotFoundException(GroupServiceErrorCode.GROUP_MEMBER_NOT_FOUND)
 
-        if(requestMember != targetMember) {
-            if(
-                requestMember.isGroupMember() ||
-                (requestMember.isGroupAdmin() && (targetMember.isGroupOwner() || targetMember.isGroupAdmin()))
-            ) {
-                throw ForbiddenException(GroupServiceErrorCode.GROUP_MEMBER_NOT_ENOUGH_PERMISSION)
-            }
-            members.remove(targetMember)
-        } else {
-            if(targetMember.isGroupOwner() && members.size > 1) {
-                throw BadRequestException(GroupServiceErrorCode.GROUP_OWNER_CANT_LEAVE)
-            }
-            members.remove(targetMember)
+        if ((requestMember != targetMember) &&
+            requestMember.isGroupMember() ||
+            (requestMember.isGroupAdmin() && (targetMember.isGroupOwner() || targetMember.isGroupAdmin()))
+        ) {
+            throw ForbiddenException(GroupServiceErrorCode.GROUP_MEMBER_NOT_ENOUGH_PERMISSION)
+        } else if(targetMember.isGroupOwner() && members.size > 1) {
+            throw BadRequestException(GroupServiceErrorCode.GROUP_OWNER_CANT_LEAVE)
         }
-    }
 
+        targetMember.removed()
+    }
 }

@@ -1,6 +1,6 @@
 package kr.respectme.group.application.dto.member
 
-import kr.respectme.group.interfaces.dto.GroupMemberCreateRequest
+import kr.respectme.group.port.`in`.interfaces.dto.GroupMemberCreateRequest
 
 class GroupMemberCreateCommand(
     val nickname: String,

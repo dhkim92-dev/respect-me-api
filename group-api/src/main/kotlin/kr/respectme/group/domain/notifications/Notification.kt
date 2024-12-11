@@ -3,6 +3,7 @@ package kr.respectme.group.domain.notifications
 import kr.respectme.common.error.BadRequestException
 import kr.respectme.common.utility.UUIDV7Generator
 import kr.respectme.group.common.errors.GroupServiceErrorCode
+import kr.respectme.group.domain.BaseDomainEntity
 import kr.respectme.group.domain.notifications.NotificationType.*
 import java.time.Instant
 import java.util.*
@@ -17,7 +18,8 @@ abstract class Notification(
     createdAt: Instant = Instant.now(),
     updatedAt: Instant? = null,
     lastSentAt: Instant? = null
-){
+): BaseDomainEntity() {
+
     var status: NotificationStatus = status
         private set
 
@@ -41,10 +43,9 @@ abstract class Notification(
             throw BadRequestException(GroupServiceErrorCode.GROUP_NOTIFICATION_CANNOT_UPDATE_CONTENTS)
         }
 
-        content?.let {
-            this.content = content
-            this.updatedAt = Instant.now()
-        }
+        if(content == null) return
+        this.content = content
+        this.updatedAt = Instant.now()
     }
 
     fun updateStatus(status: NotificationStatus?) {
@@ -54,11 +55,13 @@ abstract class Notification(
             this.lastSentAt = Instant.now()
         }
         updateTime()
+        updated()
     }
 
     fun switchType(type: NotificationType) {
         this.type = type
         updateTime()
+        updated()
     }
 
     protected fun updateTime() {

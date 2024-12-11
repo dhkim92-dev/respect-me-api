@@ -2,7 +2,7 @@ package kr.respectme.group.application.dto.notification
 
 import kr.respectme.group.domain.notifications.DayOfWeek
 import kr.respectme.group.domain.notifications.NotificationType
-import kr.respectme.group.interfaces.dto.NotificationCreateRequest
+import kr.respectme.group.port.`in`.interfaces.dto.NotificationCreateRequest
 import java.time.Instant
 import java.time.OffsetTime
 import java.time.ZoneOffset

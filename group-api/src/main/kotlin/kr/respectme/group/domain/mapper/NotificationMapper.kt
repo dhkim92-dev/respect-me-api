@@ -1,72 +1,50 @@
 package kr.respectme.group.domain.mapper
 
+import kr.respectme.group.adapter.out.persistence.entity.notifications.JpaGroupNotification
 import kr.respectme.group.application.dto.notification.NotificationDto
 import kr.respectme.group.domain.notifications.ImmediateNotification
 import kr.respectme.group.domain.notifications.Notification
 import kr.respectme.group.domain.notifications.ScheduledNotification
-import kr.respectme.group.infrastructures.persistence.jpa.entity.JpaNotificationGroup
-import kr.respectme.group.infrastructures.persistence.jpa.entity.notifications.JpaGroupNotification
-import kr.respectme.group.infrastructures.persistence.jpa.entity.notifications.JpaImmediateNotification
-import kr.respectme.group.infrastructures.persistence.jpa.entity.notifications.JpaScheduledNotification
+import kr.respectme.group.adapter.out.persistence.entity.notifications.JpaImmediateNotification
+import kr.respectme.group.adapter.out.persistence.entity.notifications.JpaScheduledNotification
+import kr.respectme.group.domain.EntityStatus
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
 
 /**
  * Mapper for notification entity
  */
-object NotificationMapper {
-
+@Component
+class NotificationMapper {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    /**
-     * Maps a JPA notification to a domain notification.
-     * @param jpaNotification: The JPA notification to map.
-     * @return Notification
-     * @throws IllegalArgumentException if the notification type is not valid.
-     */
-    fun mapToDomainEntity(jpaNotification: JpaGroupNotification): Notification {
-        return when(jpaNotification) {
+    fun toDomain(jpaNotification: JpaGroupNotification): Notification {
+        val notification = when(jpaNotification) {
             is JpaImmediateNotification -> castToImmediateNotification(jpaNotification)
             is JpaScheduledNotification -> castToScheduledNotification(jpaNotification)
             else -> throw IllegalArgumentException("Notification type is not valid")
         }
+        notification.loaded()
+        return notification
     }
 
-    /**
-     * Maps a domain notification to a JPA notification.
-     * @param notification: The domain notification to map.
-     * @param jpaNotificationGroup: The JPA notification group to map to.
-     */
-    fun mapToJpaNotification(
-        notification: Notification,
-        jpaNotificationGroup: JpaNotificationGroup
-    ): JpaGroupNotification {
-        val jpaNotification = jpaNotificationGroup.notifications.find{ it.id == notification.id }
-            ?.apply{
-                logger.debug("notification modified : ${notification.id}")
-                this.type = notification.type
-                this.status = notification.status
-                this.content = notification.content
-                this.createdAt = notification.createdAt
-                this.updatedAt = notification.updatedAt
-                this.lastSentAt = notification.lastSentAt
-                castToJpaEntity(notification, this)
-            }
-            ?: createJpaNotification(notification, jpaNotificationGroup)
-
-        logger.debug("notification modified : ${jpaNotification.toString()}")
-        return jpaNotification
+    fun toEntity(notification: Notification): JpaGroupNotification {
+        return when(notification) {
+            is ImmediateNotification -> createJpaImmediateNotification(notification)
+            is ScheduledNotification -> createJpaScheduledNotification(notification)
+            else -> throw IllegalArgumentException("Notification type is not valid")
+        }
     }
 
     /**
      * create new JpaGroupNotification entity
      * @param notification: The domain notification to map.
      */
-    private fun createJpaNotification(notification: Notification, jpaGroup: JpaNotificationGroup): JpaGroupNotification {
-        logger.debug("new notification created : ${notification.id}")
+    private fun createJpaNotification(notification: Notification): JpaGroupNotification {
         return when (notification) {
-            is ImmediateNotification -> createJpaImmediateNotification(notification, jpaGroup)
-            is ScheduledNotification -> createJpaScheduledNotification(notification, jpaGroup)
+            is ImmediateNotification -> createJpaImmediateNotification(notification)
+            is ScheduledNotification -> createJpaScheduledNotification(notification)
             else -> throw IllegalArgumentException("Notification type is not valid")
         }
     }
@@ -76,29 +54,15 @@ object NotificationMapper {
      * @param notification: The domain notification to map.
      * @param jpaGroup: The JPA notification group entity, only use for search group member
      */
-    private fun createJpaImmediateNotification(notification: ImmediateNotification, jpaGroup: JpaNotificationGroup): JpaImmediateNotification {
+    private fun createJpaImmediateNotification(notification: ImmediateNotification): JpaImmediateNotification {
         val entity = JpaImmediateNotification(
             id = notification.id,
-            group = jpaGroup,
-            member = jpaGroup.members.find { it.pk.memberId == notification.senderId }!!,
+            groupId = notification.groupId,
+            memberId = notification.senderId,
             content = notification.content,
             status = notification.status,
             lastSentAt = notification.lastSentAt,
         )
-        logger.debug("""createJpaImmediateNotification
-            |notificationId: ${entity.id}
-            |groupId: ${entity.member.group.id}
-            |memberId: ${entity.member.pk.memberId}
-            |content: ${entity.content}
-            |type: ${entity.type}
-            |state: ${entity.status}
-            |scheduledAt: null
-            |dayOfWeeks: null
-            |dayInterval: null
-            |createdAt: ${entity.createdAt}
-            |updatedAt: ${entity.updatedAt}
-            |lastSentAt: ${entity.lastSentAt}
-        """.trimMargin())
         return entity
     }
 
@@ -107,11 +71,11 @@ object NotificationMapper {
      * @param notification: The domain notification to map.
      * @param jpaGroup: The JPA notification group entity, only use for search group member
      */
-    private fun createJpaScheduledNotification(notification: ScheduledNotification, jpaGroup: JpaNotificationGroup): JpaScheduledNotification {
+    private fun createJpaScheduledNotification(notification: ScheduledNotification): JpaScheduledNotification {
         return JpaScheduledNotification(
             id = notification.id,
-            group = jpaGroup,
-            member = jpaGroup.members.find { it.pk.memberId == notification.senderId }!!,
+            groupId = notification.groupId,
+            memberId = notification.senderId,
             content = notification.content,
             status = notification.status,
             lastSentAt = notification.lastSentAt,
@@ -130,8 +94,6 @@ object NotificationMapper {
             is ScheduledNotification -> castToJpaScheduledNotification(notification, jpaNotification)
             else -> throw IllegalArgumentException("Notification type is not valid")
         }
-
-        logger.debug("jpa notification entity : ${jpaEntity}")
 
         return jpaEntity
     }
@@ -176,9 +138,9 @@ object NotificationMapper {
      */
     private fun castToImmediateNotification(jpaNotification: JpaImmediateNotification): ImmediateNotification {
         return ImmediateNotification(
-            id = jpaNotification.id,
-            groupId = jpaNotification.member.group.id,
-            senderId = jpaNotification.member.pk.memberId,
+            id = jpaNotification.identifier,
+            groupId = jpaNotification.groupId,
+            senderId = jpaNotification.memberId,
             content = jpaNotification.content,
             status = jpaNotification.status,
             createdAt = jpaNotification.createdAt,
@@ -194,9 +156,9 @@ object NotificationMapper {
      */
     private fun castToScheduledNotification(jpaNotification: JpaScheduledNotification): ScheduledNotification {
         return ScheduledNotification(
-            id = jpaNotification.id,
-            groupId = jpaNotification.member.group.id,
-            senderId = jpaNotification.member.pk.memberId,
+            id = jpaNotification.identifier,
+            groupId = jpaNotification.groupId,
+            senderId = jpaNotification.memberId,
             content = jpaNotification.content,
             status = jpaNotification.status,
             createdAt = jpaNotification.createdAt,
@@ -210,23 +172,9 @@ object NotificationMapper {
      * map JPA ImmediateNotification entity to NotificationDto
      */
     fun mapToNotificationDto(jpaNotification: JpaImmediateNotification): NotificationDto {
-        logger.debug("mapToNotificationDto(immediate) called.")
-        logger.debug("""mapToNotificationDto(ImmediateNotification) 
-            |notificationId: ${jpaNotification.id}
-            |groupId: ${jpaNotification.group.id}
-            |content: ${jpaNotification.content}
-            |type: ${jpaNotification.type}
-            |state: ${jpaNotification.status}
-            |scheduledAt: null
-            |dayOfWeeks: null
-            |dayInterval: null
-            |createdAt: ${jpaNotification.createdAt}
-            |updatedAt: ${jpaNotification.updatedAt}
-            |lastSentAt: ${jpaNotification.lastSentAt}
-        """.trimMargin())
         return NotificationDto(
-            notificationId = jpaNotification.id,
-            groupId = jpaNotification.group.id,
+            notificationId = jpaNotification.identifier,
+            groupId = jpaNotification.groupId,
             content = jpaNotification.content,
             type = jpaNotification.type,
             state = jpaNotification.status,
@@ -243,27 +191,9 @@ object NotificationMapper {
      * map JPA ScheduledNotification entity to NotificationDto
      */
     fun mapToNotificationDto(jpaNotification: JpaScheduledNotification): NotificationDto {
-        logger.debug("mapToNotificationDto(scheduled) called.")
-        logger.debug("""mapToNotificationDto(JpaScheduledNotification)
-            |notificationId: ${jpaNotification.id}
-            |groupId: ${jpaNotification.group.id}
-            |content: ${jpaNotification.content}
-            |type: ${jpaNotification.type}
-            |state: ${jpaNotification.status}
-            |scheduledAt: ${jpaNotification.scheduledAt}
-            |createdAt: ${jpaNotification.createdAt}
-            |updatedAt: ${jpaNotification.updatedAt}
-            |lastSentAt: ${jpaNotification.lastSentAt}
-            |scheduledAt: ${jpaNotification.scheduledAt}
-            |dayOfWeeks: null
-            |dayInterval: null
-            |createdAt: ${jpaNotification.createdAt}
-            |updatedAt: ${jpaNotification.updatedAt}
-            |lastSentAt: ${jpaNotification.lastSentAt}
-        """.trimMargin())
         return NotificationDto(
-            notificationId = jpaNotification.id,
-            groupId = jpaNotification.group.id,
+            notificationId = jpaNotification.identifier,
+            groupId = jpaNotification.groupId,
             content = jpaNotification.content,
             type = jpaNotification.type,
             state = jpaNotification.status,
