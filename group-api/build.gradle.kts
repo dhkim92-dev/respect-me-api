@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     kotlin("jvm") version "1.9.24"
@@ -74,8 +75,7 @@ kapt {
 }
 
 tasks.register<DockerBuildImage>("buildTestImage") {
-    buildArgs.put("SPRING_PROFILES_ACTIVE", "test")
-    dependsOn("bootJar")
+    dependsOn("bootTestJar")
     inputDir.set(file(".")) // Dockerfile이 위치한 경로 (프로젝트 root 경로)
     images.add("elensar92/respect-me-group-api:${version}-test")
     group = "docker"
@@ -87,10 +87,29 @@ tasks.register<DockerPushImage>("pushTestImage") {
     group = "docker"
 }
 
-tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
-    archiveBaseName.set("${rootProject.group}.group-api")
-    archiveVersion.set("latest")
+//tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootTestJar> {
+//    archiveBaseName.set("${rootProject.group}.group-api")
+//    archiveVersion.set("latest")
+//}
+
+tasks {
+
+    bootRun {
+        jvmArgs = listOf("-Dspring.profiles.active=local")
+    }
+
+    register<BootJar>("bootTestJar") {
+        archiveBaseName.set("${rootProject.group}.group-api.test-")
+        archiveVersion.set("latest")
+    }
+
+    register<BootJar>("bootProdJar") {
+        archiveBaseName.set("${rootProject.group}.group-api.prod-")
+        archiveVersion.set("latest")
+    }
 }
+
+
 
 tasks.test {
     useJUnitPlatform()
