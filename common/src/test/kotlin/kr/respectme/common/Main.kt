@@ -3,7 +3,7 @@ package kr.respectme.common.study
 import io.kotest.core.spec.style.AnnotationSpec
 import org.springframework.web.util.UriComponentsBuilder
 
-class Test: AnnotationSpec() {
+class Main: AnnotationSpec() {
 
     @Test
     fun `URLComponentTest`() {

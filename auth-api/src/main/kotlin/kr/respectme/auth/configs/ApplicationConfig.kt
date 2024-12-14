@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import kr.respectme.common.advice.CursorPaginationAdvice
 import kr.respectme.common.advice.EnvelopPatternResponseBodyAdvice
 import kr.respectme.common.advice.GeneralExceptionHandlerAdvice
+import kr.respectme.common.domain.DomainEntityCacheAutoConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
-import org.springframework.web.bind.annotation.ControllerAdvice
 
 @Configuration
 class ApplicationConfig(private val objectMapper: ObjectMapper) {
