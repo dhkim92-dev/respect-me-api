@@ -1,10 +1,11 @@
 package kr.respectme.common.domain.cache
 
 import kr.respectme.common.domain.BaseDomainEntity
+import kr.respectme.common.domain.enums.EntityStatus
 
 interface DomainEntityCache {
 
-    fun <T: BaseDomainEntity<*>> isModified(clazz: Class<T>, obj: T): Int
+    fun <T: BaseDomainEntity<*>> isSameWithCache(clazz: Class<T>, obj: T): EntityStatus
 
     fun <T: BaseDomainEntity<*>> get(clazz: Class<T>, obj: T): T?
 

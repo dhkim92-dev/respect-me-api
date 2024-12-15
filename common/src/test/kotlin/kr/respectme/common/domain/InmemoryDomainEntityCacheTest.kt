@@ -23,18 +23,18 @@ class InmemoryDomainEntityCacheTest(): AnnotationSpec() {
     @Test
     fun `이미 추가된 Entity와 같은 ID 값을 가진 엔티티가 수정된 경우 isModified는 1을 반환한다`() {
         entity.name = "changed"
-        cacheStore.isModified(TestPassEntity::class.java, entity) shouldBe 1
+        cacheStore.isSameWithCache(TestPassEntity::class.java, entity) shouldBe 1
     }
 
     @Test
     fun `이미 추가된 Entity와 같은 ID값을 가진 엔티티가 수정되지 않은 경우 isModified는 0을 반환한다`() {
-        cacheStore.isModified(TestPassEntity::class.java, entity) shouldBe 0
+        cacheStore.isSameWithCache(TestPassEntity::class.java, entity) shouldBe 0
     }
 
     @Test
     fun `캐시에 저장되지 않은 Entity는 isModified는 -1을 반환한다`() {
         val newEntity = TestPassEntity(2, "new")
-        cacheStore.isModified(TestPassEntity::class.java, newEntity) shouldBe -1
+        cacheStore.isSameWithCache(TestPassEntity::class.java, newEntity) shouldBe -1
     }
 
     @Test
@@ -51,7 +51,7 @@ class InmemoryDomainEntityCacheTest(): AnnotationSpec() {
     fun `캐시에 저장된 entity의 @DomainRelation 어노테이션이 붙은 필드를 제외한 다른 값에 변화가 없다면 isModified는 0을 반환한다`() {
         val newEntity = TestPassEntity(1, "first commit")
         newEntity.relations = listOf(TestPassUUIDEntity(UUID.randomUUID()))
-        cacheStore.isModified(TestPassEntity::class.java, newEntity) shouldBe 0
+        cacheStore.isSameWithCache(TestPassEntity::class.java, newEntity) shouldBe 0
     }
 
     @Test

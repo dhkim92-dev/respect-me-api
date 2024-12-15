@@ -1,6 +1,7 @@
 package kr.respectme.common.domain.cache
 
 import kr.respectme.common.domain.BaseDomainEntity
+import kr.respectme.common.domain.enums.EntityStatus
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -15,9 +16,9 @@ class DefaultDomainEntityCacheProxy(
         logger.info("DefaultDomainEntityCacheProxy initialized.")
     }
 
-    override fun <T : BaseDomainEntity<*>> isModified(clazz: Class<T>, obj: T): Int {
+    override fun <T : BaseDomainEntity<*>> isSameWithCache(clazz: Class<T>, obj: T): EntityStatus {
         val cache = DomainEntityCacheRepository.getProperty(domainEntityCacheFactory)
-        return getDomainEntityCache().isModified(clazz, obj)
+        return getDomainEntityCache().isSameWithCache(clazz, obj)
     }
 
     override fun <T : BaseDomainEntity<*>> get(clazz: Class<T>, obj: T): T? {

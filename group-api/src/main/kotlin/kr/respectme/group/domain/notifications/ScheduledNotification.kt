@@ -1,11 +1,13 @@
 package kr.respectme.group.domain.notifications
 
+import kr.respectme.common.domain.annotations.DomainEntity
 import kr.respectme.common.error.BadRequestException
 import kr.respectme.common.utility.UUIDV7Generator
 import kr.respectme.group.common.errors.GroupServiceErrorCode.GROUP_NOTIFICATION_RESERVED_AT_INVALID
 import java.time.Instant
 import java.util.*
 
+@DomainEntity
 class ScheduledNotification(
     id : UUID = UUIDV7Generator.generate(),
     groupId : UUID = UUIDV7Generator.generate(),

@@ -1,37 +1,38 @@
 package kr.respectme.common.domain.cache
 
-import com.google.gson.Gson
+import com.fasterxml.jackson.databind.ObjectMapper
 import kr.respectme.common.domain.BaseDomainEntity
 import kr.respectme.common.domain.annotations.DomainEntity
 import kr.respectme.common.domain.annotations.DomainRelation
+import kr.respectme.common.domain.annotations.IgnoreField
+import kr.respectme.common.domain.enums.EntityStatus
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.gson.GsonProperties
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.javaMethod
 
-class InMemoryDomainEntityCache: DomainEntityCache {
+class InMemoryDomainEntityCache(private val objectMapper: ObjectMapper): DomainEntityCache {
 
     private val snapshot = mutableMapOf<String, BaseDomainEntity<*>>()
 
     private val logger = LoggerFactory.getLogger(InMemoryDomainEntityCache::class.java)
-
 
     /**
      * 오브젝트가 캐시에 없으면 -1, 신규 엔티티임을 의미
      * 오브젝트가 캐시에 있고, 캐시와 비교하여 프로퍼티가 변경되었으면 1, 수정된 엔티티임을 의미
      * 오브젝트가 캐시에 있고, 캐시와 비교하여 프로퍼티가 변경되지 않았으면 0, 수정되지 않은 엔티티임을 의미
       */
-    override fun <T : BaseDomainEntity<*>> isModified(clazz: Class<T>, obj: T): Int {
-        obj.id?.let {
-            val key = getKey(clazz, it)
-            get(clazz, key)?.let {
-                return compareProperties(obj, it).let { if(it) 1 else 0 }
+    override fun <T : BaseDomainEntity<*>> isSameWithCache(clazz: Class<T>, obj: T): EntityStatus {
+        val cached = snapshot[getKey(clazz, obj.id)]
+        return if(cached == null) {
+            EntityStatus.CREATED
+        } else {
+            if(compareProperties(obj, cached)) {
+                EntityStatus.UPDATED
+            } else {
+                EntityStatus.ACTIVE
             }
         }
-        return -1
     }
 
     override fun <T: BaseDomainEntity<*>> get(clazz: Class<T>, obj: T): T? {
@@ -48,24 +49,28 @@ class InMemoryDomainEntityCache: DomainEntityCache {
     }
 
     override fun <T: BaseDomainEntity<*>> get(clazz: Class<T>, key: String?): T? {
-        return snapshot[key]?.let { clazz.cast(it) }
+        val cached = snapshot[key]?.let { clazz.cast(it) }
+        return cached
     }
 
     override fun <T : BaseDomainEntity<*>> put(clazz: Class<T>, value: T): Boolean {
         if(clazz.isAnnotationPresent(DomainEntity::class.java).not()) {
-            logger.error("Class is not annotated with DomainEntity")
+//            logger.error("Class is not annotated with DomainEntity")
             return false
         }
 
         val key = getKey(clazz, value.id)
         key?.let{
             snapshot[key] = copyObject(value)
+//            logger.debug("${clazz.name} instance ${key} will be cached.")
+//            logger.debug("cache info ${objectMapper.writeValueAsString(snapshot[key])}")
             return true
         }
         return false
     }
 
     override fun evict(key: String) {
+//        logger.debug("key will be evicted.")
         snapshot.remove(key)
     }
 
@@ -118,22 +123,31 @@ class InMemoryDomainEntityCache: DomainEntityCache {
             return false
         }
 
-        val targetProperties = obj::class.memberProperties.filter{
-            val fieldHasAnnotation = it.javaField?.isAnnotationPresent(DomainRelation::class.java) == true
-            val getterHasAnnotation = it.getter.javaMethod?.isAnnotationPresent(DomainRelation::class.java) == true
-//            logger.info("Property: ${it.name}, Field Annotation: $fieldHasAnnotation, Getter Annotation: $getterHasAnnotation")
-            !fieldHasAnnotation && !getterHasAnnotation
-        }
+        val targetProperties = obj::class.memberProperties
+            /* DomainRelation, IgnoreField 어노테이션 제외 */
+            .filter {
+                val hasDomainRelationAnnotation = it.javaField?.isAnnotationPresent(DomainRelation::class.java) == true ||
+                        it.getter.javaMethod?.isAnnotationPresent(DomainRelation::class.java) == true
 
-        return targetProperties.any { property ->
+                val hasIgnoreFieldAnnotation = it.javaField?.isAnnotationPresent(IgnoreField::class.java) == true ||
+                        it.getter.javaMethod?.isAnnotationPresent(IgnoreField::class.java) == true
+
+                !hasDomainRelationAnnotation && !hasIgnoreFieldAnnotation
+            }
+
+        val result =  targetProperties.any { property ->
             val objValue = property.getter.call(obj)
             val cachedValue = property.getter.call(cached)
-//            logger.info("cached value : ${cachedValue}, current value : ${objValue}")
-            objValue != cachedValue
+            val propertyCompareResult = objValue != cachedValue
+            logger.debug("property name : ${property.name}, objValue : ${objValue}, cachedValue : ${cachedValue} same? : ${objValue == cachedValue}")
+            propertyCompareResult
         }
+
+//        logger.debug("compare result : $result")
+        return result
     }
 
     private fun <T> copyObject(obj: T): T {
-        return Gson().fromJson(Gson().toJson(obj), obj!!::class.java)
+        return objectMapper.writeValueAsString(obj).let { objectMapper.readValue(it, obj!!::class.java) }
     }
 }

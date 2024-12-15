@@ -122,7 +122,7 @@ class NotificationGroupCommandService(
         val group = loadGroupPort.loadGroup(groupId)
             ?: throw NotFoundException(GROUP_NOT_FOUND)
         if(group.ownerId != loginId) {
-            logger.error("[GroupDeleteEvent] group delete request rejected, member : ${loginId} is not group owner.")
+            logger.error("[GroupDeleteEvent] group delete request rejected, member : ${loginId} is not group owner. owner Id ${group.ownerId}")
             throw ForbiddenException(GROUP_MEMBER_NOT_OWNER)
         }
         saveGroupPort.delete(group)

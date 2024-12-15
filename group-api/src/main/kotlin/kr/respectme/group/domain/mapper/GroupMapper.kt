@@ -3,7 +3,6 @@ package kr.respectme.group.domain.mapper
 import kr.respectme.group.adapter.out.persistence.entity.JpaGroupMember
 import kr.respectme.group.adapter.out.persistence.entity.JpaNotificationGroup
 import kr.respectme.group.adapter.out.persistence.entity.notifications.JpaGroupNotification
-import kr.respectme.group.domain.EntityStatus
 import kr.respectme.group.domain.NotificationGroup
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -27,10 +26,10 @@ class GroupMapper(
             ownerId = group.ownerId,
             password = group.password,
             type = group.type,
-            _members = members.map { memberMapper.toDomain(it) }.toMutableSet(),
-            _notifications = notifications.map { notificationMapper.toDomain(it) }.toMutableSet()
+            members = members.map { memberMapper.toDomain(it) }.toMutableSet(),
+            notifications = notifications.map { notificationMapper.toDomain(it) }.toMutableSet()
         )
-        domainGroup.loaded()
+//        domainGroup.loaded()
 
         return domainGroup
     }
@@ -48,9 +47,9 @@ class GroupMapper(
             type = group.type
         )
 
-        if(group.isNew()) {
-            entity.created()
-        }
+//        if(group.isNew()) {
+//            entity.created()
+//        }
 
         return entity
     }

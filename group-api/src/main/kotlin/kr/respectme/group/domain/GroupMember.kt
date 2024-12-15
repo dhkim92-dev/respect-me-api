@@ -1,5 +1,7 @@
 package kr.respectme.group.domain
 
+import kr.respectme.common.domain.BaseDomainEntity
+import kr.respectme.common.domain.annotations.DomainEntity
 import java.time.Instant
 import java.util.*
 
@@ -8,14 +10,38 @@ import java.util.*
  * group member can leave group or if the member is owner or admin, can kick member.
  * can change member etc
  */
+
+class GroupMemberId(
+    val groupId: UUID,
+    val memberId: UUID
+){
+    override fun equals(other: Any?): Boolean {
+        if(other == null) return false
+        if(other !is GroupMemberId) return false
+        if(this === other) return true
+        return this.groupId == other.groupId && this.memberId == other.memberId
+    }
+
+    override fun hashCode(): Int {
+        return Objects.hash(groupId, memberId)
+    }
+}
+
+@DomainEntity
 class GroupMember(
-    val memberId: UUID = UUID.randomUUID(),
-    val groupId: UUID = UUID.randomUUID(),
+    memberId: UUID = UUID.randomUUID(),
+    groupId: UUID = UUID.randomUUID(),
     nickname: String = "",
     memberRole: GroupMemberRole = GroupMemberRole.MEMBER,
     profileImageUrl : String? = null,
-    val createdAt: Instant = Instant.now()
-): BaseDomainEntity() {
+    createdAt: Instant = Instant.now()
+): BaseDomainEntity<GroupMemberId>(GroupMemberId(groupId, memberId)) {
+
+    val memberId: UUID
+        get() = id.memberId
+
+    val groupId: UUID
+        get() = id.groupId
 
     var nickname: String = nickname
         private set
@@ -25,6 +51,8 @@ class GroupMember(
 
     var profileImageUrl: String? = profileImageUrl
         private set
+
+    val createdAt = createdAt
 
     fun isGroupOwner(): Boolean {
         return memberRole == GroupMemberRole.OWNER
@@ -45,14 +73,12 @@ class GroupMember(
     fun changeMemberRole(role: GroupMemberRole?) {
         role?.let{
             this.memberRole = role
-            updated()
         }
     }
 
     fun changeNickname(nickname: String?) {
         nickname?.let{
             this.nickname = nickname
-            updated()
         }
     }
 
@@ -60,10 +86,10 @@ class GroupMember(
         if(this === other) return true
         if(javaClass != other?.javaClass) return false
         other as GroupMember
-        return (other.memberId == memberId) && (other.groupId == groupId)
+        return this.id == other.id
     }
 
     override fun hashCode(): Int {
-        return Objects.hash(memberId, groupId)
+        return id.hashCode()
     }
 }

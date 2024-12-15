@@ -1,24 +1,37 @@
 package kr.respectme.group.domain.notifications
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import kr.respectme.common.domain.BaseDomainEntity
+import kr.respectme.common.domain.annotations.DomainEntity
 import kr.respectme.common.error.BadRequestException
 import kr.respectme.common.utility.UUIDV7Generator
 import kr.respectme.group.common.errors.GroupServiceErrorCode
-import kr.respectme.group.domain.BaseDomainEntity
 import kr.respectme.group.domain.notifications.NotificationType.*
 import java.time.Instant
 import java.util.*
 
+@DomainEntity
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@type")
+@JsonSubTypes(
+    JsonSubTypes.Type(value = ImmediateNotification::class, name = "ImmediateNotification"),
+    JsonSubTypes.Type(value = ScheduledNotification::class, name = "ScheduledNotification")
+)
 abstract class Notification(
-    val id: UUID = UUIDV7Generator.generate(),
-    val groupId: UUID,
-    val senderId: UUID,
+    id: UUID = UUIDV7Generator.generate(),
+    groupId: UUID = UUID.randomUUID(),
+    senderId: UUID = UUID.randomUUID(),
     content: String = "",
     status : NotificationStatus = NotificationStatus.PENDING,
     type: NotificationType = IMMEDIATE,
     createdAt: Instant = Instant.now(),
     updatedAt: Instant? = null,
     lastSentAt: Instant? = null
-): BaseDomainEntity() {
+): BaseDomainEntity<UUID>(id) {
+
+    val groupId = groupId
+
+    val senderId = senderId
 
     var status: NotificationStatus = status
         private set
@@ -55,13 +68,13 @@ abstract class Notification(
             this.lastSentAt = Instant.now()
         }
         updateTime()
-        updated()
+//        updated()
     }
 
     fun switchType(type: NotificationType) {
         this.type = type
         updateTime()
-        updated()
+//        updated()
     }
 
     protected fun updateTime() {

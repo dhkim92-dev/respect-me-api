@@ -1,8 +1,12 @@
 package kr.respectme.common.domain.cache
 
-class InMemoryDomainEntityCacheFactory: DomainEntityCacheFactory {
+import com.fasterxml.jackson.databind.ObjectMapper
+
+class InMemoryDomainEntityCacheFactory(
+    private val objectMapper: ObjectMapper
+): DomainEntityCacheFactory {
 
     override fun createCache(): DomainEntityCache {
-        return InMemoryDomainEntityCache()
+        return InMemoryDomainEntityCache(objectMapper)
     }
 }

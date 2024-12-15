@@ -16,7 +16,7 @@ class GroupMemberMapper {
             createdAt = member.createdAt,
             profileImageUrl = member.profileImageUrl
         )
-        groupMember.loaded()
+//        groupMember.loaded()
         return groupMember
     }
 

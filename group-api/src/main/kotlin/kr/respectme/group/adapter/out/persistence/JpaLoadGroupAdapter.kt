@@ -1,12 +1,18 @@
 package kr.respectme.group.adapter.out.persistence
 
+import kr.respectme.common.domain.cache.DomainEntityCache
 import kr.respectme.group.adapter.out.persistence.repository.JpaGroupMemberRepository
 import kr.respectme.group.adapter.out.persistence.repository.JpaGroupNotificationRepository
 import kr.respectme.group.adapter.out.persistence.repository.JpaGroupRepository
+import kr.respectme.group.domain.GroupMember
 import kr.respectme.group.domain.NotificationGroup
 import kr.respectme.group.domain.mapper.GroupMapper
 import kr.respectme.group.domain.mapper.GroupMemberMapper
 import kr.respectme.group.domain.mapper.NotificationMapper
+import kr.respectme.group.domain.notifications.ImmediateNotification
+import kr.respectme.group.domain.notifications.Notification
+import kr.respectme.group.domain.notifications.NotificationType
+import kr.respectme.group.domain.notifications.ScheduledNotification
 import kr.respectme.group.port.out.persistence.LoadGroupPort
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -14,12 +20,11 @@ import java.util.*
 
 @Component
 class JpaLoadGroupAdapter(
+    private val entityCache: DomainEntityCache,
     private val groupRepository: JpaGroupRepository,
     private val groupMemberRepository: JpaGroupMemberRepository,
     private val groupNotificationRepository: JpaGroupNotificationRepository,
     private val groupMapper: GroupMapper,
-    private val memberMapper: GroupMemberMapper,
-    private val notificationMapper: NotificationMapper
 ): LoadGroupPort {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -43,6 +48,29 @@ class JpaLoadGroupAdapter(
             groupNotificationRepository.findByIdInAndGroupId(notificationIds, groupId)
         }
 
-        return groupMapper.toDomain(group, members, notifications)
+        val domainGroup = groupMapper.toDomain(group, members, notifications)
+        entityCache.put(NotificationGroup::class.java, domainGroup)
+        cacheGroupMembers(domainGroup.members.toList())
+        cacheNotifications(domainGroup.notifications.toList())
+
+        return domainGroup
+    }
+
+    private fun cacheGroupMembers(members: List<GroupMember>) {
+        members.forEach { member ->
+            entityCache.put(GroupMember::class.java, member)
+        }
+    }
+
+    private fun cacheNotifications(notifications: List<Notification>) {
+        notifications.forEach { notification ->
+            when(notification.type) {
+                NotificationType.IMMEDIATE ->
+                    entityCache.put(ImmediateNotification::class.java, notification as ImmediateNotification)
+                NotificationType.SCHEDULED ->
+                    entityCache.put(ScheduledNotification::class.java, notification as ScheduledNotification)
+                else -> throw IllegalArgumentException("Unknown notification type: ${notification.type}")
+            }
+        }
     }
 }
