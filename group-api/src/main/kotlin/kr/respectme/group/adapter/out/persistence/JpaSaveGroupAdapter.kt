@@ -1,24 +1,34 @@
 package kr.respectme.group.adapter.out.persistence
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import kr.respectme.common.domain.cache.DomainEntityCache
+import kr.respectme.common.domain.enums.EntityStatus
+import kr.respectme.common.error.BadRequestException
+import kr.respectme.common.error.BusinessException
+import kr.respectme.common.error.InternalServerError
 import kr.respectme.group.adapter.out.persistence.entity.JpaGroupMember
 import kr.respectme.group.adapter.out.persistence.entity.JpaNotificationGroup
 import kr.respectme.group.adapter.out.persistence.entity.notifications.JpaGroupNotification
 import kr.respectme.group.adapter.out.persistence.repository.JpaGroupMemberRepository
 import kr.respectme.group.adapter.out.persistence.repository.JpaGroupNotificationRepository
 import kr.respectme.group.adapter.out.persistence.repository.JpaGroupRepository
-import kr.respectme.group.domain.EntityStatus
+import kr.respectme.group.domain.GroupMember
 import kr.respectme.group.domain.NotificationGroup
 import kr.respectme.group.domain.mapper.GroupMapper
 import kr.respectme.group.domain.mapper.GroupMemberMapper
 import kr.respectme.group.domain.mapper.NotificationMapper
+import kr.respectme.group.domain.notifications.*
 import kr.respectme.group.port.out.persistence.SaveGroupPort
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import java.util.*
+import javax.swing.text.html.parser.Entity
 
 
 @Component
 class JpaSaveGroupAdapter(
+    private val entityCache: DomainEntityCache,
     private val groupMapper: GroupMapper,
     private val memberMapper: GroupMemberMapper,
     private val notificationMapper: NotificationMapper,
@@ -30,65 +40,127 @@ class JpaSaveGroupAdapter(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun save(group: NotificationGroup): NotificationGroup {
-        var groupEntity = groupMapper.toEntity(group)
-        logger.info("domain entity status : ${group.entityStatus}")
-        logger.info("group entity isNew?  ${groupEntity.isNew}")
-        if(group.isNew() || group.isUpdated()) {
-            logger.info("Group is new or updated, saving group")
-            groupEntity = groupRepository.save(groupEntity)
-            logger.info("Group saved : ${groupEntity.id}")
-        }
+        val groupEntity = groupMapper.toEntity(group)
+        val members = mutableListOf<JpaGroupMember>()
+        val notifications = mutableListOf<JpaGroupNotification>()
 
-        val members = handleMembers(group)
-        val notifications = handleNotifications(group)
+        handleGroup(group, groupEntity)
+        members.addAll(handleMembers(group))
+        notifications.addAll(handleNotifications(group))
 
         return groupMapper.toDomain(groupEntity, members, notifications)
     }
 
-    private fun handleNotifications(group: NotificationGroup): List<JpaGroupNotification> {
-        val updatedNotifications = group.notifications.filter { it.isUpdated() }
-        val newNotifications = group.notifications.filter { it.isNew() }
-        val deletedNotifications = group.notifications.filter { it.isRemoved() }
-        val activeNotifications: MutableList<JpaGroupNotification> = mutableListOf()
-
-        // 삭제 먼저 수행
-        deletedNotifications.forEach {
-            groupNotificationRepository.deleteById(it.id)
+    private fun handleGroup(group: NotificationGroup, groupEntity: JpaNotificationGroup) {
+        logger.debug("handleGroup called.")
+        if(entityCache.contains(NotificationGroup::class.java, group)) {
+            if(entityCache.isSameWithCache(NotificationGroup::class.java, group) == EntityStatus.UPDATED) {
+                logger.debug("group ${group.id} is cached, and changed.")
+                groupRepository.save(groupEntity) // 변경사항이 있을때만 save 호출
+            } else {
+                logger.debug("group ${group.id} is cached, and not changed.")
+            }
+        } else {
+            logger.debug("new group created.")
+            groupRepository.save(groupEntity)
         }
-
-        // 업데이트 수행
-        updatedNotifications.forEach {
-            val notification = notificationMapper.toEntity(it)
-            activeNotifications.add(groupNotificationRepository.save(notification))
-        }
-
-        // 신규생성
-        newNotifications.forEach {
-            val notification = notificationMapper.toEntity(it)
-            groupNotificationRepository.save(notification)
-            activeNotifications.add(groupNotificationRepository.save(notification))
-        }
-
-        return activeNotifications
     }
 
-    private fun handleMembers(group: NotificationGroup)
-    : List<JpaGroupMember> {
-        val updatedMembers = group.members.filter { it.isUpdated() }
-        val newMembers = group.members.filter { it.isNew() }
-        val deletedMembers = group.members.filter { it.isRemoved() }
-        val activeMembers: MutableList<JpaGroupMember> = mutableListOf()
+    private fun handleMembers(group: NotificationGroup): List<JpaGroupMember> {
+        val deletedMembers = getDeletedMembers(group)
+        val updatedMembers = getUpdatedMembers(group)
+        val newMembers = getNewMembers(group)
+        val activeMembers = mutableListOf<JpaGroupMember>()
+        logger.debug("deletedMembers: ${deletedMembers.size}")
 
-        // 삭제 먼저 수행
-        deletedMembers.forEach {
-            groupMemberRepository.deleteById(JpaGroupMember.Pk(groupId = it.groupId, memberId = it.memberId))
+        updatedMembers.union(newMembers).forEach { member ->
+            groupMemberRepository.save(memberMapper.toEntity(member))
+            entityCache.put(GroupMember::class.java, member)
+            activeMembers.add(memberMapper.toEntity(member))
         }
-        // 업데이트 수행
-        activeMembers.addAll(updatedMembers.map { groupMemberRepository.save(memberMapper.toEntity(it)) })
-        // 신규생성
-        activeMembers.addAll(newMembers.map { groupMemberRepository.save(memberMapper.toEntity(it)) })
 
-        return activeMembers
+        deletedMembers.forEach { member ->
+            groupMemberRepository.deleteById(JpaGroupMember.Pk(member.groupId, member.memberId))
+            entityCache.evict(GroupMember::class.java, member)
+        }
+
+        return activeMembers.toList()
+    }
+
+    private fun handleNotifications(group: NotificationGroup): List<JpaGroupNotification> {
+        val deletedNotifications = getDeletedNotifications(group)
+        val updatedNotifications = getUpdatedNotifications(group)
+        val newNotifications = getNewNotifications(group)
+        val activeNotifications = mutableListOf<JpaGroupNotification>()
+
+        updatedNotifications.union(newNotifications).forEach { notification ->
+            groupNotificationRepository.save(notificationMapper.toEntity(notification))
+            when(notification.type) {
+                NotificationType.IMMEDIATE -> entityCache.put(ImmediateNotification::class.java, notification as ImmediateNotification)
+                NotificationType.SCHEDULED -> entityCache.put(ScheduledNotification::class.java, notification as ScheduledNotification)
+                else -> throw InternalServerError("Unknown notification type")
+            }
+            activeNotifications.add(notificationMapper.toEntity(notification))
+        }
+
+        deletedNotifications.forEach { notification ->
+            groupNotificationRepository.deleteById(notification.id)
+            when(notification.type) {
+                NotificationType.IMMEDIATE -> entityCache.evict(ImmediateNotification::class.java, notification)
+                NotificationType.SCHEDULED -> entityCache.evict(ScheduledNotification::class.java, notification)
+                else -> throw InternalServerError("Unknown notification type")
+            }
+        }
+
+        return activeNotifications.toList()
+    }
+
+    private fun <T: Notification> checkNotificationExistsInCache(entity: T): Boolean {
+        return when(entity.type) {
+            NotificationType.IMMEDIATE -> entityCache.contains(ImmediateNotification::class.java, entity.id)
+            NotificationType.SCHEDULED -> entityCache.contains(ScheduledNotification::class.java, entity.id)
+            else -> false
+        }
+    }
+
+    private fun <T: Notification> checkNotificationUpdated(entity: T): EntityStatus{
+        return when(entity.type) {
+            NotificationType.IMMEDIATE -> entityCache.isSameWithCache(ImmediateNotification::class.java, entity as ImmediateNotification)
+            NotificationType.SCHEDULED -> entityCache.isSameWithCache(ScheduledNotification::class.java, entity as ScheduledNotification)
+            else -> throw InternalServerError("Unknown notification type")
+        }
+    }
+
+    private fun getDeletedNotifications(group: NotificationGroup): List<Notification> {
+        return entityCache.get(NotificationGroup::class.java, group)?.let { cachedGroup ->
+            // 현재 그룹 캐시가 존재하는 경우에만 이 로직이 유효하다.
+            cachedGroup.notifications.filter { notification -> group.notifications.none { it.id == notification.id } }
+        } ?: emptyList()
+    }
+
+    private fun getUpdatedNotifications(group: NotificationGroup): List<Notification> {
+        // 현재 노티피케이션 중 캐시에 존재하고, 내용이 변한 경우
+        return group.notifications.filter { notification -> checkNotificationUpdated(notification) == EntityStatus.UPDATED }
+    }
+
+    private fun getNewNotifications(group: NotificationGroup): List<Notification> {
+        return group.notifications.filter { notification -> !checkNotificationExistsInCache(notification) }
+    }
+
+    private fun getDeletedMembers(group: NotificationGroup): List<GroupMember> {
+        return entityCache.get(NotificationGroup::class.java, group)?.let { cachedGroup ->
+            cachedGroup.members.filter { member -> group.members.none { it.id == member.id } }
+        } ?: emptyList()
+    }
+
+    private fun getUpdatedMembers(group: NotificationGroup): List<GroupMember> {
+        return entityCache.get(NotificationGroup::class.java, group)?.let { cachedGroup ->
+            cachedGroup.members.filter { member -> group.members.none { it.id == member.id } }
+        } ?: emptyList()
+    }
+
+    private fun getNewMembers(group: NotificationGroup): List<GroupMember> {
+        return group.members.filter { member -> !entityCache.contains(GroupMember::class.java, member) }
     }
 
     override fun deleteById(id: UUID) {

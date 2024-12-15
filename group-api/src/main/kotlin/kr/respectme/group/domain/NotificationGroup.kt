@@ -1,5 +1,9 @@
 package kr.respectme.group.domain
 
+import kr.respectme.common.domain.BaseDomainEntity
+import kr.respectme.common.domain.annotations.DomainEntity
+import kr.respectme.common.domain.annotations.DomainRelation
+import kr.respectme.common.domain.annotations.IgnoreField
 import kr.respectme.common.error.BadRequestException
 import kr.respectme.common.error.ForbiddenException
 import kr.respectme.common.error.NotFoundException
@@ -27,17 +31,18 @@ import java.util.*
  * @property ownerId group owner id
  * @property password group password (if group is private required)
  */
+@DomainEntity
 class NotificationGroup(
-    val id: UUID = UUIDV7Generator.generate(),
-    private val _members: MutableSet<GroupMember> =  mutableSetOf(),
-    private val _notifications: MutableSet<Notification> = mutableSetOf<Notification>(),
+    id: UUID = UUIDV7Generator.generate(),
+    members: MutableSet<GroupMember> =  mutableSetOf(),
+    notifications: MutableSet<Notification> = mutableSetOf<Notification>(),
     createdAt: Instant = Instant.now(),
     name: String,
     description: String,
     ownerId: UUID,
     password: String? = null,
     type: GroupType = GroupType.GROUP_PRIVATE,
-): BaseDomainEntity() {
+): BaseDomainEntity<UUID>(id) {
 
     var name: String = name
         private set
@@ -54,34 +59,35 @@ class NotificationGroup(
     var password: String? = password
         private set
 
-    val members: Set<GroupMember>
-        get() = this._members.toSet()
+    @DomainRelation
+    val members: MutableSet<GroupMember> = members
 
-    val notifications: Set<Notification>
-        get() = this._notifications.toSet()
+    @DomainRelation
+    val notifications: MutableSet<Notification> = notifications
 
     val createdAt: Instant = createdAt
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+//    @IgnoreField
+//    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun changeGroupType(groupType: GroupType?) {
         groupType?.let {
             this.type = groupType
-            updated()
+//            updated()
         }
     }
 
     fun changeGroupName(name: String?) {
         name?.let {
             this.name = it
-            updated()
+//            updated()
         }
     }
 
     fun changeGroupDescription(description: String?) {
         description?.let {
             this.description = it
-            updated()
+//            updated()
         }
     }
 
@@ -95,7 +101,7 @@ class NotificationGroup(
      * @param newOwnerId new owner ID
      */
     fun changeGroupOwner(requestMemberId: UUID, newOwnerId: UUID) {
-        val owner = members.find { it.memberId == requestMemberId }
+        val owner =members.find { it.memberId == requestMemberId }
             ?: throw NotFoundException(GroupServiceErrorCode.GROUP_MEMBER_NOT_FOUND)
         val member = members.find { member -> member.memberId == newOwnerId }
             ?: throw NotFoundException(GroupServiceErrorCode.GROUP_MEMBER_NOT_FOUND)
@@ -107,29 +113,27 @@ class NotificationGroup(
         member.changeMemberRole(GroupMemberRole.OWNER)
         owner.changeMemberRole(GroupMemberRole.MEMBER)
         ownerId = newOwnerId
-        updated()
+//        updated()
     }
 
     fun changePassword(passwordEncoder: PasswordEncoder, password: String?) {
         password?.let{
             this.password = passwordEncoder.encode(password)
-            updated()
+//            updated()
         }
     }
 
     fun removeNotification(requestMemberId: UUID, notificationId: UUID) {
-        val member = _members.find { it.memberId == requestMemberId }
+        val member = members.find { it.memberId == requestMemberId }
             ?: throw NotFoundException(GroupServiceErrorCode.GROUP_MEMBER_NOT_FOUND)
-        val notification = _notifications.find{ it.id == notificationId }
+        val notification = notifications.find{ it.id == notificationId }
             ?: throw NotFoundException(GroupServiceErrorCode.GROUP_NOTIFICATION_NOT_EXISTS)
 
         if(notification.groupId == id && (member.memberId == notification.senderId || member.isGroupOwner())) {
             throw ForbiddenException(GroupServiceErrorCode.GROUP_MEMBER_NOT_ENOUGH_PERMISSION)
         }
 
-        if(notifications.contains(notification)) {
-            notification.removed()
-        }
+        notifications.remove(notification)
     }
 
     /**
@@ -150,20 +154,20 @@ class NotificationGroup(
         }
 
         if(notifications.contains(notification)) {
-            _notifications.remove(notification)
+            notifications.remove(notification)
             notification.validate()
-            notification.updated()
+//            notification.updated()
         }
 
-        _notifications.add(notification)
+        notifications.add(notification)
     }
 
     fun addMember(member: GroupMember) {
         if(members.contains(member)) {
-            _members.remove(member)
-            member.updated()
+            members.remove(member)
+//            member.updated()
         }
-        _members.add(member)
+        members.add(member)
     }
 
     /**
@@ -188,7 +192,7 @@ class NotificationGroup(
         } else if(targetMember.isGroupOwner() && members.size > 1) {
             throw BadRequestException(GroupServiceErrorCode.GROUP_OWNER_CANT_LEAVE)
         }
-
-        targetMember.removed()
+        members.remove(targetMember)
+//        targetMember.removed()
     }
 }

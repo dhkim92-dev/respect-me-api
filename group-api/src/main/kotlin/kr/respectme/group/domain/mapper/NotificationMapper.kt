@@ -7,7 +7,6 @@ import kr.respectme.group.domain.notifications.Notification
 import kr.respectme.group.domain.notifications.ScheduledNotification
 import kr.respectme.group.adapter.out.persistence.entity.notifications.JpaImmediateNotification
 import kr.respectme.group.adapter.out.persistence.entity.notifications.JpaScheduledNotification
-import kr.respectme.group.domain.EntityStatus
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -25,7 +24,7 @@ class NotificationMapper {
             is JpaScheduledNotification -> castToScheduledNotification(jpaNotification)
             else -> throw IllegalArgumentException("Notification type is not valid")
         }
-        notification.loaded()
+//        notification.loaded()
         return notification
     }
 

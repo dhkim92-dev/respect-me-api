@@ -12,7 +12,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.0.16"
+version = "0.1.0"
 
 repositories {
     mavenCentral()
@@ -44,7 +44,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.kafka:spring-kafka")
-    implementation("org.postgresql:postgresql:42.5.4")
+//    implementation("org.postgresql:postgresql:42.5.4")
+    runtimeOnly("org.postgresql:postgresql:42.5.4")
+    runtimeOnly("com.h2database:h2:2.1.214")
     implementation("org.flywaydb:flyway-core:9.16.3")
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")

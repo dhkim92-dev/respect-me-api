@@ -44,7 +44,7 @@ class DomainEntityAnnotationProcessor: BeanFactoryPostProcessor{
 
     private fun checkClassImplementationBaseDomainEntity(clazz: Class<*>) {
         logger.debug("Checking class ${clazz.name}")
-        if(clazz.superclass != BaseDomainEntity::class.java) {
+        if(clazz.isAssignableFrom(BaseDomainEntity::class.java)) {
             throw IllegalArgumentException("Class ${clazz.name} should extend BaseDomainEntity")
         }
     }

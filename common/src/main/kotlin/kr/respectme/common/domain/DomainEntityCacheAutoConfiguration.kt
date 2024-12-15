@@ -1,5 +1,6 @@
 package kr.respectme.common.domain
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import kr.respectme.common.domain.annotations.DomainEntityAnnotationProcessor
 import kr.respectme.common.domain.cache.*
 import org.slf4j.LoggerFactory
@@ -14,17 +15,16 @@ import org.springframework.core.env.Environment
 
 @Configuration
 @AutoConfigurationPackage
-class DomainEntityCacheAutoConfiguration(
-) {
+class DomainEntityCacheAutoConfiguration() {
 
     @Autowired private lateinit var environment: Environment
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Bean
     @ConditionalOnMissingBean(DomainEntityCacheFactory::class)
-    fun cacheFactory(): DomainEntityCacheFactory {
+    fun cacheFactory(objectMapper: ObjectMapper): DomainEntityCacheFactory {
         logger.info("DomainEntityCacheFactory initialized.")
-        return InMemoryDomainEntityCacheFactory()
+        return InMemoryDomainEntityCacheFactory(objectMapper)
     }
 
     @Bean

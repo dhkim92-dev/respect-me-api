@@ -1,9 +1,11 @@
 package kr.respectme.group.domain.notifications
 
+import kr.respectme.common.domain.annotations.DomainEntity
 import kr.respectme.common.utility.UUIDV7Generator
 import java.time.Instant
 import java.util.*
 
+@DomainEntity
 class ImmediateNotification(
     id: UUID = UUIDV7Generator.generate(),
     groupId: UUID = UUIDV7Generator.generate(),
