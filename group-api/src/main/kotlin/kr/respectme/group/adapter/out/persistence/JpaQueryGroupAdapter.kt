@@ -201,7 +201,7 @@ class JpaQueryGroupAdapter(
             Projections.constructor(
                 NotificationDto::class.java,
                 notification.id,
-                notification.memberId,
+                notification.groupId,
                 notification.content,
                 notification.type,
                 notification.status,
