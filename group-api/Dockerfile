@@ -1,3 +1,4 @@
 FROM openjdk:17.0.1-jdk-slim
-COPY build/libs/kr.respectme.group-api.test-latest.jar /app.jar
-CMD ["java", "-jar", "/app.jar"]
+COPY build/libs/kr.respectme.group-api-latest.jar /app.jar
+ENV SPRING_PROFILES_ACTIVE=test
+CMD ["java", "-jar", "-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE}", "/app.jar"]
