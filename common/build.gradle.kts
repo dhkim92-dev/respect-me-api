@@ -35,6 +35,7 @@ dependencies {
     api("com.auth0:java-jwt:4.4.0")
     api("org.jetbrains.kotlin:kotlin-reflect")
     api("org.springframework.cloud:spring-cloud-starter-openfeign:4.1.3")
+    api("com.fasterxml.jackson.module:jackson-module-kotlin")
     api("org.springframework.boot:spring-boot-starter-security")
     api("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
     api("org.springframework.boot:spring-boot-starter-aop")

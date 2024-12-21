@@ -28,7 +28,7 @@ fun createAccessToken(member: Member, configs: JwtConfigs, timestamp: Long = 360
         .withClaim("id", member.id.toString())
         .withClaim("role", member.role)
         .withExpiresAt(Date(System.currentTimeMillis() + timestamp))
-        .sign(Algorithm.HMAC512(configs.accessTokenSecretKey))
+        .sign(Algorithm.HMAC256(configs.accessTokenSecretKey))
 }
 
 fun createRefreshToken(member: Member, configs: JwtConfigs, timestamp: Long = 360000, permanent: Boolean = false): String {
@@ -37,5 +37,5 @@ fun createRefreshToken(member: Member, configs: JwtConfigs, timestamp: Long = 36
         .withClaim("id", member.id.toString())
         .withClaim("role", member.role)
         .withExpiresAt(Date(System.currentTimeMillis() + timestamp))
-        .sign(Algorithm.HMAC512(configs.refreshTokenSecretKey))
+        .sign(Algorithm.HMAC256(configs.refreshTokenSecretKey))
 }

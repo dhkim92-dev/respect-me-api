@@ -54,7 +54,7 @@ class MemberService(
                 id = UUIDV7Generator.generate(),
                 nickname = command.nickname,
                 email = command.email,
-                password = passwordEncoder.encode(command.password),
+                password = passwordEncoder.encode(command.password?:UUID.randomUUID().toString()),
                 role = MemberRole.ROLE_MEMBER,
                 isBlocked = false,
                 blockReason = "",

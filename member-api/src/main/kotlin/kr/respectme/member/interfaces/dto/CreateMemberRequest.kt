@@ -15,9 +15,8 @@ class CreateMemberRequest(
     @field: Length(min=4, max=64, message = "Email length should be in range 4~64.")
     @Schema(required = true, example = "email", description = "이메일", minLength = 4, maxLength = 64)
     val email: String="",
-    @field: NotBlank(message = "Password should not be empty string or null.")
-    @Schema(required = true, example = "password", description = "비밀번호")
-    val password: String=""
+    @Schema(required = false, example = "password", description = "비밀번호, OIDC 회원 생성에서는 사용되지 않습니다.")
+    val password: String?=null
 ) {
 
 }

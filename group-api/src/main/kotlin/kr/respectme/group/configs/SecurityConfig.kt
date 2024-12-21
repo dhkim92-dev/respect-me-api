@@ -5,7 +5,6 @@ import kr.respectme.common.security.handler.EntrypointUnauthorizedHandler
 import kr.respectme.common.security.handler.JwtAccessDeniedHandler
 import kr.respectme.common.security.jwt.JwtAuthenticationFilter
 import kr.respectme.common.security.jwt.JwtAuthenticationProvider
-import kr.respectme.common.security.jwt.adapter.RestJwtAuthenticationAdapter
 import kr.respectme.common.security.jwt.port.JwtAuthenticationPort
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value

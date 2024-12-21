@@ -12,7 +12,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 class CreateServiceToken {
 
     private val jwtConfigs = createJwtConfigs(accessTokenExpiry=3600*24*365*60)
-    private val accessTokenAlgorithm = Algorithm.HMAC512(jwtConfigs.accessTokenSecretKey)
+    private val accessTokenAlgorithm = Algorithm.HMAC256(jwtConfigs.accessTokenSecretKey)
 
     @OptIn(ExperimentalEncodingApi::class)
     @Test

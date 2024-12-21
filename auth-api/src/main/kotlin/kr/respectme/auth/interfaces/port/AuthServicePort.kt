@@ -1,5 +1,7 @@
 package kr.respectme.auth.interfaces.port
 
+import com.google.auth.oauth2.AccessToken
+import kr.respectme.auth.application.dto.JwtAccessTokenVerifierRequiredInfo
 import kr.respectme.auth.infrastructures.dto.LoginRequest
 import kr.respectme.auth.interfaces.dto.LoginResponse
 import kr.respectme.auth.interfaces.dto.RefreshAccessTokenRequest
@@ -10,7 +12,9 @@ interface AuthServicePort {
 
     fun login(request: LoginRequest): LoginResponse
 
-    fun verifyAccessToken(request: VerifyAccessTokenRequest): VerifyAccessTokenResponse
+//    fun verifyAccessToken(request: VerifyAccessTokenRequest): VerifyAccessTokenResponse
+
+    fun retrieveAccessTokenVerificationRequirements(jwtToken: String): JwtAccessTokenVerifierRequiredInfo
 
     fun reissueAccessToken(request: RefreshAccessTokenRequest): LoginResponse
 }

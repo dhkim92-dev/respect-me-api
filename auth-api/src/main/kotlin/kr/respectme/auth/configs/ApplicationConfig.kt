@@ -9,9 +9,19 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
+import org.springframework.web.reactive.function.client.WebClient
+import reactor.netty.http.client.HttpClient
 
 @Configuration
 class ApplicationConfig(private val objectMapper: ObjectMapper) {
+
+    @Bean
+    fun webClient(): WebClient {
+        return WebClient.builder()
+            .clientConnector(ReactorClientHttpConnector(HttpClient.create().followRedirect(true)))
+            .build()
+    }
 
     @Bean
     fun exceptionHandler() : GeneralExceptionHandlerAdvice {
