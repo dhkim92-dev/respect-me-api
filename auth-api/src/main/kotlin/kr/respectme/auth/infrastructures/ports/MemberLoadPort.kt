@@ -7,7 +7,7 @@ import java.util.UUID
 
 interface MemberLoadPort {
 
-    fun loadMemberByEmailAndPassword(loginRequest: LoginRequest): ApiResult<Member?>
+//    fun loadMemberByEmailAndPassword(loginRequest: LoginRequest): ApiResult<Member?>
 
     fun loadMemberById(id: UUID): ApiResult<Member?>
 }

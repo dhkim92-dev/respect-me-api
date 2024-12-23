@@ -10,7 +10,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.0.5"
+version = "0.1.1"
 
 repositories {
     mavenCentral()
@@ -23,6 +23,12 @@ kotlin {
     }
 }
 
+allOpen {
+    annotation("jakarta.persistence.Entity")
+    annotation("jakarta.persistence.MappedSuperclass")
+    annotation("jakarta.persistence.Embeddable")
+}
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(17))
@@ -33,12 +39,18 @@ dependencies {
     implementation(project(":common"))
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+
+    runtimeOnly("org.postgresql:postgresql:42.5.4")
+    runtimeOnly("com.h2database:h2:2.1.214")
+    implementation("org.flywaydb:flyway-core:9.16.3")
 
     // B3 Propagation 구현 라이브러리
     implementation("io.micrometer:micrometer-tracing-bridge-brave")
 
-    // zipkin은 추후 적용
-    //implementation("io.zipkin.reporter2:zipkin-reporter-brave")
+    // Firebase Admin SDK
+    implementation("com.google.firebase:firebase-admin:9.3.0")
+    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
 
     // Logstash
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")

@@ -11,7 +11,7 @@ class Member(
     val id: UUID,
     email: String = "",
     nickname: String = "",
-    password: String = "",
+    password: String? = null,
     role: MemberRole = MemberRole.ROLE_MEMBER,
     isBlocked: Boolean = false,
     blockReason: String = "",
@@ -24,7 +24,7 @@ class Member(
     var nickname: String = nickname
         private set
 
-    var password: String = password
+    var password: String? = password
         private set
 
     var role: MemberRole = role

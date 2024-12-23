@@ -1,5 +1,6 @@
 package kr.respectme.group.port.out.persistence
 
+import kr.respectme.group.domain.GroupMember
 import kr.respectme.group.domain.NotificationGroup
 import java.util.UUID
 
@@ -19,4 +20,11 @@ interface LoadGroupPort {
      * @param notificationIds list of notification id want to load
      */
     fun loadGroup(groupId: UUID, memberIds: List<UUID> = emptyList(), notificationIds: List<UUID> = emptyList()): NotificationGroup?
+
+    /**
+     * load Group Members
+     * @param groupId id of group
+     */
+
+    fun loadGroupMemberIds(groupId: UUID): List<UUID>
 }

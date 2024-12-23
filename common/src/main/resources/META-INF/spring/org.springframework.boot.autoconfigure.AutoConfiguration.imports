@@ -1,1 +1,2 @@
 kr.respectme.common.domain.DomainEntityCacheAutoConfiguration
+kr.respectme.common.security.jwt.DefaultJwtAuthenticationConfig

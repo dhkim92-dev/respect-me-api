@@ -11,7 +11,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.0.9"
+version = "0.1.1"
 
 repositories {
     mavenCentral()
@@ -72,7 +72,6 @@ kapt {
 }
 
 tasks.register<DockerBuildImage>("buildTestImage") {
-    buildArgs.put("SPRING_PROFILES_ACTIVE", "test")
     dependsOn("bootJar")
     inputDir.set(file(".")) // Dockerfile이 위치한 경로 (프로젝트 root 경로)
     images.add("elensar92/respect-me-member-api:${version}-test")
@@ -85,13 +84,18 @@ tasks.register<DockerPushImage>("pushTestImage") {
     group = "docker"
 }
 
-tasks.named("build") {
-}
-
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
     archiveBaseName.set("${rootProject.group}.member-api")
     archiveVersion.set("latest")
 }
+
+tasks {
+    bootRun {
+        jvmArgs = listOf("-Dspring.profiles.active=local")
+    }
+}
+
+
 
 tasks.test {
     useJUnitPlatform()

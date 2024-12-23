@@ -225,7 +225,7 @@ class NotificationGroupCommandService(
             notificationId = notification.id,
             contents = notification.content.take(100),
             createdAt = notification.createdAt,
-            receiverIds = receivers.map { it.memberId },
+            receiverIds = loadGroupPort.loadGroupMemberIds(notification.groupId),
             senderId = notification.senderId
         )
 

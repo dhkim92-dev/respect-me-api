@@ -15,7 +15,7 @@ class JpaMemberEntity(
     @Column
     var nickname: String = "",
     @Column
-    var password: String = "",
+    var password: String? = null,
     @Convert(converter = MemberRoleConverter::class)
     var role: MemberRole = MemberRole.ROLE_MEMBER,
     @Column
