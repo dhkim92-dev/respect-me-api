@@ -56,6 +56,11 @@ class JpaLoadGroupAdapter(
         return domainGroup
     }
 
+    override fun loadGroupMemberIds(groupId: UUID): List<UUID> {
+        return groupMemberRepository.findPkMemberIdByPkGroupId(groupId)
+            .map { it.pk!!.memberId }
+    }
+
     private fun cacheGroupMembers(members: List<GroupMember>) {
         members.forEach { member ->
             entityCache.put(GroupMember::class.java, member)

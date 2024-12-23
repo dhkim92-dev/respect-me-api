@@ -6,4 +6,4 @@ create table member_auth_info (
     oidc_auth_user_identifier varchar(255),
     last_login_at timestamp(6) with time zone,
     primary key (id)
-)
+);

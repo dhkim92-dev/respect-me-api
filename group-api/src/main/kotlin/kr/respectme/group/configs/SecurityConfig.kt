@@ -5,6 +5,7 @@ import kr.respectme.common.security.handler.EntrypointUnauthorizedHandler
 import kr.respectme.common.security.handler.JwtAccessDeniedHandler
 import kr.respectme.common.security.jwt.JwtAuthenticationFilter
 import kr.respectme.common.security.jwt.JwtAuthenticationProvider
+import kr.respectme.common.security.jwt.adapter.JwtAuthenticationAdapter
 import kr.respectme.common.security.jwt.port.JwtAuthenticationPort
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -37,24 +38,14 @@ class SecurityConfig(
     private val authUrl: String,
     private val objectMapper: ObjectMapper,
     @Value("\${server.cors.allowed-origins}")
-    private val allowedOriginsString: String
+    private val allowedOriginsString: String,
+    private val jwtAuthenticationProvider: JwtAuthenticationProvider
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val allowedOrigins: List<String> by lazy {
         allowedOriginsString.split(",")
-    }
-
-    @Bean
-    fun jwtAuthenticationPort(): JwtAuthenticationPort {
-        logger.info("Respect Me Authentication URL : ${authUrl}")
-        return RestJwtAuthenticationAdapter("${authUrl}/api/v1/auth/jwt/verify")
-    }
-
-    @Bean
-    fun jwtAuthenticationProvider(): JwtAuthenticationProvider {
-        return JwtAuthenticationProvider(jwtAuthenticationPort(), objectMapper)
     }
 
     fun excludePathMatcher(): RequestMatcher {
@@ -70,7 +61,7 @@ class SecurityConfig(
     }
 
     fun jwtAuthenticationFilter(): JwtAuthenticationFilter {
-        return JwtAuthenticationFilter(excludePathMatcher(), jwtAuthenticationProvider(), objectMapper)
+        return JwtAuthenticationFilter(excludePathMatcher(), jwtAuthenticationProvider, objectMapper)
     }
     //
     @Bean
