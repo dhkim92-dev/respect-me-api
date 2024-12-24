@@ -2,6 +2,7 @@ package kr.respectme.group.adapter.out.persistence
 
 import com.querydsl.core.types.NullExpression
 import com.querydsl.core.types.Projections
+import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.jpa.impl.JPAQueryFactory
 import kr.respectme.group.adapter.out.persistence.entity.QJpaGroupMember
@@ -82,7 +83,7 @@ class JpaQueryGroupAdapter(
         val notification = QJpaGroupNotification.jpaGroupNotification
         val queryResult = qf.selectFrom(notification)
             .where(notification.groupId.eq(groupId)
-                .and(notification.id.gt(cursor))
+                .and(lessOrEqualNotificationId(cursor))
             )
             .orderBy(notification.id.desc())
             .limit(size.toLong())
@@ -177,7 +178,7 @@ class JpaQueryGroupAdapter(
             .from(group)
             .join(member)
             .on(group.id.eq(member.pk.groupId))
-            .where(group.id.gt(cursor))
+            .where(lessOrEqualNotificationId(cursor))
             .orderBy(group.id.desc())
             .groupBy(group)
             .limit(size?.toLong() ?: 20)
@@ -220,11 +221,18 @@ class JpaQueryGroupAdapter(
             ))
             .from(notification)
             .leftJoin(scheduledNotification).on(notification.id.eq(scheduledNotification.id))
-            .where(notification.groupId.`in`(groupList).and(notification.id.gt(cursor)))
+            .where(notification.groupId.`in`(groupList).and(lessOrEqualNotificationId(cursor)))
             .orderBy(notification.id.desc())
             .limit(size.toLong())
             .fetch()
     }
 
-    private fun gtCursor(cursor: UUID?) = QJpaGroupNotification.jpaGroupNotification.id.gt(cursor)
+    private fun lessOrEqualNotificationId(cursor: UUID?): BooleanExpression {
+        val notification = QJpaGroupNotification.jpaGroupNotification
+        return if (cursor != null) {
+            notification.id.loe(cursor)
+        } else {
+            Expressions.TRUE
+        }
+    }
 }
