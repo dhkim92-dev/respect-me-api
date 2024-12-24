@@ -1,4 +1,4 @@
-package kr.respectme.auth.common.oidc
+package kr.respectme.auth.application.oidc
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
@@ -6,9 +6,9 @@ import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import kr.respectme.auth.common.AuthenticationErrorCode
 import kr.respectme.auth.common.AuthenticationErrorCode.OIDC_ID_TOKEN_VERIFICATION_FAILED
-import kr.respectme.auth.common.oidc.idToken.AppleOidcIdTokenPayload
-import kr.respectme.auth.common.oidc.idToken.CommonOidcIdTokenPayload
-import kr.respectme.auth.common.oidc.idToken.GoogleOidcIdTokenPayload
+import kr.respectme.auth.application.oidc.idToken.AppleOidcIdTokenPayload
+import kr.respectme.auth.application.oidc.idToken.CommonOidcIdTokenPayload
+import kr.respectme.auth.application.oidc.idToken.GoogleOidcIdTokenPayload
 import kr.respectme.common.error.BadRequestException
 import kr.respectme.common.error.UnauthorizedException
 import org.springframework.beans.factory.annotation.Qualifier

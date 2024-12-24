@@ -1,4 +1,4 @@
-package kr.respectme.auth.common.oidc.idToken
+package kr.respectme.auth.application.oidc.idToken
 
 
 class CommonOidcIdTokenPayload(

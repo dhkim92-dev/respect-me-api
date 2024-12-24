@@ -8,7 +8,7 @@ import kr.respectme.auth.application.dto.JwtAccessTokenVerifierRequiredInfo
 import kr.respectme.auth.application.dto.TokenValidationResult
 import kr.respectme.auth.application.useCase.AuthUseCase
 import kr.respectme.auth.common.AuthenticationErrorCode
-import kr.respectme.auth.common.jwt.JwtService
+import kr.respectme.auth.application.jwt.JwtService
 import kr.respectme.auth.configs.JwtConfigs
 import kr.respectme.auth.domain.MemberAuthInfoRepository
 import kr.respectme.auth.infrastructures.dto.LoginRequest

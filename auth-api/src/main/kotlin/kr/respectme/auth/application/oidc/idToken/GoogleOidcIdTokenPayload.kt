@@ -1,4 +1,4 @@
-package kr.respectme.auth.common.oidc.idToken
+package kr.respectme.auth.application.oidc.idToken
 
 import com.auth0.jwt.interfaces.DecodedJWT
 

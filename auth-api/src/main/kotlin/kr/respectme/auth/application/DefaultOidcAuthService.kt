@@ -3,11 +3,11 @@ package kr.respectme.auth.application
 import kr.respectme.auth.application.dto.AuthenticationResult
 import kr.respectme.auth.application.dto.OidcMemberLoginCommand
 import kr.respectme.auth.application.useCase.AuthUseCase
-import kr.respectme.auth.common.oidc.idToken.CommonOidcIdTokenPayload
+import kr.respectme.auth.application.oidc.idToken.CommonOidcIdTokenPayload
 import kr.respectme.auth.application.useCase.OidcAuthUseCase
 import kr.respectme.auth.common.AuthenticationErrorCode
-import kr.respectme.auth.common.jwt.JwtService
-import kr.respectme.auth.common.oidc.IdTokenVerifier
+import kr.respectme.auth.application.jwt.JwtService
+import kr.respectme.auth.application.oidc.IdTokenVerifier
 import kr.respectme.auth.domain.*
 import kr.respectme.auth.infrastructures.dto.CreateMemberRequest
 import kr.respectme.auth.infrastructures.dto.Member
