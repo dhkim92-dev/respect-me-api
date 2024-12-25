@@ -1,4 +1,4 @@
-package kr.respectme.auth.common.oidc
+package kr.respectme.auth.application.oidc
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Qualifier

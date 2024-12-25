@@ -55,11 +55,13 @@ dependencies {
     // Logstash
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
+    testImplementation("io.mockk:mockk:1.13.4")
+    testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:5.9.1")
+    testImplementation("io.kotest:kotest-runner-junit5-jvm:5.9.1")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("io.kotest:kotest-runner-junit5:4.4.3")
-    testImplementation("io.kotest:kotest-assertions-core:4.4.3")
-    testImplementation("io.kotest:kotest-extensions-spring:4.4.3")
-    testImplementation("com.ninja-squad:springmockk:4.0.2")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 kapt {

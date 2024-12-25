@@ -1,10 +1,10 @@
-package kr.respectme.auth.common.oidc.idToken
+package kr.respectme.auth.application.oidc.idToken
 
 
 class CommonOidcIdTokenPayload(
     val iss: String,
     val sub: String,
-    val aud: String,
+    val aud: List<String>,
     val iat: Long,
     val exp: Long,
     val email: String,

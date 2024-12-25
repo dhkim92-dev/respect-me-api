@@ -8,7 +8,7 @@ import kr.respectme.auth.application.dto.JwtAccessTokenVerifierRequiredInfo
 import kr.respectme.auth.application.dto.TokenValidationResult
 import kr.respectme.auth.application.useCase.AuthUseCase
 import kr.respectme.auth.common.AuthenticationErrorCode
-import kr.respectme.auth.common.jwt.JwtService
+import kr.respectme.auth.application.jwt.JwtService
 import kr.respectme.auth.configs.JwtConfigs
 import kr.respectme.auth.domain.MemberAuthInfoRepository
 import kr.respectme.auth.infrastructures.dto.LoginRequest
@@ -18,6 +18,7 @@ import kr.respectme.common.error.NotFoundException
 import kr.respectme.common.error.UnauthorizedException
 import kr.respectme.common.security.jwt.JwtClaims
 import org.slf4j.LoggerFactory
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -30,7 +31,8 @@ class AuthService(
     private val jwtService: JwtService,
     private val jwtConfigs: JwtConfigs,
     private val memberLoadPort: MemberLoadPort,
-    private val authInfoRepository: MemberAuthInfoRepository
+    private val authInfoRepository: MemberAuthInfoRepository,
+    private val passwordEncoder: PasswordEncoder
 ): AuthUseCase {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -45,6 +47,11 @@ class AuthService(
         logger.debug("login request: ${loginRequest}")
         val memberAuthInfo = authInfoRepository.findByEmail(loginRequest.email)
             ?: throw NotFoundException(AuthenticationErrorCode.FAILED_TO_SIGN_IN)
+
+        if(!passwordEncoder.matches(loginRequest.password, memberAuthInfo.password)) {
+            throw UnauthorizedException(AuthenticationErrorCode.FAILED_TO_SIGN_IN)
+        }
+
         val member = memberLoadPort.loadMemberById(memberAuthInfo.memberId?.id!!).data
             ?: throw NotFoundException(AuthenticationErrorCode.FAILED_TO_SIGN_IN)
 

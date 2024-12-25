@@ -1,4 +1,4 @@
-package kr.respectme.auth.common.oidc
+package kr.respectme.auth.application.oidc
 
 import java.security.interfaces.RSAPublicKey
 

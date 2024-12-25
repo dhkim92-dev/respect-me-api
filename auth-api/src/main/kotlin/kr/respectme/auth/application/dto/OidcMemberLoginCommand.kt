@@ -5,7 +5,7 @@ import kr.respectme.auth.domain.OidcPlatform
 data class OidcMemberLoginCommand(
     val platform: OidcPlatform,
     val idToken: String,
-    val nickname: String?
+    val nickname: String?=null
 ) {
 
 }

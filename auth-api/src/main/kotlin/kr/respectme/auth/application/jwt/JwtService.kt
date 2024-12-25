@@ -1,4 +1,4 @@
-package kr.respectme.auth.common.jwt
+package kr.respectme.auth.application.jwt
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm

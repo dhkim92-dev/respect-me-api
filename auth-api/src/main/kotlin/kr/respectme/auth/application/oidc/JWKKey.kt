@@ -1,4 +1,4 @@
-package kr.respectme.auth.common.oidc
+package kr.respectme.auth.application.oidc
 
 data class JWKKey(
     val kty: String,

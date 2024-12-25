@@ -3,6 +3,7 @@ package kr.respectme.auth.interfaces.adapter
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import jakarta.validation.Valid
 import kr.respectme.auth.application.dto.OidcMemberLoginCommand
 import kr.respectme.auth.application.useCase.OidcAuthUseCase
 import kr.respectme.auth.domain.OidcPlatform
@@ -12,6 +13,7 @@ import kr.respectme.auth.interfaces.port.OidcAuthPort
 import kr.respectme.common.annotation.ApplicationResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -32,7 +34,7 @@ class OidcAuthServiceAdapter(
         ApiResponse(responseCode = "404", description = "해당 사용자 정보로 가입된 회원 정보 및 인증 정보가 존재하지 않음")
     ])
     @ApplicationResponse(status = HttpStatus.CREATED, message = "login with google success.")
-    override fun loginWithGoogle(request: OidcLoginRequest): LoginResponse {
+    override fun loginWithGoogle(@RequestBody @Valid request: OidcLoginRequest): LoginResponse {
         val result = oidcAuthUseCase.loginWithOidc(OidcMemberLoginCommand(
             platform = OidcPlatform.GOOGLE,
             idToken = request.idToken,

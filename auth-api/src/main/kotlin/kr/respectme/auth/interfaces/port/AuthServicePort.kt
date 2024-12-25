@@ -12,8 +12,6 @@ interface AuthServicePort {
 
     fun login(request: LoginRequest): LoginResponse
 
-//    fun verifyAccessToken(request: VerifyAccessTokenRequest): VerifyAccessTokenResponse
-
     fun retrieveAccessTokenVerificationRequirements(jwtToken: String): JwtAccessTokenVerifierRequiredInfo
 
     fun reissueAccessToken(request: RefreshAccessTokenRequest): LoginResponse

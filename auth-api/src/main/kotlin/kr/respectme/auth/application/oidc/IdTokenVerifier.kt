@@ -1,4 +1,4 @@
-package kr.respectme.auth.common.oidc
+package kr.respectme.auth.application.oidc
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
@@ -6,11 +6,12 @@ import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import kr.respectme.auth.common.AuthenticationErrorCode
 import kr.respectme.auth.common.AuthenticationErrorCode.OIDC_ID_TOKEN_VERIFICATION_FAILED
-import kr.respectme.auth.common.oidc.idToken.AppleOidcIdTokenPayload
-import kr.respectme.auth.common.oidc.idToken.CommonOidcIdTokenPayload
-import kr.respectme.auth.common.oidc.idToken.GoogleOidcIdTokenPayload
+import kr.respectme.auth.application.oidc.idToken.AppleOidcIdTokenPayload
+import kr.respectme.auth.application.oidc.idToken.CommonOidcIdTokenPayload
+import kr.respectme.auth.application.oidc.idToken.GoogleOidcIdTokenPayload
 import kr.respectme.common.error.BadRequestException
 import kr.respectme.common.error.UnauthorizedException
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import java.security.interfaces.RSAPublicKey
@@ -24,10 +25,14 @@ class IdTokenVerifier(
 ) {
 
     private val GOOGLE_ISSUER_STRING = "https://accounts.google.com"
+
     private val APPLE_ISSUER_STRING = "https://appleid.apple.com"
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun verifyToken(idToken: String): CommonOidcIdTokenPayload {
         val decodedJWT = JWT.decode(idToken)
+        logger.debug("Decoded JWT: $decodedJWT")
         val pubKey = getPublicKey(decodedJWT)
         val algorithm = getAlgorithm(decodedJWT, pubKey)
         val verifier = JWT.require(algorithm)
@@ -55,7 +60,10 @@ class IdTokenVerifier(
         return when(decodedJWT.issuer) {
             GOOGLE_ISSUER_STRING -> googleJwksProvider.getPublicKey(kid)
             APPLE_ISSUER_STRING -> appleJwksProvider.getPublicKey(kid)
-            else -> throw BadRequestException(AuthenticationErrorCode.NOT_SUPPORTED_OIDC_PROVIDER)
+            else -> {
+                println("Not supported OIDC provider")
+                throw BadRequestException(AuthenticationErrorCode.NOT_SUPPORTED_OIDC_PROVIDER)
+            }
         }
     }
 

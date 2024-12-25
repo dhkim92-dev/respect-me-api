@@ -14,11 +14,8 @@ class MemberAuthInfo(
     @Id
     @Embedded
     val memberId: MemberId? = null,
-    @Column
-    val email: String = "",
-    @Column
-    val password: String? = null,
-
+    email: String = "",
+    password: String? = null,
     @AttributeOverrides(
         AttributeOverride(name = "platform", column = Column(name = "oidc_auth_platform")),
         AttributeOverride(name = "userIdentifier", column = Column(name = "oidc_auth_user_identifier", nullable = true))
@@ -27,8 +24,16 @@ class MemberAuthInfo(
     lastLoginAt: Instant? = null
 ){
     @Column
+    var email: String = email
+        protected set
+
+    @Column
+    var password: String? = password
+        protected set
+
+    @Column
     var lastLoginAt: Instant? = lastLoginAt
-    protected set
+        protected set
 
     fun login() {
         lastLoginAt = Instant.now()
