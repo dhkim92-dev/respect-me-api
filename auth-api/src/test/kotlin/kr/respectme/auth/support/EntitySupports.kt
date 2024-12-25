@@ -32,7 +32,6 @@ fun createMemberEntityFromMemberService(
     return Member(
         id = id,
         email = email,
-        nickname = nickname,
         role = role,
         isBlocked = isBlocked,
         blockReason = blockReason

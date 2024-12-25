@@ -81,7 +81,6 @@ class AuthServiceTest() : BehaviorSpec({
             id = memberAuthInfo.memberId!!.id,
             email = memberAuthInfo.email,
             role = "ROLE_ADMIN",
-            nickname = "test",
             isBlocked = false,
             blockReason = ""
         ))

@@ -13,8 +13,7 @@ import kr.respectme.member.interfaces.dto.MemberResponse
 import kr.respectme.member.interfaces.dto.MembersQueryRequest
 import kr.respectme.member.interfaces.port.InternalCommandPort
 import kr.respectme.member.interfaces.port.InternalQueryPort
-import org.springframework.http.HttpStatus.CREATED
-import org.springframework.http.HttpStatus.OK
+import org.springframework.http.HttpStatus.*
 import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
@@ -51,7 +50,7 @@ class RestInternalAdapter(private val memberUseCase: MemberCommandUseCase): Inte
             .map { MemberResponse.of(it) }
     }
 
-    @PostMapping("/members")
+    @PostMapping("/registration")
     @ApplicationResponse(status = CREATED, message = "create member success.")
     @Operation(summary = "회원 가입", description = "내부 서비스용 회원 생성 서비스")
     override fun createMember(
@@ -61,5 +60,15 @@ class RestInternalAdapter(private val memberUseCase: MemberCommandUseCase): Inte
         return MemberResponse.of(memberUseCase.join(
             CreateMemberCommand.of(request)
         ))
+    }
+
+    @DeleteMapping("/{memberId}")
+    @ApplicationResponse(status = NO_CONTENT, message = "delete member success.")
+    @Operation(summary = "회원 삭제", description = "내부 서비스용 회원 삭제 서비스")
+    override fun deleteMember(
+        @ServiceAccount serviceAccountId: UUID,
+        @PathVariable memberId: UUID
+    ) {
+        memberUseCase.deleteMemberByService(memberId)
     }
 }

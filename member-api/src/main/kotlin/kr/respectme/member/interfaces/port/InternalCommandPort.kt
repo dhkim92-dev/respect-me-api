@@ -7,4 +7,6 @@ import java.util.UUID
 interface InternalCommandPort {
 
     fun createMember(serviceAccountId: UUID, request: CreateMemberRequest): MemberResponse
+
+    fun deleteMember(serviceAccountId: UUID, memberId: UUID)
 }

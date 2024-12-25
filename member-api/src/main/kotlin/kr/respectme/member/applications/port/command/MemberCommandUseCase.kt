@@ -15,4 +15,6 @@ interface MemberCommandUseCase {
     fun getMember(memberId: UUID, resourceId: UUID): MemberDto
 
     fun getMembers(memberId: UUID, memberIds: List<UUID>): List<MemberDto>
+
+    fun deleteMemberByService(memberId: UUID)
 }
