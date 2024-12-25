@@ -12,10 +12,6 @@ class JpaMemberEntity(
     val id: UUID = UUIDV7Generator.generate(),
     @Column
     var email: String = "",
-    @Column
-    var nickname: String = "",
-    @Column
-    var password: String? = null,
     @Convert(converter = MemberRoleConverter::class)
     var role: MemberRole = MemberRole.ROLE_MEMBER,
     @Column

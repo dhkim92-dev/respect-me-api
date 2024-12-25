@@ -38,7 +38,6 @@ class JwtAuthenticationProvider(
     private fun convertToJwtAuthentication(jwtClaims: JwtClaims): JwtAuthentication {
         return JwtAuthentication(
             id = UUID.fromString(jwtClaims.memberId),
-            nickname = jwtClaims.nickname,
             email = jwtClaims.email,
             roles = jwtClaims.roles.map{ it -> SimpleGrantedAuthority(it) }.toMutableList(),
             isActivated = jwtClaims.isActivated

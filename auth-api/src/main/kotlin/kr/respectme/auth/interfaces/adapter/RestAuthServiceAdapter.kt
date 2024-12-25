@@ -62,13 +62,4 @@ class RestAuthServiceAdapter(private val authUseCase: AuthUseCase): AuthServiceP
         val result = authUseCase.refreshAccessToken(request.refreshToken)
         return LoginResponse.of(result)
     }
-//
-//    @Operation(summary = "JWT Access Token 유효성 검사", description = "Access Token의 유효성 검사")
-//    @ApiResponses(value = [ApiResponse(responseCode = "200", description = "JWT Token 유효성 검사 성공")])
-//    @PostMapping("/jwt/verify")
-//    @ApplicationResponse(status=OK, message = "validate access token success.")
-//    override fun verifyAccessToken(@RequestBody @Valid request: VerifyAccessTokenRequest): VerifyAccessTokenResponse {
-//        val result = authUseCase.validateToken(request.accessToken)
-//        return VerifyAccessTokenResponse.of(result)
-//    }
 }

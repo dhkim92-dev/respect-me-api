@@ -7,7 +7,6 @@ import java.util.UUID
 
 data class MemberResponse(
     val id: UUID,
-    val nickname: String,
     val email: String,
     val role: MemberRole,
     val isBlocked: Boolean,
@@ -20,7 +19,6 @@ data class MemberResponse(
         fun of(memberDto: MemberDto): MemberResponse {
             return MemberResponse(
                 id = memberDto.id,
-                nickname = memberDto.nickname,
                 email = memberDto.email,
                 role = memberDto.role,
                 isBlocked = memberDto.isBlocked,

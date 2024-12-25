@@ -8,10 +8,7 @@ import kr.respectme.auth.domain.OidcPlatform
 data class OidcLoginRequest(
     @field: NotEmpty
     @Schema(description = "OIDC 플랫폼 프로바이더가 제공한 ID Token, Firebase ID Token 사용 불가", required = true, example = "Google ID Token Or Apple ID Token")
-    val idToken: String,
-    @Schema(description = "OIDC ID Token으로 로그인 시도 시, 404 에러가 발생하면 해당 필드를 채워 다시 요청을 보내면 회원가입 로직과 함께 수행됨", required = false)
-    @Deprecated("더이상 사용되지 않습니다, 회원가입 로직은 자동으로 수행됩니다.")
-    val nickname: String?=null
+    val idToken: String
 ) {
 
 }

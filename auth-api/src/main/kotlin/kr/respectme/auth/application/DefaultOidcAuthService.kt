@@ -76,7 +76,6 @@ class DefaultOidcAuthService(
     private fun createMemberRequest(command: OidcMemberLoginCommand, payload: CommonOidcIdTokenPayload): CreateMemberRequest {
         return CreateMemberRequest(
             email = payload.email,
-            nickname = command.nickname ?: throw BadRequestException(AuthenticationErrorCode.REQUIRE_NICKNAME_TO_JOIN_SERVICE_BY_OIDC),
             profileImageUrl = payload.profileImageUrl
         )
     }

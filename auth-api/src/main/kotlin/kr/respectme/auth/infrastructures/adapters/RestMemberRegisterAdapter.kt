@@ -12,6 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody
 @FeignClient(name = "member-feign-save-client", url = "\${respect-me.msa.member-api.url}")
 interface RestMemberRegisterAdapter: MemberSavePort {
 
-    @PostMapping(value = ["/api/v1/members"], consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
+    @PostMapping(value = ["/internal/api/v1/members"], consumes = [APPLICATION_JSON_VALUE], produces = [APPLICATION_JSON_VALUE])
     override fun registerMember(@RequestBody request: CreateMemberRequest): ApiResult<Member>
 }

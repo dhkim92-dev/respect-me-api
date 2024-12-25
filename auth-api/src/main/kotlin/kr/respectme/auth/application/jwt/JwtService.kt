@@ -37,7 +37,6 @@ class JwtService(
             .withIssuer(jwtConfigs.issuer)
             .withSubject(member.id.toString())
             .withClaim("email", member.email)
-            .withClaim("nickname", member.nickname)
             .withArrayClaim("roles", arrayOf(member.role))
             .withClaim("isActivated", !member.isBlocked)
             .withExpiresAt(now.plusMillis(jwtConfigs.accessTokenExpiry))
