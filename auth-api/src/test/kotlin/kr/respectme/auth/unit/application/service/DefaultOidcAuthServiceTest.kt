@@ -66,7 +66,6 @@ class DefaultOidcAuthServiceTest: BehaviorSpec({
                 val request = OidcMemberLoginCommand(
                     platform = OidcPlatform.GOOGLE,
                     idToken = idToken,
-                    nickname = "test",
                 )
 
                 val result = oidcAuthService.loginWithOidc(request)

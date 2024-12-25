@@ -45,9 +45,8 @@ class RestMemberAdapter(
     @DeleteMapping("/{memberId}")
     override fun deleteMember(
         @LoginMember loginId: UUID,
-        @PathVariable memberId: UUID) {
-
-
+        @PathVariable memberId: UUID
+    ) {
         return memberUseCase.leave(loginId, memberId)
     }
 

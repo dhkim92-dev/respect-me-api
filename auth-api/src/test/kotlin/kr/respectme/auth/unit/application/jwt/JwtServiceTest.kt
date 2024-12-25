@@ -28,7 +28,6 @@ class JwtServiceTest : AnnotationSpec() {
     fun setUp() {
         member = Member(
             id = UUID.randomUUID(),
-            nickname = "nickname",
             email = "nickname@respect-me.kr",
             role = "ROLE_MEMBER",
             isBlocked = false,
@@ -52,7 +51,6 @@ class JwtServiceTest : AnnotationSpec() {
         accessToken shouldNotBe null
         decodedJwt.subject shouldBe member.id.toString()
         decodedJwt.getClaim("email").asString() shouldBe member.email
-        decodedJwt.getClaim("nickname").asString() shouldBe member.nickname
         decodedJwt.getClaim("roles").asList(String::class.java) shouldBe listOf(member.role)
         decodedJwt.getClaim("isActivated").asBoolean() shouldBe !member.isBlocked
     }

@@ -91,4 +91,11 @@ class MemberService(
         return memberLoadPort.getMembersInList(memberIds)
             .map { member -> memberMapper.memberToMemberDto(member) }
     }
+
+    @Transactional
+    override fun deleteMemberByService(memberId: UUID) {
+        memberLoadPort.getMemberById(memberId)?.let { member ->
+            memberSavePort.delete(member)
+        }
+    }
 }

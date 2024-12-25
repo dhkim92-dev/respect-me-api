@@ -28,10 +28,14 @@ class JwtAuthenticationAdapter(
 
     init {
         logger.info("JwtAuthenticationAdapter generated.")
-        jwtAuthenticationRequirements = getRequirements()
-        accessTokenVerifier = JWT.require(getAlgorithm())
-            .withIssuer(jwtAuthenticationRequirements!!.issuer)
-            .build()
+        try {
+            jwtAuthenticationRequirements = getRequirements()
+            accessTokenVerifier = JWT.require(getAlgorithm())
+                .withIssuer(jwtAuthenticationRequirements!!.issuer)
+                .build()
+        }catch(e: Exception) {
+            logger.error("JWT Authentication Adapter Initialization Failed : ${e.message}")
+        }
     }
 
     override fun verify(jwtValidationRequest: JwtValidateRequest): JwtClaims {
