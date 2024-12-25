@@ -7,8 +7,6 @@ import java.util.UUID
 
 interface InternalQueryPort {
 
-    fun getMemberWithPassword(serviceAccountId: UUID, request: LoginRequest): MemberResponse
-
     fun getMember(serviceAccountId: UUID, memberId: UUID): MemberResponse
 
     fun getMembersWithIds(serviceAccountId: UUID, request: MembersQueryRequest): List<MemberResponse>

@@ -11,7 +11,6 @@ import kr.respectme.common.annotation.CursorPagination
 import kr.respectme.common.annotation.LoginMember
 import kr.respectme.member.applications.dto.CreateMemberCommand
 import kr.respectme.member.applications.dto.ModifyNicknameCommand
-import kr.respectme.member.applications.dto.ModifyPasswordCommand
 import kr.respectme.member.applications.dto.RegisterDeviceTokenCommand
 import kr.respectme.member.applications.port.command.DeviceTokenCommandUseCase
 import kr.respectme.member.applications.port.command.MemberCommandUseCase
@@ -39,66 +38,16 @@ class RestMemberAdapter(
     private val deviceTokenUseCase: DeviceTokenCommandUseCase
 ): MemberQueryPort, MemberCommandPort {
 
-//    @PostMapping("/login")
-//    @ApplicationResponse(MemberServiceResultCode::class, "G")
-//    override fun loginWithPassword(
-//        @RequestBody @Valid request: LoginRequest
-//    ): MemberResponse {
-//        return MemberResponse.of(memberUseCase.login(LoginCommand.of(request)))
-//    }
-
-    @Operation(summary = "회원 가입", description = "email/password 기반 회원 가입")
-    @ApiResponses(value = [
-        ApiResponse(responseCode = "201", description = "회원 가입 성공"),
-    ])
-    @PostMapping
-    @ApplicationResponse(status= CREATED, message = "join member success.")
-    override fun createMember(@RequestBody request: CreateMemberRequest)
-    : MemberResponse {
-        return MemberResponse.of(memberUseCase.join(CreateMemberCommand.of(request)))
-    }
-
-    @Operation(summary = "닉네임 변경", description = "닉네임 변경")
-    @ApiResponses(value = [
-        ApiResponse(responseCode = "200", description = "닉네임 변경 성공"),
-    ])
-    @PatchMapping("/{memberId}/nickname")
-    @ApplicationResponse(OK, "update nickname success.")
-    override fun updateNickname(
-        @LoginMember loginId: UUID,
-        @PathVariable memberId: UUID,
-        @RequestBody @Valid request: ModifyMemberRequest)
-    : MemberResponse {
-        return MemberResponse.of(
-            memberUseCase.changeNickname(loginId, ModifyNicknameCommand.of(memberId, request))
-        )
-    }
-
-    @Operation(summary = "비밀번호 변경", description = "비밀번호 변경")
-    @ApiResponses(value = [
-        ApiResponse(responseCode = "200", description = "비밀번호 변경 성공"),
-    ])
-    @PatchMapping("/{memberId}/password")
-    @ApplicationResponse(OK, "update password success")
-    override fun updatePassword(
-        @LoginMember loginId: UUID,
-        @PathVariable memberId: UUID,
-        @RequestBody @Valid request: ModifyMemberRequest)
-    : MemberResponse {
-        return MemberResponse.of(
-            memberUseCase.changePassword(loginId, ModifyPasswordCommand.of(memberId, request))
-        )
-    }
-
     @Operation(summary = "회원 탈퇴", description = "회원 탈퇴")
     @ApiResponses(value = [
         ApiResponse(responseCode = "200", description = "회원 탈퇴 성공"),
     ])
     @DeleteMapping("/{memberId}")
-//    @ApplicationResponse(MemberServiceResultCode::class, "DELETE_MEMBER_SUCCESS")
     override fun deleteMember(
         @LoginMember loginId: UUID,
         @PathVariable memberId: UUID) {
+
+
         return memberUseCase.leave(loginId, memberId)
     }
 
@@ -128,20 +77,6 @@ class RestMemberAdapter(
         return memberUseCase.getMembers(loginId, request.memberIds)
             .map { memberDto -> MemberResponse.of(memberDto)}
     }
-
-//    @Operation(summary = "회원의 알람 수신 디바이스 토큰 목록 조회", description = "회원의 알람 수신 디바이스 토큰 목록 조회")
-//    @ApiResponses(value = [
-//        ApiResponse(responseCode = "200", description = "디바이스 목록 조회 성공"),
-//    ])
-//    @GetMapping("/{memberId}/device-tokens")
-//    @ApplicationResponse(OK, "get device tokens success")
-//    @CursorPagination
-//    fun getDeviceTokens(@LoginMember loginId: UUID,
-//                        @PathVariable memberId: UUID,
-//                        ): List<DeviceTokenResponse> {
-//        return deviceTokenUseCase.retrieveDeviceTokens(loginId, memberId)
-//            .map { DeviceTokenResponse.of(it) }
-//    }
 
     @Operation(summary = "회원 알람 수신 디바이스 토큰 삭제", description = "회원 알람 수신 디바이스 삭제")
     @ApiResponses(value = [

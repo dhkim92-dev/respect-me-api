@@ -1,17 +1,13 @@
 package kr.respectme.member.domain.model
 
 import kr.respectme.common.error.BadRequestException
-import kr.respectme.common.error.NotFoundException
 import kr.respectme.member.common.code.MemberServiceErrorCode
-import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.Instant
 import java.util.UUID
 
 class Member(
     val id: UUID,
     email: String = "",
-    nickname: String = "",
-    password: String? = null,
     role: MemberRole = MemberRole.ROLE_MEMBER,
     isBlocked: Boolean = false,
     blockReason: String = "",
@@ -19,12 +15,6 @@ class Member(
     deviceTokens: MutableSet<DeviceToken> = mutableSetOf()
 ) {
     var email: String = email
-        private set
-
-    var nickname: String = nickname
-        private set
-
-    var password: String? = password
         private set
 
     var role: MemberRole = role
@@ -57,18 +47,6 @@ class Member(
         }
 
         return true
-    }
-
-    fun changePassword(encoder: PasswordEncoder, password: String?) {
-        password?.let {
-            this.password = encoder.encode(password)
-        }
-    }
-
-    fun changeNickname(value: String?) {
-        value?.let{
-            nickname = value
-        }
     }
 
     fun block(reason: String) {

@@ -11,7 +11,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.1.1"
+version = "0.1.3"
 
 repositories {
     mavenCentral()
@@ -43,6 +43,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
     implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    runtimeOnly("com.h2database:h2:2.1.214")
 //    implementation("io.zipkin.reporter2:zipkin-reporter-brave")
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")

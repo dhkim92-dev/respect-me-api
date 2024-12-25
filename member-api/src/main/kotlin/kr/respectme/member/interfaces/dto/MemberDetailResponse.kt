@@ -7,7 +7,6 @@ import java.util.UUID
 data class MemberDetailResponse(
     val id : UUID,
     val email: String,
-    val nickname: String,
     val role: MemberRole,
 ) {
 
@@ -16,7 +15,6 @@ data class MemberDetailResponse(
             return MemberDetailResponse(
                 id = memberDto.id,
                 email = memberDto.email,
-                nickname = memberDto.nickname,
                 role = memberDto.role
             )
         }

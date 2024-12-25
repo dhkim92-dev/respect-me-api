@@ -15,7 +15,6 @@ class MemberMapper(
 
     fun memberToMemberDto(member: Member) = MemberDto(
         id = member.id,
-        nickname =  member.nickname,
         email = member.email,
         role = member.role,
         isBlocked = member.isBlocked,
@@ -28,9 +27,7 @@ class MemberMapper(
 
     fun toDomainEntity(jpaMemberEntity: JpaMemberEntity) = Member(
         id = jpaMemberEntity.id,
-        nickname = jpaMemberEntity.nickname,
         email = jpaMemberEntity.email,
-        password = jpaMemberEntity.password,
         role = jpaMemberEntity.role,
         isBlocked = jpaMemberEntity.isBlocked,
         blockReason = jpaMemberEntity.blockReason,
@@ -39,14 +36,9 @@ class MemberMapper(
     )
 
     fun toJpaEntity(member: Member): JpaMemberEntity {
-        println("member mapper to jpa entity")
-        println("member mapper member tokens size : ${member.deviceTokens.size}")
         val jpaEntity = jpaMemberRepository.findByIdOrNull(member.id)
             ?: JpaMemberEntity(id = member.id,)
         jpaEntity.apply {
-                println("member mapper to jpa entity apply")
-                this.nickname = member.nickname
-                this.password = member.password
                 this.email = member.email
                 this.role = member.role
                 this.isBlocked = member.isBlocked

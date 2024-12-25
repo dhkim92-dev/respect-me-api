@@ -10,7 +10,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.1.1"
+version = "0.1.6"
 
 repositories {
     mavenCentral()
@@ -51,7 +51,6 @@ dependencies {
     // Firebase Admin SDK
     implementation("com.google.firebase:firebase-admin:9.3.0")
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
-
     // Logstash
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 

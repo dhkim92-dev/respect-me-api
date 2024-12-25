@@ -7,7 +7,6 @@ import java.util.UUID
 class MemberDto(
     val id: UUID,
     val email: String,
-    val nickname: String,
     val role: MemberRole,
     val createdAt: Instant,
     val isBlocked: Boolean,
