@@ -21,4 +21,5 @@ enum class AuthenticationErrorCode(
     FAILED_TO_VERIFY_SERVICE("Failed to verify service.", "AUTH-012", HttpStatus.UNAUTHORIZED),
     REQUIRE_NICKNAME_TO_JOIN_SERVICE_BY_OIDC("Require nickname to join service by OIDC.", "AUTH-013", HttpStatus.BAD_REQUEST),
     ONLY_SERVICE_CAN_ACCESS("Only service can access.", "AUTH-014", HttpStatus.FORBIDDEN),
+    AUTHENTICATION_INFO_EXISTS_BUT_NO_MEMBER_INFO("Authentication info exists but no member info.", "AUTH-015", HttpStatus.UNAUTHORIZED),
 }

@@ -14,9 +14,13 @@ import kr.respectme.auth.infrastructures.dto.Member
 import kr.respectme.auth.infrastructures.ports.MemberLoadPort
 import kr.respectme.auth.infrastructures.ports.MemberSavePort
 import kr.respectme.common.error.BadRequestException
+import kr.respectme.common.error.InternalServerError
 import kr.respectme.common.error.UnauthorizedException
+import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 /**
  * OIDC 인증을 처리하는 서비스
@@ -37,6 +41,8 @@ class DefaultOidcAuthService(
     private val jwtService: JwtService
 ): OidcAuthUseCase {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @Transactional
     override fun loginWithOidc(command: OidcMemberLoginCommand): AuthenticationResult {
         val payload = idTokenVerifier.verifyToken(command.idToken)
@@ -44,18 +50,17 @@ class DefaultOidcAuthService(
 
         if(memberAuthInfo == null) {
             val member = processMemberRegistration(command, payload)
-            memberAuthInfo = authInfoRepository.save(MemberAuthInfo(
-                memberId = MemberId.of(member.id),
-                email = member.email,
-                oidcAuth = OidcAuth(
-                    platform = command.platform,
-                    userIdentifier = payload.sub
-                )
-            ))
+            memberAuthInfo = createMemberAuthInfo(member.id, command.platform, payload)
         }
 
-        var memberInfo = memberLoadPort.loadMemberById(memberAuthInfo.memberId?.id!!).data
-            ?: throw UnauthorizedException(AuthenticationErrorCode.FAILED_TO_SIGN_IN)
+        val memberInfo = memberLoadPort.loadMemberById(memberAuthInfo.memberId?.id!!).data
+
+        if(memberInfo == null) {
+            processMemberRegistration(command, payload)
+        }
+
+        memberInfo as Member
+
         val refreshToken = jwtService.createRefreshToken(memberInfo.id)
         val accessToken = jwtService.createAccessToken(memberInfo)
 
@@ -67,10 +72,39 @@ class DefaultOidcAuthService(
         )
     }
 
+    private fun createMemberAuthInfo(memberId: UUID, platform: OidcPlatform, payload: CommonOidcIdTokenPayload): MemberAuthInfo {
+        val memberAuthInfo = MemberAuthInfo(
+            memberId = MemberId.of(memberId),
+            email = payload.email,
+            oidcAuth = OidcAuth(
+                platform = platform,
+                userIdentifier = payload.sub
+            )
+        )
+
+        return try {
+            authInfoRepository.save(memberAuthInfo)
+        } catch(e: Exception) {
+            rollbackMemberRegistration(memberId)
+            throw UnauthorizedException(AuthenticationErrorCode.FAILED_TO_SIGN_IN)
+        }
+    }
+
     private fun processMemberRegistration(command: OidcMemberLoginCommand, payload: CommonOidcIdTokenPayload): Member {
         val member = memberSavePort.registerMember(createMemberRequest(command, payload))
             .data
         return member
+    }
+
+    private fun rollbackMemberRegistration(memberId: UUID) {
+        logger.info("Oidc member join request failed, rollback transaction memberId: ${memberId}")
+
+        try {
+            memberSavePort.deleteMember(memberId)
+        } catch(e: Exception) {
+            logger.error("[ACID CRITICAL] Failed to rollback member registration member: ${memberId} with message : ${e.message}")
+            throw InternalServerError(message = "Oidc Member join request failed, and failed to rollback transaction.")
+        }
     }
 
     private fun createMemberRequest(command: OidcMemberLoginCommand, payload: CommonOidcIdTokenPayload): CreateMemberRequest {

@@ -50,4 +50,13 @@ class MemberAuthInfo(
     override fun hashCode(): Int {
         return memberId.hashCode()
     }
+
+    override fun toString(): String {
+        return """{
+            memberId=$memberId, 
+            email='$email', 
+            oidcAuth=$oidcAuth, 
+            lastLoginAt=$lastLoginAt)
+            }""".trimMargin()
+    }
 }
