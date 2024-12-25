@@ -37,6 +37,7 @@ class RestAuthServiceAdapter(private val authUseCase: AuthUseCase): AuthServiceP
     ])
     @PostMapping("/jwt")
     @ApplicationResponse(status=CREATED, message = "create token success.")
+    @Deprecated("이메일/패스워드를 통한 로그인은 사용되지 않습니다.")
     override fun login(@RequestBody @Valid request: LoginRequest): LoginResponse {
         val result = authUseCase.login(request)
         return LoginResponse.of(result)

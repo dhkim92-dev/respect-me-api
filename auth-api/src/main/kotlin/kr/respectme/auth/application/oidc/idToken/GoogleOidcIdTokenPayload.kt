@@ -5,7 +5,7 @@ import com.auth0.jwt.interfaces.DecodedJWT
 class GoogleOidcIdTokenPayload(
     val iss: String,
     val sub: String,
-    val aud: String,
+    val aud: List<String>,
     val iat: Long,
     val exp: Long,
     val email: String,
@@ -23,7 +23,7 @@ class GoogleOidcIdTokenPayload(
             return GoogleOidcIdTokenPayload(
                 iss = decodedJWT.issuer,
                 sub = decodedJWT.subject,
-                aud = decodedJWT.audience[0],
+                aud = decodedJWT.audience,
                 iat = decodedJWT.issuedAt.time / 1000,
                 exp = decodedJWT.expiresAt.time / 1000,
                 email = decodedJWT.claims["email"]?.asString() ?: "",

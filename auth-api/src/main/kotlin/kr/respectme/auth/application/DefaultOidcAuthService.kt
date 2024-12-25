@@ -53,9 +53,9 @@ class DefaultOidcAuthService(
                 )
             ))
         }
+
         var memberInfo = memberLoadPort.loadMemberById(memberAuthInfo.memberId?.id!!).data
             ?: throw UnauthorizedException(AuthenticationErrorCode.FAILED_TO_SIGN_IN)
-
         val refreshToken = jwtService.createRefreshToken(memberInfo.id)
         val accessToken = jwtService.createAccessToken(memberInfo)
 
