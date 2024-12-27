@@ -38,13 +38,13 @@ open class DefaultKafkaConfig(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Bean
-    fun producerFactory(): ProducerFactory<String, Any> {
+    fun producerFactory(): ProducerFactory<String, String> {
         logger.debug("kafka bootstrapServer: $bootstrapServer")
         logger.debug("Kafka Producer Factory created")
         val configProps: Map<String, Any> = mapOf(
             ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServer,
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to JsonSerializer::class.java,
+            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
             ProducerConfig.PARTITIONER_CLASS_CONFIG to "org.apache.kafka.clients.producer.internals.DefaultPartitioner", // 기본 파티셔너 사용
             ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true,
             ProducerConfig.INTERCEPTOR_CLASSES_CONFIG to listOf(TraceIdProducerInterceptor::class.java)
@@ -54,13 +54,13 @@ open class DefaultKafkaConfig(
     }
 
     @Bean
-    fun kafkaTemplate(): KafkaTemplate<String, Any> {
+    fun kafkaTemplate(): KafkaTemplate<String, String> {
         logger.debug("Kafka Template created")
         return KafkaTemplate(producerFactory())
     }
 
     @Bean
-    fun consumerFactory(): ConsumerFactory<String, Any> {
+    fun consumerFactory(): ConsumerFactory<String, String> {
         logger.debug("Kafka Consumer Factory created")
         val configProps: Map<String, Any> = mapOf(
             ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServer,
@@ -68,16 +68,16 @@ open class DefaultKafkaConfig(
             ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to autoCommitReset,
             ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to enableAutoCommit,
-            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to JsonDeserializer::class.java,
+            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
             ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG to listOf(TraceIdConsumerInterceptor::class.java)
         )
         return DefaultKafkaConsumerFactory(configProps)
     }
 
     @Bean
-    fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, Any> {
+    fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String> {
         logger.debug("Kafka Listener Container Factory created")
-        val factory = ConcurrentKafkaListenerContainerFactory<String, Any>()
+        val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
         factory.consumerFactory = consumerFactory()
         factory.setRecordMessageConverter(StringJsonMessageConverter())

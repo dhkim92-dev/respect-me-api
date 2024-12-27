@@ -14,7 +14,7 @@ class MemberDeleteTransaction(
     private val id: UUID = UUIDV7Generator.generate(),
 
     @Column
-    private val memberId: UUID,
+    private val memberId: UUID = UUID.randomUUID(),
 
     @Column(name = "transaction_status")
     private var status: TransactionStatus = TransactionStatus.PENDING,
@@ -23,10 +23,10 @@ class MemberDeleteTransaction(
     private var createdAt: Instant = Instant.now(),
 
     @Column
-    private var authServiceStatus: TransactionStatus,
+    private var authServiceStatus: TransactionStatus = TransactionStatus.PENDING,
 
     @Column
-    private var groupServiceStatus: TransactionStatus
+    private var groupServiceStatus: TransactionStatus = TransactionStatus.PENDING
 ) {
 
     fun getId() = this.id

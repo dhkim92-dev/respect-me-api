@@ -28,4 +28,20 @@ class KafkaConfig(
         topicConfiguration["retention.ms"] = "604800000" // 이건 7일 회원 탈퇴 이벤트는 7일간 보관된다.
         return NewTopic(SagaEventDefinition.MEMBER_DELETE_SAGA, 1, 1).configs(topicConfiguration)
     }
+
+    @Bean
+    fun memberDeleteCompletedTopic(): NewTopic {
+        val topicConfiguration = mutableMapOf<String, String>()
+        topicConfiguration["cleanup.policy"] = "compact"
+        topicConfiguration["retention.ms"] = "604800000" // 이건 7일 회원 탈퇴 이벤트는 7일간 보관된다.
+        return NewTopic(SagaEventDefinition.MEMBER_DELETE_COMPLETED_SAGA, 1, 1).configs(topicConfiguration)
+    }
+
+    @Bean
+    fun memberDeleteFailedTopic(): NewTopic {
+        val topicConfiguration = mutableMapOf<String, String>()
+        topicConfiguration["cleanup.policy"] = "compact"
+        topicConfiguration["retention.ms"] = "604800000" // 이건 7일 회원 탈퇴 이벤트는 7일간 보관된다.
+        return NewTopic(SagaEventDefinition.MEMBER_DELETE_FAILED_SAGA, 1, 1).configs(topicConfiguration)
+    }
 }
