@@ -1,7 +1,7 @@
 package kr.respectme.member.applications.dto
 
 import jakarta.validation.constraints.NotBlank
-import kr.respectme.member.interfaces.dto.ModifyMemberRequest
+import kr.respectme.member.port.`in`.dto.ModifyMemberRequest
 import java.util.*
 
 data class ModifyNicknameCommand(

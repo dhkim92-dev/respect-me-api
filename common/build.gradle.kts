@@ -42,6 +42,11 @@ dependencies {
     api("org.aspectj:aspectjrt:1.9.20")
     api("com.google.code.gson:gson:2.8.8")
     api("org.springframework:spring-tx")
+    api("io.micrometer:micrometer-tracing-bridge-brave")
+    api("net.logstash.logback:logstash-logback-encoder:7.4")
+
+    implementation("org.springframework.kafka:spring-kafka")
+
     testImplementation("io.mockk:mockk:1.13.4")
     testImplementation("io.kotest.extensions:kotest-extensions-spring:1.3.0")
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.9.1")

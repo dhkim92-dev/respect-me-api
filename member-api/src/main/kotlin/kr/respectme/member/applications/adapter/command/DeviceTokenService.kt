@@ -6,12 +6,12 @@ import kr.respectme.common.error.NotFoundException
 import kr.respectme.member.applications.adapter.command.strategy.TokenValidationStrategyFactory
 import kr.respectme.member.applications.dto.DeviceTokenDto
 import kr.respectme.member.applications.dto.RegisterDeviceTokenCommand
-import kr.respectme.member.applications.port.command.DeviceTokenCommandUseCase
+import kr.respectme.member.applications.usecase.command.DeviceTokenCommandUseCase
 import kr.respectme.member.common.code.MemberServiceErrorCode
 import kr.respectme.member.domain.model.DeviceToken
 import kr.respectme.member.domain.model.DeviceTokenType
-import kr.respectme.member.infrastructures.persistence.port.command.MemberLoadPort
-import kr.respectme.member.infrastructures.persistence.port.command.MemberSavePort
+import kr.respectme.member.port.out.persistence.command.MemberLoadPort
+import kr.respectme.member.port.out.persistence.command.MemberSavePort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -41,8 +41,8 @@ class DeviceTokenService(
         val member = memberLoadPort.getMemberWithDeviceToken(memberId)
             ?: throw NotFoundException(MemberServiceErrorCode.MEMBER_NOT_FOUND)
 
-        val token = member.deviceTokens
-            .find { it.token == command.token}
+        val token = member.getDeviceTokens()
+            .find { it.getToken() == command.token}
             ?: DeviceToken(
                 memberId = memberId,
                 type = command.type,
@@ -52,7 +52,7 @@ class DeviceTokenService(
         member.registerDeviceToken(token)
         val savedMember = memberSavePort.save(member)
         val savedDeviceToken = savedMember
-            .deviceTokens
+            .getDeviceTokens()
             .find{ it.id == token.id }
             ?: throw NotFoundException(MemberServiceErrorCode.DEVICE_TOKEN_NOT_FOUND)
 
@@ -68,7 +68,7 @@ class DeviceTokenService(
         val member = memberLoadPort.getMemberWithDeviceToken(memberId)
             ?: throw NotFoundException(MemberServiceErrorCode.MEMBER_NOT_FOUND)
 
-        return member.deviceTokens.map {
+        return member.getDeviceTokens().map {
             DeviceTokenDto.valueOf(it)
         }
     }
@@ -81,7 +81,7 @@ class DeviceTokenService(
 
         val member = memberLoadPort.getMemberWithDeviceToken(memberId)
             ?: throw NotFoundException(MemberServiceErrorCode.MEMBER_NOT_FOUND)
-        val token = member.deviceTokens.find { it.id == tokenId }
+        val token = member.getDeviceTokens().find { it.id == tokenId }
         val result = member.removeDeviceToken(token)
 
         memberSavePort.save(member)

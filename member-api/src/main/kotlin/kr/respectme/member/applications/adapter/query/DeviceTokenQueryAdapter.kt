@@ -2,9 +2,9 @@ package kr.respectme.member.applications.adapter.query
 
 import kr.respectme.common.error.ForbiddenException
 import kr.respectme.member.applications.dto.DeviceTokenDto
-import kr.respectme.member.applications.port.query.DeviceTokenQueryUseCase
+import kr.respectme.member.applications.usecase.query.DeviceTokenQueryUseCase
 import kr.respectme.member.common.code.MemberServiceErrorCode
-import kr.respectme.member.infrastructures.persistence.port.query.DeviceTokenQueryRepository
+import kr.respectme.member.port.out.persistence.query.DeviceTokenQueryRepository
 import org.springframework.stereotype.Service
 import java.util.UUID
 

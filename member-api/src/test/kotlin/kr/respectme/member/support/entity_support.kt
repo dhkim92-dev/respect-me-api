@@ -2,10 +2,9 @@ package kr.respectme.member.support
 
 import kr.respectme.member.domain.model.Member
 import kr.respectme.member.domain.model.MemberRole
-import kr.respectme.member.infrastructures.persistence.jpa.JpaMemberEntity
+import kr.respectme.member.adapter.out.persistence.jpa.JpaMemberEntity
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.time.Instant
-import java.time.LocalDateTime
 import java.util.*
 
 fun createJpaMembers(size: Int): List<JpaMemberEntity> {

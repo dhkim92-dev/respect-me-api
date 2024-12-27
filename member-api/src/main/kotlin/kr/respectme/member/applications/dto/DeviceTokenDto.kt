@@ -2,7 +2,7 @@ package kr.respectme.member.applications.dto
 
 import kr.respectme.member.domain.model.DeviceToken
 import kr.respectme.member.domain.model.DeviceTokenType
-import kr.respectme.member.infrastructures.persistence.jpa.JpaDeviceTokenEntity
+import kr.respectme.member.adapter.out.persistence.jpa.JpaDeviceTokenEntity
 import java.time.Instant
 import java.util.UUID
 
@@ -20,11 +20,11 @@ data class DeviceTokenDto(
         fun valueOf(entity: DeviceToken): DeviceTokenDto {
             return DeviceTokenDto(
                 id = entity.id,
-                type = entity.type,
-                memberId = entity.memberId,
-                token = entity.token,
-                createdAt = entity.createdAt,
-                lastUsedAt = entity.lastUsedAt
+                type = entity.getType(),
+                memberId = entity.getMemberId(),
+                token = entity.getToken(),
+                createdAt = entity.getCreatedAt(),
+                lastUsedAt = entity.getLastUsedAt()
             )
         }
 

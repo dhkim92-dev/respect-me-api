@@ -1,7 +1,7 @@
 package kr.respectme.member.applications.dto
 
 import kr.respectme.member.domain.model.DeviceTokenType
-import kr.respectme.member.interfaces.dto.RegisterDeviceTokenRequest
+import kr.respectme.member.port.`in`.dto.RegisterDeviceTokenRequest
 
 data class RegisterDeviceTokenCommand(
     val type: DeviceTokenType,

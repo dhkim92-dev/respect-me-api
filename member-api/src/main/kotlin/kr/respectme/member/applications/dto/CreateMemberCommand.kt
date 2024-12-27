@@ -1,6 +1,6 @@
 package kr.respectme.member.applications.dto
 
-import kr.respectme.member.interfaces.dto.CreateMemberRequest
+import kr.respectme.member.port.`in`.dto.CreateMemberRequest
 
 data class CreateMemberCommand(
     val email: String,

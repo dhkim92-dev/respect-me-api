@@ -1,36 +1,53 @@
 package kr.respectme.member.domain.model
 
+import kr.respectme.common.domain.BaseDomainEntity
+import kr.respectme.common.domain.annotations.DomainEntity
+import kr.respectme.common.domain.annotations.DomainRelation
 import kr.respectme.common.error.BadRequestException
 import kr.respectme.member.common.code.MemberServiceErrorCode
 import java.time.Instant
 import java.util.UUID
 
+@DomainEntity
 class Member(
-    val id: UUID,
-    email: String = "",
-    role: MemberRole = MemberRole.ROLE_MEMBER,
-    isBlocked: Boolean = false,
-    blockReason: String = "",
+    id : UUID,
+    private var email: String = "",
+    private var role: MemberRole = MemberRole.ROLE_MEMBER,
+    private var isBlocked: Boolean = false,
+    private var blockReason: String = "",
     val createdAt: Instant = Instant.now(),
-    deviceTokens: MutableSet<DeviceToken> = mutableSetOf()
-) {
-    var email: String = email
-        private set
+    @DomainRelation
+    private var deviceTokens: MutableSet<DeviceToken> = mutableSetOf(),
+    private var isDeleted: Boolean = false
+): BaseDomainEntity<UUID>(id) {
 
-    var role: MemberRole = role
-        private set
+    fun getEmail(): String {
+        return email
+    }
 
-    var isBlocked: Boolean = isBlocked
-        private set
+    fun getRole(): MemberRole {
+        return role
+    }
 
-    var blockReason: String = blockReason
-        private set
+    fun getIsBlocked(): Boolean {
+        return isBlocked
+    }
 
-    val deviceTokens: MutableSet<DeviceToken> = deviceTokens
+    fun getBlockReason(): String {
+        return blockReason
+    }
+
+    fun getDeviceTokens(): Set<DeviceToken> {
+        return deviceTokens
+    }
+
+    fun getIsDeleted(): Boolean {
+        return isDeleted
+    }
 
     fun registerDeviceToken(token: DeviceToken) {
-        if(token.memberId != this.id) {
-            println("token member id : ${token.memberId} this.id : ${id}")
+        if(token.getMemberId() != this.id) {
+            println("token member id : ${token.getMemberId()} this.id : ${id}")
             throw IllegalStateException("Not your device token.")
         }
 
@@ -57,5 +74,9 @@ class Member(
     fun unblock() {
         isBlocked = false
         blockReason = ""
+    }
+
+    fun setSoftDeleted(value: Boolean) {
+        isDeleted = value
     }
 }
