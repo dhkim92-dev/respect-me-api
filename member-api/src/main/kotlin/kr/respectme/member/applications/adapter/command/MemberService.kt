@@ -5,18 +5,17 @@ import kr.respectme.common.error.ForbiddenException
 import kr.respectme.common.error.NotFoundException
 import kr.respectme.common.utility.UUIDV7Generator
 import kr.respectme.member.applications.dto.CreateMemberCommand
-import kr.respectme.member.applications.dto.LoginCommand
-import kr.respectme.member.applications.dto.ModifyNicknameCommand
-import kr.respectme.member.applications.port.command.MemberCommandUseCase
+import kr.respectme.member.applications.usecase.command.MemberCommandUseCase
 import kr.respectme.member.common.code.MemberServiceErrorCode.*
 import kr.respectme.member.domain.dto.MemberDto
 import kr.respectme.member.domain.mapper.MemberMapper
 import kr.respectme.member.domain.model.Member
 import kr.respectme.member.domain.model.MemberRole
-import kr.respectme.member.infrastructures.persistence.port.command.MemberLoadPort
-import kr.respectme.member.infrastructures.persistence.port.command.MemberSavePort
+import kr.respectme.member.common.saga.event.MemberDeleteSaga
+import kr.respectme.member.port.out.saga.MemberEventPublishPort
+import kr.respectme.member.port.out.persistence.command.MemberLoadPort
+import kr.respectme.member.port.out.persistence.command.MemberSavePort
 import org.slf4j.LoggerFactory
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -26,7 +25,8 @@ import java.util.*
 class MemberService(
     private val memberSavePort: MemberSavePort,
     private val memberLoadPort: MemberLoadPort,
-    private val memberMapper: MemberMapper
+    private val memberMapper: MemberMapper,
+    private val memberEventSourcingPort: MemberEventPublishPort
 ): MemberCommandUseCase {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -66,13 +66,10 @@ class MemberService(
         if(memberId != targetId) throw ForbiddenException(RESOURCE_OWNERSHIP_VIOLATION)
 
         memberLoadPort.getMemberById(targetId)?.let { member ->
-            memberSavePort.delete(member)
+            member.setSoftDeleted()
+            memberSavePort.save(member)
         } ?: throw NotFoundException(MEMBER_NOT_FOUND)
-
-        // TODO MemberDeleteEvent 발행 필요
-        // 이벤트 발행 시 Auth Service는 이 이벤트를 수신하여 회원의 인증 정보를 삭제 해야한다.
-        // Group 서비스에서는 회원이 그룹 소유자인 모든 그룹을 삭제 해야하며,
-        // 그룹 멤버로 참여중인 경우 그룹에서 탈퇴 해야한다.
+        publishMemberDeletedEvent(targetId, memberId)
     }
 
     @Transactional(readOnly = true)
@@ -93,9 +90,29 @@ class MemberService(
     }
 
     @Transactional
-    override fun deleteMemberByService(memberId: UUID) {
+    override fun deleteMemberByService(serviceAccountId: UUID, memberId: UUID) {
+        logger.info("[MemberDeleteEvent] Member delete event received. MemberId: $memberId, by $serviceAccountId")
+
         memberLoadPort.getMemberById(memberId)?.let { member ->
-            memberSavePort.delete(member)
+                member.setSoftDeleted()
+                memberSavePort.save(member)
+                publishMemberDeletedEvent(memberId, serviceAccountId)
+        } ?: throw NotFoundException(MEMBER_NOT_FOUND)
+    }
+
+    private fun publishMemberDeletedEvent(memberId: UUID, deletedBy: UUID) {
+        try {
+            memberEventSourcingPort.memberDeleteSagaStart(
+                MemberDeleteSaga(
+                    eventVersion = 1,
+                    memberId = memberId,
+                    deletedBy = deletedBy
+                )
+            )
+        }catch(e: Exception) {
+            logger.error("[MemberDeleteEvent] Member delete event publish failed. MemberId: $memberId, by $deletedBy, reason: ${e.message}")
+            e.printStackTrace()
         }
+        logger.debug("[MemberDeleteEvent] Member delete event published. MemberId: $memberId, by $deletedBy")
     }
 }

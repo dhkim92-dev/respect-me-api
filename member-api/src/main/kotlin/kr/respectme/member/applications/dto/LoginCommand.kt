@@ -1,6 +1,6 @@
 package kr.respectme.member.applications.dto
 
-import kr.respectme.member.interfaces.dto.LoginRequest
+import kr.respectme.member.port.`in`.dto.LoginRequest
 
 data class LoginCommand(
     val email: String,

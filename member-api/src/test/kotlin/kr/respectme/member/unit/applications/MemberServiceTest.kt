@@ -17,8 +17,8 @@ import kr.respectme.member.common.code.MemberServiceErrorCode
 import kr.respectme.member.common.code.MemberServiceErrorCode.RESOURCE_OWNERSHIP_VIOLATION
 import kr.respectme.member.domain.mapper.MemberMapper
 import kr.respectme.member.domain.model.MemberRole
-import kr.respectme.member.infrastructures.persistence.port.command.MemberLoadPort
-import kr.respectme.member.infrastructures.persistence.port.command.MemberSavePort
+import kr.respectme.member.port.out.persistence.command.MemberLoadPort
+import kr.respectme.member.port.out.persistence.command.MemberSavePort
 import kr.respectme.member.support.createMember
 import kr.respectme.member.support.createMembers
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
