@@ -5,7 +5,7 @@ import kr.respectme.member.common.saga.SagaEventDefinition
 import kr.respectme.member.common.saga.event.MemberDeleteSaga
 import kr.respectme.member.port.out.saga.MemberDeleteTransaction
 import kr.respectme.member.port.out.saga.MemberDeleteTransactionRepository
-import kr.respectme.member.port.out.saga.MemberEventPublishPort
+import kr.respectme.member.port.out.saga.MemberDeleteSagaEventPublishPort
 import kr.respectme.member.port.out.saga.TransactionStatus
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
@@ -17,11 +17,13 @@ import java.util.*
 class KafkaMemberEventPublishAdapter(
     private val kafkaTemplate: KafkaTemplate<String, Any>,
     private val memberDeleteTransactionRepository: MemberDeleteTransactionRepository,
-): MemberEventPublishPort {
+): MemberDeleteSagaEventPublishPort {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override fun memberDeleteSagaStart(saga: MemberDeleteSaga) {
+
+        logger.info()
         var transaction = MemberDeleteTransaction(
             memberId = saga.memberId,
             status = TransactionStatus.PENDING,
