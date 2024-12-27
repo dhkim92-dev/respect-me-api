@@ -4,7 +4,7 @@ import kr.respectme.member.common.saga.event.MemberDeleteSaga
 import java.util.*
 
 
-interface MemberEventPublishPort {
+interface MemberDeleteSagaEventPublishPort {
 
     fun memberDeleteSagaStart(saga: MemberDeleteSaga)
 

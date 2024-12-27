@@ -1,5 +1,8 @@
 package kr.respectme.member.port.out.saga
 
+import jakarta.persistence.LockModeType
+import org.springframework.data.jpa.repository.Lock
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.Repository
 import java.util.UUID
 
@@ -18,6 +21,8 @@ interface MemberDeleteTransactionRepository: Repository<MemberDeleteTransaction,
      * @param transactionId
      * @return MemberDeleteTransaction
      */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT t FROM MemberDeleteTransaction t WHERE t.id = :transactionId")
     fun findByIdForUpdate(transactionId: UUID) : MemberDeleteTransaction?
 
     fun save(transaction: MemberDeleteTransaction) : MemberDeleteTransaction

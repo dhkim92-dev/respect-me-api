@@ -12,7 +12,7 @@ import kr.respectme.member.domain.mapper.MemberMapper
 import kr.respectme.member.domain.model.Member
 import kr.respectme.member.domain.model.MemberRole
 import kr.respectme.member.common.saga.event.MemberDeleteSaga
-import kr.respectme.member.port.out.saga.MemberEventPublishPort
+import kr.respectme.member.port.out.saga.MemberDeleteSagaEventPublishPort
 import kr.respectme.member.port.out.persistence.command.MemberLoadPort
 import kr.respectme.member.port.out.persistence.command.MemberSavePort
 import org.slf4j.LoggerFactory
@@ -26,7 +26,7 @@ class MemberService(
     private val memberSavePort: MemberSavePort,
     private val memberLoadPort: MemberLoadPort,
     private val memberMapper: MemberMapper,
-    private val memberEventSourcingPort: MemberEventPublishPort
+    private val memberDeleteSavaPublishPort: MemberDeleteSagaEventPublishPort
 ): MemberCommandUseCase {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -66,7 +66,7 @@ class MemberService(
         if(memberId != targetId) throw ForbiddenException(RESOURCE_OWNERSHIP_VIOLATION)
 
         memberLoadPort.getMemberById(targetId)?.let { member ->
-            member.setSoftDeleted()
+            member.setSoftDeleted(true)
             memberSavePort.save(member)
         } ?: throw NotFoundException(MEMBER_NOT_FOUND)
         publishMemberDeletedEvent(targetId, memberId)
@@ -94,7 +94,7 @@ class MemberService(
         logger.info("[MemberDeleteEvent] Member delete event received. MemberId: $memberId, by $serviceAccountId")
 
         memberLoadPort.getMemberById(memberId)?.let { member ->
-                member.setSoftDeleted()
+                member.setSoftDeleted(true)
                 memberSavePort.save(member)
                 publishMemberDeletedEvent(memberId, serviceAccountId)
         } ?: throw NotFoundException(MEMBER_NOT_FOUND)
@@ -102,11 +102,10 @@ class MemberService(
 
     private fun publishMemberDeletedEvent(memberId: UUID, deletedBy: UUID) {
         try {
-            memberEventSourcingPort.memberDeleteSagaStart(
+            memberDeleteSavaPublishPort.memberDeleteSagaStart(
                 MemberDeleteSaga(
                     eventVersion = 1,
                     memberId = memberId,
-                    deletedBy = deletedBy
                 )
             )
         }catch(e: Exception) {

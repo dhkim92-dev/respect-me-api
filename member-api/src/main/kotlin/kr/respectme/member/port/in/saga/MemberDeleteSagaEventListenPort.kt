@@ -4,7 +4,7 @@ import kr.respectme.common.saga.Saga
 import kr.respectme.member.common.saga.event.MemberDeleteSaga
 import org.springframework.kafka.support.Acknowledgment
 
-interface MemberEventSubscribePort {
+interface MemberDeleteSagaEventListenPort {
 
     fun onMemberDeleteSagaCompleted(
         message: Saga<MemberDeleteSaga>,

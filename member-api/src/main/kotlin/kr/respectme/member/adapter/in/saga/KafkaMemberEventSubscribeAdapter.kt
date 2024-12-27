@@ -2,12 +2,12 @@ package kr.respectme.member.adapter.`in`.saga
 
 import kr.respectme.common.saga.Saga
 import kr.respectme.member.common.saga.event.MemberDeleteSaga
-import kr.respectme.member.port.`in`.saga.MemberEventSubscribePort
+import kr.respectme.member.port.`in`.saga.MemberDeleteSagaEventListenPort
 import kr.respectme.member.port.out.persistence.command.MemberLoadPort
 import kr.respectme.member.port.out.persistence.command.MemberSavePort
 import kr.respectme.member.port.out.saga.MemberDeleteTransaction
 import kr.respectme.member.port.out.saga.MemberDeleteTransactionRepository
-import kr.respectme.member.port.out.saga.MemberEventPublishPort
+import kr.respectme.member.port.out.saga.MemberDeleteSagaEventPublishPort
 import kr.respectme.member.port.out.saga.TransactionStatus
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
@@ -25,12 +25,12 @@ import java.util.UUID
  * @property memberEventPublishPort: MemberEventPublishPort
  */
 @Component
-class KafkaMemberEventSubscribeAdapter(
+class KafkaMemberDeleteSagaEventListenAdapter(
     private val memberLoadPort: MemberLoadPort,
     private val memberSavePort: MemberSavePort,
     private val memberDeleteTransactionRepository: MemberDeleteTransactionRepository,
-    private val memberEventPublishPort: MemberEventPublishPort
-): MemberEventSubscribePort {
+    private val memberEventPublishPort: MemberDeleteSagaEventPublishPort
+): MemberDeleteSagaEventListenPort {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -171,10 +171,13 @@ class KafkaMemberEventSubscribeAdapter(
     ) {
         try {
             var transaction = getTransaction(message.transactionId)
+            val currentStatus = transaction.getStatus()
             transaction.setGroupServiceCompleted(TransactionStatus.FAILED)
             transaction.setStatus(TransactionStatus.FAILED)
             transaction = memberDeleteTransactionRepository.save(transaction)
-            memberEventPublishPort.memberDeleteSagaFailed(transaction.getId(), message.data!!)
+            if(currentStatus != TransactionStatus.FAILED) {
+                memberEventPublishPort.memberDeleteSagaFailed(transaction.getId(), message.data!!)
+            }
             commit(acknowledgment)
         } catch(e: Exception) {
             logger.error("[member-delete-saga][group-service-failed] - transaction ${message.transactionId} handling failed")
@@ -198,9 +201,13 @@ class KafkaMemberEventSubscribeAdapter(
     ) {
         try {
             var transaction = getTransaction(message.transactionId)
+            val currentStatus = transaction.getStatus()
             transaction.setAuthServiceCompleted(TransactionStatus.FAILED)
             transaction.setStatus(TransactionStatus.FAILED)
             transaction = memberDeleteTransactionRepository.save(transaction)
+            if(currentStatus != TransactionStatus.FAILED) {
+                memberEventPublishPort.memberDeleteSagaFailed(transaction.getId(), message.data!!)
+            }
             memberEventPublishPort.memberDeleteSagaFailed(transaction.getId(), message.data!!)
             commit(acknowledgment)
         } catch(e: Exception) {
@@ -214,7 +221,7 @@ class KafkaMemberEventSubscribeAdapter(
             memberDeleteTransactionRepository.findByIdForUpdate(transactionId)
                 ?: throw IllegalArgumentException("transaction not found")
         } catch (e: Exception) {
-            logger.error("[MemberDeleteSaga][Fatal] - transaction ${transactionId} should be restored manually failed")
+            logger.error("[member-delete-saga] - get transaction ${transactionId} failed")
             throw e
         }
     }
@@ -236,6 +243,9 @@ class KafkaMemberEventSubscribeAdapter(
         }
     }
 
+    /**
+     * 모든 트랜잭션이 완료되었는지 확인
+     */
     private fun checkAllTransactionCompleted(transaction: MemberDeleteTransaction): Boolean {
         return transaction.getAuthServiceCompleted() == TransactionStatus.COMPLETED && transaction.getGroupServiceCompleted() == TransactionStatus.COMPLETED
     }
