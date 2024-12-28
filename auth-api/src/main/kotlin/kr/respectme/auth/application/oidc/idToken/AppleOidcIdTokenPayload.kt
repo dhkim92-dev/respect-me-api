@@ -10,7 +10,7 @@ data class AppleOidcIdTokenPayload(
     val exp: Long,
     val email: String,
     val emailVerified: Boolean,
-    val isPrivateEmail: Boolean,
+    //val isPrivateEmail: Boolean,
     val nonceSupported: Boolean,
 ) {
 
@@ -25,7 +25,7 @@ data class AppleOidcIdTokenPayload(
                 exp = decodedJWT.expiresAt.time / 1000,
                 email = decodedJWT.getClaim("email").asString(),
                 emailVerified = decodedJWT.getClaim("email_verified").asBoolean(),
-                isPrivateEmail = decodedJWT.getClaim("is_private_email").asBoolean(),
+                //isPrivateEmail = decodedJWT.getClaim("is_private_email").asBoolean(),
                 nonceSupported = decodedJWT.getClaim("nonce_supported").asBoolean()
             )
         }

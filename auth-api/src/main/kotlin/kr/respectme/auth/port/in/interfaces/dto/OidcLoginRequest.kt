@@ -1,4 +1,4 @@
-package kr.respectme.auth.interfaces.dto
+package kr.respectme.auth.port.`in`.interfaces.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotEmpty

@@ -6,7 +6,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import kr.respectme.auth.common.AuthenticationErrorCode
 import kr.respectme.auth.configs.JwtConfigs
-import kr.respectme.auth.infrastructures.dto.Member
+import kr.respectme.auth.port.`in`.msa.members.dto.Member
 import kr.respectme.common.error.UnauthorizedException
 import org.springframework.stereotype.Service
 import java.time.Instant

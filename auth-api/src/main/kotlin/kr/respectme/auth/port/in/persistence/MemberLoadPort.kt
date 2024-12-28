@@ -1,7 +1,6 @@
-package kr.respectme.auth.infrastructures.ports
+package kr.respectme.auth.port.`in`.persistence
 
-import kr.respectme.auth.infrastructures.dto.LoginRequest
-import kr.respectme.auth.infrastructures.dto.Member
+import kr.respectme.auth.port.`in`.msa.members.dto.Member
 import kr.respectme.common.response.ApiResult
 import java.util.UUID
 

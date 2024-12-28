@@ -7,9 +7,9 @@ import jakarta.validation.Valid
 import kr.respectme.auth.application.dto.OidcMemberLoginCommand
 import kr.respectme.auth.application.useCase.OidcAuthUseCase
 import kr.respectme.auth.domain.OidcPlatform
-import kr.respectme.auth.interfaces.dto.LoginResponse
-import kr.respectme.auth.interfaces.dto.OidcLoginRequest
-import kr.respectme.auth.interfaces.port.OidcAuthPort
+import kr.respectme.auth.port.`in`.interfaces.dto.LoginResponse
+import kr.respectme.auth.port.`in`.interfaces.dto.OidcLoginRequest
+import kr.respectme.auth.port.`in`.interfaces.OidcAuthPort
 import kr.respectme.common.annotation.ApplicationResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PostMapping

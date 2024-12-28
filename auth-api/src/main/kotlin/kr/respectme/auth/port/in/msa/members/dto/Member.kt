@@ -1,4 +1,4 @@
-package kr.respectme.auth.infrastructures.dto
+package kr.respectme.auth.port.`in`.msa.members.dto
 
 import java.util.UUID
 

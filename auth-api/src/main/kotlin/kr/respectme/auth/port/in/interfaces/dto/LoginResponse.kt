@@ -1,4 +1,4 @@
-package kr.respectme.auth.interfaces.dto
+package kr.respectme.auth.port.`in`.interfaces.dto
 
 import kr.respectme.auth.application.dto.AuthenticationResult
 import java.util.*

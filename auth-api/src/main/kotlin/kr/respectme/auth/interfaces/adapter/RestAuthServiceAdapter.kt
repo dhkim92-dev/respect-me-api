@@ -7,12 +7,10 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kr.respectme.auth.application.dto.JwtAccessTokenVerifierRequiredInfo
 import kr.respectme.auth.application.useCase.AuthUseCase
-import kr.respectme.auth.infrastructures.dto.LoginRequest
-import kr.respectme.auth.interfaces.dto.LoginResponse
-import kr.respectme.auth.interfaces.dto.RefreshAccessTokenRequest
-import kr.respectme.auth.interfaces.dto.VerifyAccessTokenRequest
-import kr.respectme.auth.interfaces.dto.VerifyAccessTokenResponse
-import kr.respectme.auth.interfaces.port.AuthServicePort
+import kr.respectme.auth.port.`in`.interfaces.dto.LoginRequest
+import kr.respectme.auth.port.`in`.interfaces.dto.LoginResponse
+import kr.respectme.auth.port.`in`.interfaces.dto.RefreshAccessTokenRequest
+import kr.respectme.auth.port.`in`.interfaces.AuthServicePort
 import kr.respectme.common.annotation.ApplicationResponse
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus.CREATED

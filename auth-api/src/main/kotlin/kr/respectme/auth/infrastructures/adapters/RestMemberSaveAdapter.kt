@@ -1,9 +1,9 @@
 package kr.respectme.auth.infrastructures.adapters
 
 import jakarta.validation.Valid
-import kr.respectme.auth.infrastructures.dto.CreateMemberRequest
-import kr.respectme.auth.infrastructures.dto.Member
-import kr.respectme.auth.infrastructures.ports.MemberSavePort
+import kr.respectme.auth.port.`in`.msa.members.dto.CreateMemberRequest
+import kr.respectme.auth.port.`in`.msa.members.dto.Member
+import kr.respectme.auth.port.`in`.persistence.MemberSavePort
 import kr.respectme.common.response.ApiResult
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
