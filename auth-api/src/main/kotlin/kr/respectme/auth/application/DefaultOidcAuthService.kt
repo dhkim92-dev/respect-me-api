@@ -9,15 +9,13 @@ import kr.respectme.auth.common.AuthenticationErrorCode
 import kr.respectme.auth.application.jwt.JwtService
 import kr.respectme.auth.application.oidc.IdTokenVerifier
 import kr.respectme.auth.domain.*
-import kr.respectme.auth.infrastructures.dto.CreateMemberRequest
-import kr.respectme.auth.infrastructures.dto.Member
-import kr.respectme.auth.infrastructures.ports.MemberLoadPort
-import kr.respectme.auth.infrastructures.ports.MemberSavePort
-import kr.respectme.common.error.BadRequestException
+import kr.respectme.auth.port.out.persistence.member.dto.CreateMemberRequest
+import kr.respectme.auth.port.out.persistence.member.dto.Member
+import kr.respectme.auth.port.out.persistence.member.MemberLoadPort
+import kr.respectme.auth.port.out.persistence.member.MemberSavePort
 import kr.respectme.common.error.InternalServerError
 import kr.respectme.common.error.UnauthorizedException
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -53,7 +51,7 @@ class DefaultOidcAuthService(
             memberAuthInfo = createMemberAuthInfo(member.id, command.platform, payload)
         }
 
-        val memberInfo = memberLoadPort.loadMemberById(memberAuthInfo.memberId?.id!!).data
+        val memberInfo = memberLoadPort.loadMemberById(memberAuthInfo.getMemberId().id).data
 
         if(memberInfo == null) {
             processMemberRegistration(command, payload)

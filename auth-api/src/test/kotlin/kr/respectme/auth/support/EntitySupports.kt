@@ -4,7 +4,7 @@ import kr.respectme.auth.domain.MemberAuthInfo
 import kr.respectme.auth.domain.MemberId
 import kr.respectme.auth.domain.OidcAuth
 import kr.respectme.auth.domain.OidcPlatform
-import kr.respectme.auth.infrastructures.dto.Member
+import kr.respectme.auth.port.out.persistence.member.dto.Member
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.util.*
 import kotlin.random.Random

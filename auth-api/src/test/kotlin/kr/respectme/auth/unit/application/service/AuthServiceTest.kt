@@ -11,9 +11,9 @@ import kr.respectme.auth.application.dto.AuthenticationResult
 import kr.respectme.auth.application.dto.JwtAccessTokenVerifierRequiredInfo
 import kr.respectme.auth.application.jwt.JwtService
 import kr.respectme.auth.domain.MemberAuthInfoRepository
-import kr.respectme.auth.infrastructures.dto.LoginRequest
-import kr.respectme.auth.infrastructures.dto.Member
-import kr.respectme.auth.infrastructures.ports.MemberLoadPort
+import kr.respectme.auth.port.`in`.interfaces.dto.LoginRequest
+import kr.respectme.auth.port.out.persistence.member.dto.Member
+import kr.respectme.auth.port.out.persistence.member.MemberLoadPort
 import kr.respectme.auth.support.*
 import kr.respectme.common.error.NotFoundException
 import kr.respectme.common.error.UnauthorizedException
@@ -77,13 +77,15 @@ class AuthServiceTest() : BehaviorSpec({
 
     Given("엑세스 토큰 갱신 요청이 들어온다") {
         val validRefreshToken = jwtService.createRefreshToken(memberAuthInfo.memberId!!.id)
-        val invalidAccessToken = jwtService.createAccessToken(Member(
+        val invalidAccessToken = jwtService.createAccessToken(
+            Member(
             id = memberAuthInfo.memberId!!.id,
             email = memberAuthInfo.email,
             role = "ROLE_ADMIN",
             isBlocked = false,
             blockReason = ""
-        ))
+        )
+        )
 
         When("리프레시 토큰이 유효하지 않으면") {
             val exception = shouldThrowAny {

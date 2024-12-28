@@ -10,7 +10,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.1.7"
+version = "0.1.8"
 
 repositories {
     mavenCentral()
@@ -39,6 +39,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.kafka:spring-kafka")
     implementation("org.springframework.retry:spring-retry")
     implementation("org.flywaydb:flyway-core:9.16.3")
     runtimeOnly("org.postgresql:postgresql:42.5.4")

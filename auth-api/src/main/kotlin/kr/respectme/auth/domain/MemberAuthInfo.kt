@@ -13,27 +13,53 @@ import java.time.Instant
 class MemberAuthInfo(
     @Id
     @Embedded
-    val memberId: MemberId? = null,
-    email: String = "",
-    password: String? = null,
+    private val memberId: MemberId? = null,
     @AttributeOverrides(
         AttributeOverride(name = "platform", column = Column(name = "oidc_auth_platform")),
         AttributeOverride(name = "userIdentifier", column = Column(name = "oidc_auth_user_identifier", nullable = true))
     )
-    val oidcAuth: OidcAuth = OidcAuth(),
-    lastLoginAt: Instant? = null
+    @Embedded
+    private val oidcAuth: OidcAuth = OidcAuth(),
+    @Column
+    private val email: String = "",
+    @Column
+    private var lastLoginAt: Instant? = null,
+    @Column
+    private var password: String? = null,
+    @Column
+    private var isDeleted: Boolean = false
 ){
-    @Column
-    var email: String = email
-        protected set
+    fun getMemberId(): MemberId {
+        return memberId!!
+    }
 
-    @Column
-    var password: String? = password
-        protected set
+    fun getEmail(): String {
+        return email
+    }
 
-    @Column
-    var lastLoginAt: Instant? = lastLoginAt
-        protected set
+    fun getOidcAuth(): OidcAuth {
+        return oidcAuth
+    }
+
+    fun getLastLoginAt(): Instant? {
+        return lastLoginAt
+    }
+
+    fun getPassword(): String? {
+        return password
+    }
+
+    fun isDeleted(): Boolean {
+        return isDeleted
+    }
+
+    fun changePassword(password: String) {
+        this.password = password
+    }
+
+    fun setIsDeleted(isDeleted: Boolean) {
+        this.isDeleted = isDeleted
+    }
 
     fun login() {
         lastLoginAt = Instant.now()

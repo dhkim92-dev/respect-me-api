@@ -1,13 +1,11 @@
 package kr.respectme.auth.unit.application.jwt
 
-import com.auth0.jwt.exceptions.JWTVerificationException
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kr.respectme.auth.application.jwt.JwtService
-import kr.respectme.auth.infrastructures.dto.Member
+import kr.respectme.auth.port.out.persistence.member.dto.Member
 import kr.respectme.auth.support.createJwtConfigs
 import kr.respectme.common.error.UnauthorizedException
 import java.util.UUID

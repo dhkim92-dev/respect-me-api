@@ -15,8 +15,8 @@ import kr.respectme.auth.application.useCase.AuthUseCase
 import kr.respectme.auth.common.AuthenticationErrorCode
 import kr.respectme.auth.domain.MemberAuthInfoRepository
 import kr.respectme.auth.domain.OidcPlatform
-import kr.respectme.auth.infrastructures.ports.MemberLoadPort
-import kr.respectme.auth.infrastructures.ports.MemberSavePort
+import kr.respectme.auth.port.out.persistence.member.MemberLoadPort
+import kr.respectme.auth.port.out.persistence.member.MemberSavePort
 import kr.respectme.auth.support.*
 import kr.respectme.common.error.UnauthorizedException
 import kr.respectme.common.response.ApiResult
