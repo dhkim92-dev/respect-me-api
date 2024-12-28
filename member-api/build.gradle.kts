@@ -44,7 +44,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("io.micrometer:micrometer-tracing-bridge-brave")
-    runtimeOnly("com.h2database:h2:2.1.214")
+    runtimeOnly("com.h2database:h2:2.3.232")
 //    implementation("io.zipkin.reporter2:zipkin-reporter-brave")
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -54,7 +54,6 @@ dependencies {
 
     implementation("org.postgresql:postgresql:42.5.4")
     implementation("org.flywaydb:flyway-core:9.16.3")
-//    implementation("com.h2database:h2:2.1.214")
     implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
     implementation("com.google.firebase:firebase-admin:9.3.0")
 

@@ -9,7 +9,7 @@ import kr.respectme.auth.application.jwt.JwtService
 import kr.respectme.auth.configs.JwtConfigs
 import kr.respectme.auth.domain.MemberAuthInfoRepository
 import kr.respectme.auth.port.`in`.interfaces.dto.LoginRequest
-import kr.respectme.auth.port.`in`.persistence.MemberLoadPort
+import kr.respectme.auth.port.out.persistence.member.MemberLoadPort
 import kr.respectme.common.error.NotFoundException
 import kr.respectme.common.error.UnauthorizedException
 import kr.respectme.common.security.jwt.JwtClaims
@@ -41,11 +41,11 @@ class AuthService(
         val memberAuthInfo = authInfoRepository.findByEmail(loginRequest.email)
             ?: throw NotFoundException(AuthenticationErrorCode.FAILED_TO_SIGN_IN)
 
-        if(!passwordEncoder.matches(loginRequest.password, memberAuthInfo.password)) {
+        if(!passwordEncoder.matches(loginRequest.password, memberAuthInfo.getPassword())) {
             throw UnauthorizedException(AuthenticationErrorCode.FAILED_TO_SIGN_IN)
         }
 
-        val member = memberLoadPort.loadMemberById(memberAuthInfo.memberId?.id!!).data
+        val member = memberLoadPort.loadMemberById(memberAuthInfo.getMemberId().id).data
             ?: throw NotFoundException(AuthenticationErrorCode.FAILED_TO_SIGN_IN)
 
         val refreshToken = jwtService.createRefreshToken(member.id)

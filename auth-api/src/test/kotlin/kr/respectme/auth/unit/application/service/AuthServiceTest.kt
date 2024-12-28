@@ -12,8 +12,8 @@ import kr.respectme.auth.application.dto.JwtAccessTokenVerifierRequiredInfo
 import kr.respectme.auth.application.jwt.JwtService
 import kr.respectme.auth.domain.MemberAuthInfoRepository
 import kr.respectme.auth.port.`in`.interfaces.dto.LoginRequest
-import kr.respectme.auth.port.`in`.msa.members.dto.Member
-import kr.respectme.auth.port.`in`.persistence.MemberLoadPort
+import kr.respectme.auth.port.out.persistence.member.dto.Member
+import kr.respectme.auth.port.out.persistence.member.MemberLoadPort
 import kr.respectme.auth.support.*
 import kr.respectme.common.error.NotFoundException
 import kr.respectme.common.error.UnauthorizedException

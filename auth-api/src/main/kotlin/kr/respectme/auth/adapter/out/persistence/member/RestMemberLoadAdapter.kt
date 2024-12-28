@@ -1,7 +1,7 @@
-package kr.respectme.auth.infrastructures.adapters
+package kr.respectme.auth.adapter.out.persistence.member
 
-import kr.respectme.auth.port.`in`.msa.members.dto.Member
-import kr.respectme.auth.port.`in`.persistence.MemberLoadPort
+import kr.respectme.auth.port.out.persistence.member.dto.Member
+import kr.respectme.auth.port.out.persistence.member.MemberLoadPort
 import kr.respectme.common.response.ApiResult
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE

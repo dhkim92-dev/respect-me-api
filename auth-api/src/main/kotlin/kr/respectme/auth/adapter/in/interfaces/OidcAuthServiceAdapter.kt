@@ -1,4 +1,4 @@
-package kr.respectme.auth.interfaces.adapter
+package kr.respectme.auth.adapter.`in`.interfaces
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse

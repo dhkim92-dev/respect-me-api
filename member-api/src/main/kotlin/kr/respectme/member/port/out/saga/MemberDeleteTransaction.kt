@@ -32,6 +32,7 @@ class MemberDeleteTransaction(
     fun getId() = this.id
     fun getStatus() = this.status
     fun getCreatedAt() = this.createdAt
+    fun getMemberId() = this.memberId
     fun getAuthServiceCompleted() = this.authServiceStatus
     fun getGroupServiceCompleted() = this.groupServiceStatus
 

@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import kr.respectme.auth.application.oidc.idToken.CommonOidcIdTokenPayload
 import kr.respectme.auth.configs.JwtConfigs
-import kr.respectme.auth.port.`in`.msa.members.dto.Member
+import kr.respectme.auth.port.out.persistence.member.dto.Member
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey

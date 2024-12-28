@@ -1,4 +1,4 @@
-package kr.respectme.auth.port.`in`.msa.members.dto
+package kr.respectme.auth.port.out.persistence.member.dto
 
 data class CreateMemberRequest(
     val email: String,

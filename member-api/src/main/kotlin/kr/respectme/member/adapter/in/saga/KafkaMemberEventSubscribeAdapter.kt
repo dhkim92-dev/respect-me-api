@@ -15,6 +15,7 @@ import org.springframework.kafka.annotation.RetryableTopic
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.retry.annotation.Backoff
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 /**
@@ -132,6 +133,7 @@ class KafkaMemberDeleteSagaEventListenAdapter(
         autoCreateTopics = "false",
     )
     @KafkaListener(topics=["member-delete-saga-auth-service-completed"])
+    @Transactional
     override fun onMemberDeleteSagaAuthServiceCompleted(
         message: Saga<MemberDeleteSaga>,
         acknowledgment: Acknowledgment
@@ -165,6 +167,7 @@ class KafkaMemberDeleteSagaEventListenAdapter(
         autoCreateTopics = "false",
     )
     @KafkaListener(topics = ["member-delete-saga-group-service-failed"])
+    @Transactional
     override fun onMemberDeleteSagaGroupServiceFailed(
         message: Saga<MemberDeleteSaga>,
         acknowledgment: Acknowledgment
@@ -195,6 +198,7 @@ class KafkaMemberDeleteSagaEventListenAdapter(
         autoCreateTopics = "false",
     )
     @KafkaListener(topics = ["member-delete-saga-auth-service-failed"])
+    @Transactional
     override fun onMemberDeleteSagaAuthServiceFailed(
         message: Saga<MemberDeleteSaga>,
         acknowledgment: Acknowledgment
@@ -218,8 +222,10 @@ class KafkaMemberDeleteSagaEventListenAdapter(
 
     private fun getTransaction(transactionId: UUID): MemberDeleteTransaction {
         return try {
-            memberDeleteTransactionRepository.findByIdForUpdate(transactionId)
+            val transaction = memberDeleteTransactionRepository.findById(transactionId)
                 ?: throw IllegalArgumentException("transaction not found")
+            logger.debug("[member-delete-saga] - get transaction ${transactionId}, memeberId: ${transaction.getMemberId()}")
+            transaction
         } catch (e: Exception) {
             logger.error("[member-delete-saga] - get transaction ${transactionId} failed")
             throw e
