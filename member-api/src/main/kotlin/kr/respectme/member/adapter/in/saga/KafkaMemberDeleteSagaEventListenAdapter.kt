@@ -10,9 +10,12 @@ import kr.respectme.member.port.out.saga.MemberDeleteTransactionRepository
 import kr.respectme.member.port.out.saga.MemberDeleteSagaEventPublishPort
 import kr.respectme.member.port.out.saga.TransactionStatus
 import org.slf4j.LoggerFactory
+import org.springframework.kafka.annotation.DltHandler
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.annotation.RetryableTopic
 import org.springframework.kafka.support.Acknowledgment
+import org.springframework.kafka.support.KafkaHeaders
+import org.springframework.messaging.handler.annotation.Header
 import org.springframework.retry.annotation.Backoff
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -46,10 +49,12 @@ class KafkaMemberDeleteSagaEventListenAdapter(
         autoCreateTopics = "false",
     )
     @KafkaListener(topics = ["member-delete-completed-saga"])
+    @Transactional
     override fun onMemberDeleteSagaCompleted(
         message: Saga<MemberDeleteSaga>,
         acknowledgment: Acknowledgment
     ) {
+        logger.debug("[member-delete-completed-saga] - transaction ${message.transactionId} handling")
         try {
             val member = memberLoadPort.getMemberById(message.data?.memberId!!)
 
@@ -77,6 +82,7 @@ class KafkaMemberDeleteSagaEventListenAdapter(
         autoCreateTopics = "false",
     )
     @KafkaListener(topics = ["member-delete-failed-saga"])
+    @Transactional
     override fun onMemberDeleteSagaFailed(
         message: Saga<MemberDeleteSaga>,
         acknowledgment: Acknowledgment
@@ -105,6 +111,7 @@ class KafkaMemberDeleteSagaEventListenAdapter(
         message: Saga<MemberDeleteSaga>,
         acknowledgment: Acknowledgment
     ) {
+        logger.debug("[member-delete-saga-group-service-completed] - transaction ${message.transactionId} handling")
         try {
             var transaction = getTransaction(message.transactionId)
             transaction.setGroupServiceCompleted(TransactionStatus.COMPLETED)
@@ -138,6 +145,7 @@ class KafkaMemberDeleteSagaEventListenAdapter(
         message: Saga<MemberDeleteSaga>,
         acknowledgment: Acknowledgment
     ) {
+        logger.debug("[member-delete-saga-auth-service-completed] - transaction ${message.transactionId} handling")
         try {
             var transaction = getTransaction(message.transactionId)
             transaction.setAuthServiceCompleted(TransactionStatus.COMPLETED)
@@ -172,6 +180,7 @@ class KafkaMemberDeleteSagaEventListenAdapter(
         message: Saga<MemberDeleteSaga>,
         acknowledgment: Acknowledgment
     ) {
+        logger.info("[member-delete-saga-group-service-failed] - transaction ${message.transactionId} handling")
         try {
             var transaction = getTransaction(message.transactionId)
             val currentStatus = transaction.getStatus()
@@ -218,6 +227,16 @@ class KafkaMemberDeleteSagaEventListenAdapter(
             logger.error("[member-delete-saga][auth-service-failed] - transaction ${message.transactionId} handling failed")
             throw e
         }
+    }
+
+    @DltHandler
+    fun handleAllRetryFailed(
+        @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String,
+        message: Saga<MemberDeleteSaga>,
+        acknowledgment: Acknowledgment
+    ) {
+        logger.error("[${topic}][FATAL] all retry failed for transaction ${message.transactionId} memberId: ${message.data?.memberId}")
+        commit(acknowledgment)
     }
 
     private fun getTransaction(transactionId: UUID): MemberDeleteTransaction {

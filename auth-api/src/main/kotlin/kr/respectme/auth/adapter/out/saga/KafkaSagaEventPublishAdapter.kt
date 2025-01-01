@@ -5,13 +5,14 @@ import kr.respectme.auth.domain.MemberId
 import kr.respectme.auth.port.`in`.saga.event.MemberDeleteSaga
 import kr.respectme.auth.port.out.persistence.saga.AuthInfoDeleteSagaPublishPort
 import kr.respectme.auth.port.out.persistence.saga.SagaDefinitions
-import kr.respectme.common.saga.Saga
+import kr.respectme.common.saga.SagaEvent
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.retry.annotation.Backoff
 import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.util.UUID
 
@@ -23,8 +24,9 @@ class KafkaAuthInfoDeleteSagaPublishAdapter(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    @Transactional
     override fun publishAuthInfoDeleteCompletedSaga(transactionId: UUID, memberId: MemberId) {
-        val message = Saga<MemberDeleteSaga>(
+        val message = SagaEvent<MemberDeleteSaga>(
             transactionId = transactionId,
             timestamp = Instant.now().toEpochMilli(),
             data = MemberDeleteSaga(
@@ -36,8 +38,9 @@ class KafkaAuthInfoDeleteSagaPublishAdapter(
         publishSaga(SagaDefinitions.MEMBER_DELETE_SAGA_AUTH_DELETE_COMPLETED, message)
     }
 
+    @Transactional
     override fun publishAuthInfoDeleteFailedSaga(transactionId: UUID, memberId: MemberId) {
-        val message = Saga<MemberDeleteSaga>(
+        val message = SagaEvent<MemberDeleteSaga>(
             transactionId = transactionId,
             data = MemberDeleteSaga(
                 eventVersion = 1,
@@ -53,7 +56,7 @@ class KafkaAuthInfoDeleteSagaPublishAdapter(
         maxAttempts = 3,
         backoff = Backoff(delay = 1000)
     )
-    private fun publishSaga(topic: String, message: Saga<*>) {
+    private fun publishSaga(topic: String, message: SagaEvent<*>) {
         try {
             val record = ProducerRecord<String, String> (
                 topic,

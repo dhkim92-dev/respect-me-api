@@ -9,8 +9,8 @@ import kr.respectme.common.annotation.CursorParam
 import kr.respectme.common.annotation.LoginMember
 import kr.respectme.group.application.query.useCase.NotificationGroupQueryUseCase
 import kr.respectme.group.port.`in`.interfaces.dto.GroupMemberVo
-import kr.respectme.group.port.`in`.interfaces.dto.GroupNotificationVo
-import kr.respectme.group.port.`in`.interfaces.dto.NotificationGroupVo
+import kr.respectme.group.port.`in`.interfaces.dto.GroupNotificationQueryResponse
+import kr.respectme.group.port.`in`.interfaces.dto.NotificationGroupQueryResponse
 import kr.respectme.group.port.`in`.interfaces.NotificationGroupQueryPort
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
@@ -55,9 +55,9 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
         @PathVariable groupId: UUID,
         @RequestParam(required = false) @CursorParam(key="notificationId") cursor: UUID?,
         @RequestParam(required = false, defaultValue = "20") size: Int?
-    ): List<GroupNotificationVo> {
+    ): List<GroupNotificationQueryResponse> {
         return queryUseCase.retrieveGroupNotifications(loginId, groupId, cursor, size ?: 10)
-            .map { it -> GroupNotificationVo.valueOf(it) }
+            .map { it -> GroupNotificationQueryResponse.valueOf(it) }
     }
 
     @GetMapping("notification-groups/{groupId}/members/{memberId}")
@@ -84,9 +84,9 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
         @LoginMember loginId: UUID,
         @RequestParam(required = false) @CursorParam(key="id") cursor: UUID?,
         @RequestParam(required = false, defaultValue = "20") size: Int?
-    ): List<NotificationGroupVo> {
+    ): List<NotificationGroupQueryResponse> {
         return queryUseCase.retrieveMemberGroups(loginId)
-            .map { it -> NotificationGroupVo.valueOf(it) }
+            .map { it -> NotificationGroupQueryResponse.valueOf(it) }
     }
 
     @GetMapping("notification-groups/{groupId}")
@@ -96,8 +96,8 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
     override fun getNotificationGroup(
         @LoginMember loginId: UUID,
         @PathVariable groupId: UUID
-    ): NotificationGroupVo {
-        return NotificationGroupVo.valueOf(
+    ): NotificationGroupQueryResponse {
+        return NotificationGroupQueryResponse.valueOf(
             queryUseCase.retrieveGroup(loginId, groupId)
         )
     }
@@ -111,9 +111,9 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
         @LoginMember loginId: UUID,
         @CursorParam(key="id") @RequestParam(required = false) cursor: UUID?,
         @RequestParam(required = false, defaultValue = "20") size: Int?
-    ): List<NotificationGroupVo> {
+    ): List<NotificationGroupQueryResponse> {
         return queryUseCase.retrieveAllGroups(loginId, cursor, size)
-            .map { it -> NotificationGroupVo.valueOf(it) }
+            .map { it -> NotificationGroupQueryResponse.valueOf(it) }
     }
 
     @GetMapping("notification-groups/{groupId}/notifications/{notificationId}")
@@ -123,8 +123,8 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
         @LoginMember loginId: UUID,
         @PathVariable groupId: UUID,
         @PathVariable notificationId: UUID
-    ): GroupNotificationVo {
-        return GroupNotificationVo.valueOf(
+    ): GroupNotificationQueryResponse {
+        return GroupNotificationQueryResponse.valueOf(
             queryUseCase.retrieveNotification(loginId, groupId, notificationId)
         )
     }
@@ -137,9 +137,9 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
         @LoginMember loginId: UUID,
         @CursorParam(key = "notificationId") cursor: UUID?,
         @RequestParam(defaultValue = "20") size : Int?
-    ): List<GroupNotificationVo> {
+    ): List<GroupNotificationQueryResponse> {
         return queryUseCase.retrieveMemberNotifications(loginId, cursor, size?:20)
-            .map { it -> GroupNotificationVo.valueOf(it) }
+            .map { it -> GroupNotificationQueryResponse.valueOf(it) }
             .toList()
     }
 }

@@ -1,0 +1,2 @@
+ALTER TABLE member_auth_info
+    ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT FALSE;

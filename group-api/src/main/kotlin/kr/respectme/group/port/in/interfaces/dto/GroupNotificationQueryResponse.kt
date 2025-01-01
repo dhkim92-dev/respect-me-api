@@ -5,6 +5,7 @@ import kr.respectme.group.application.dto.notification.NotificationDto
 import kr.respectme.group.domain.notifications.DayOfWeek
 import kr.respectme.group.domain.notifications.NotificationStatus
 import kr.respectme.group.domain.notifications.NotificationType
+import kr.respectme.group.port.`in`.interfaces.vo.Writer
 import java.time.Instant
 import java.util.*
 
@@ -14,6 +15,8 @@ data class GroupNotificationVo(
     val notificationId: UUID,
     @Schema(description = "그룹 ID")
     val groupId: UUID,
+    @Schema(description = "작성자 정보")
+    val writer: Writer = Writer(),
     @Schema(description = "Notification 내용")
     val contents: String,
     @Schema(description = "Notification 타입", examples = ["IMMEDIATE", "SCHEDULED", "REPEATED_WEEKLY", "REPEATED_INTERVAL"])
@@ -40,6 +43,7 @@ data class GroupNotificationVo(
             return GroupNotificationVo(
                 notificationId = notification.notificationId,
                 groupId = notification.groupId,
+                writer = notification.writer,
                 contents = notification.content,
                 type = notification.type,
                 status = notification.state,

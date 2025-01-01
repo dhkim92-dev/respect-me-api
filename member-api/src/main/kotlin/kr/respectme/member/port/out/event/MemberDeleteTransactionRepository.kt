@@ -13,6 +13,7 @@ import java.util.UUID
 interface MemberDeleteTransactionRepository: Repository<MemberDeleteTransaction, UUID> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @QueryHints(QueryHint(name = "javax.persistence.lock.timeout", value = "5000"))
     fun findById(transactionId: UUID) : MemberDeleteTransaction?
 
     fun save(transaction: MemberDeleteTransaction) : MemberDeleteTransaction

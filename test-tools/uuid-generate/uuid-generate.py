@@ -17,4 +17,5 @@ class UUIDV7:
         return str(self.uuid)
 
 if __name__ == '__main__' :
-    print(UUIDV7().to_string())
+    for _ in range(0, 10) :
+        print(UUIDV7().to_string())
