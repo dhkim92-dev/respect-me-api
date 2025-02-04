@@ -28,7 +28,7 @@ class ImmediateNotification(
 ) {
 
     override fun validateType() {
-        if(type != NotificationType.IMMEDIATE) {
+        if(this.getType() != NotificationType.IMMEDIATE) {
             throw IllegalArgumentException("Notification type is not immediate")
         }
     }
@@ -37,14 +37,14 @@ class ImmediateNotification(
         return """
             ImmediateNotification
             id: $id,
-            groupId: $groupId,
-            senderId: $senderId,
-            content: $content,
-            status: $status,
-            type: $type,
-            createdAt: $createdAt,
-            updatedAt: $updatedAt,
-            lastSentAt: $lastSentAt 
+            groupId: ${getGroupId()},
+            senderId: ${getSenderId()},
+            content: ${getContent()},
+            status: ${getStatus()},
+            type: ${getType()},
+            createdAt: ${getCreatedAt()},
+            updatedAt: ${getUpdatedAt()},
+            lastSentAt: ${getLastSentAt()} 
         """.trimIndent()
     }
 }

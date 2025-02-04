@@ -1,11 +1,9 @@
 package kr.respectme.member.port.out.event
 
 import kr.respectme.common.saga.SagaEvent
-import kr.respectme.member.common.saga.event.MemberDeleteSaga
-import java.util.*
 
 
-interface MemberDeleteSagaEventPublishPort<T: SagaEvent<*>> {
+interface SagaEventPublishPort {
 
-    fun publish(eventName: String, payload: T)
+    fun <T: SagaEvent<*>> publish(eventName: String, payload: T)
 }

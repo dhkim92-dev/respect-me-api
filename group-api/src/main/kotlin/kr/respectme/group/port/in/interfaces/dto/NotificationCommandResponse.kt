@@ -9,7 +9,7 @@ import java.time.Instant
 import java.util.*
 
 @Schema(description = "Notification 생성/수정 응답 객체")
-data class NotificationResponse(
+data class NotificationCommandResponse(
     @Schema(description = "Notification 대상 그룹 ID")
     val groupId: UUID,
     @Schema(description = "Notification 발신자 ID")
@@ -34,8 +34,8 @@ data class NotificationResponse(
     val dayInterval: Int? = null,
 ) {
     companion object {
-        fun valueOf(result: NotificationCreateResult): NotificationResponse {
-            return NotificationResponse(
+        fun valueOf(result: NotificationCreateResult): NotificationCommandResponse {
+            return NotificationCommandResponse(
                 groupId = result.groupId,
                 senderId = result.senderId,
                 notificationId = result.notificationId,

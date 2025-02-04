@@ -1,8 +1,8 @@
-package kr.respectme.member.port.out.saga.converter
+package kr.respectme.member.port.out.event.converter
 
 import jakarta.persistence.AttributeConverter
 import jakarta.persistence.Converter
-import kr.respectme.member.port.out.saga.TransactionType
+import kr.respectme.member.port.out.event.TransactionType
 
 @Converter
 class TransactionTypeConverter: AttributeConverter<TransactionType, Int> {

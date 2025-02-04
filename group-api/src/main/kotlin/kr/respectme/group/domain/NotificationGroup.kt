@@ -3,14 +3,12 @@ package kr.respectme.group.domain
 import kr.respectme.common.domain.BaseDomainEntity
 import kr.respectme.common.domain.annotations.DomainEntity
 import kr.respectme.common.domain.annotations.DomainRelation
-import kr.respectme.common.domain.annotations.IgnoreField
 import kr.respectme.common.error.BadRequestException
 import kr.respectme.common.error.ForbiddenException
 import kr.respectme.common.error.NotFoundException
 import kr.respectme.common.utility.UUIDV7Generator
 import kr.respectme.group.common.errors.GroupServiceErrorCode
 import kr.respectme.group.domain.notifications.*
-import org.slf4j.LoggerFactory
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.Instant
 import java.util.*
@@ -34,60 +32,73 @@ import java.util.*
 @DomainEntity
 class NotificationGroup(
     id: UUID = UUIDV7Generator.generate(),
-    members: MutableSet<GroupMember> =  mutableSetOf(),
-    notifications: MutableSet<Notification> = mutableSetOf<Notification>(),
-    createdAt: Instant = Instant.now(),
-    name: String,
-    description: String,
-    ownerId: UUID,
-    password: String? = null,
-    type: GroupType = GroupType.GROUP_PRIVATE,
+    @DomainRelation
+    private val members: MutableSet<GroupMember> =  mutableSetOf(),
+    @DomainRelation
+    private val notifications: MutableSet<Notification> = mutableSetOf<Notification>(),
+    private val createdAt: Instant = Instant.now(),
+    private var name: String,
+    private var description: String,
+    private var ownerId: UUID,
+    private var password: String? = null,
+    private var type: GroupType = GroupType.GROUP_PRIVATE,
 ): BaseDomainEntity<UUID>(id) {
-
-    var name: String = name
-        private set
-
-    var description: String = description
-        private set
-
-    var ownerId: UUID = ownerId
-        private set
-
-    var type: GroupType = type
-        private set
-
-    var password: String? = password
-        private set
-
-    @DomainRelation
-    val members: MutableSet<GroupMember> = members
-
-    @DomainRelation
-    val notifications: MutableSet<Notification> = notifications
-
-    val createdAt: Instant = createdAt
 
 //    @IgnoreField
 //    private val logger = LoggerFactory.getLogger(javaClass)
 
+    fun getNotifications(): Set<Notification> {
+        return notifications
+    }
+
+    fun getMembers(): Set<GroupMember> {
+        return members
+    }
+
+    fun getCreatedAt(): Instant {
+        return createdAt
+    }
+
+    fun getName(): String {
+        return name
+    }
+
+    fun getDescription(): String {
+        return description
+    }
+
+    fun getOwnerId(): UUID {
+        return ownerId
+    }
+
+    fun getPassword(): String? {
+        return password
+    }
+
+    fun getType(): GroupType {
+        return type
+    }
+
+    fun changeGroupPassword(passwordEncoder: PasswordEncoder, password: String) {
+        this.password = passwordEncoder.encode(password)
+    }
+
+
     fun changeGroupType(groupType: GroupType?) {
         groupType?.let {
             this.type = groupType
-//            updated()
         }
     }
 
     fun changeGroupName(name: String?) {
         name?.let {
             this.name = it
-//            updated()
         }
     }
 
     fun changeGroupDescription(description: String?) {
         description?.let {
             this.description = it
-//            updated()
         }
     }
 
@@ -101,9 +112,9 @@ class NotificationGroup(
      * @param newOwnerId new owner ID
      */
     fun changeGroupOwner(requestMemberId: UUID, newOwnerId: UUID) {
-        val owner =members.find { it.memberId == requestMemberId }
+        val owner =members.find { member -> member.getMemberId() == requestMemberId }
             ?: throw NotFoundException(GroupServiceErrorCode.GROUP_MEMBER_NOT_FOUND)
-        val member = members.find { member -> member.memberId == newOwnerId }
+        val member = members.find { member -> member.getMemberId() == newOwnerId }
             ?: throw NotFoundException(GroupServiceErrorCode.GROUP_MEMBER_NOT_FOUND)
 
         if(!owner.isGroupOwner()) {
@@ -124,12 +135,12 @@ class NotificationGroup(
     }
 
     fun removeNotification(requestMemberId: UUID, notificationId: UUID) {
-        val member = members.find { it.memberId == requestMemberId }
+        val member = members.find { member->member.getMemberId() == requestMemberId }
             ?: throw NotFoundException(GroupServiceErrorCode.GROUP_MEMBER_NOT_FOUND)
         val notification = notifications.find{ it.id == notificationId }
             ?: throw NotFoundException(GroupServiceErrorCode.GROUP_NOTIFICATION_NOT_EXISTS)
 
-        if(notification.groupId == id && (member.memberId == notification.senderId || member.isGroupOwner())) {
+        if(notification.getGroupId() == id && (member.getMemberId() == notification.getSenderId() || member.isGroupOwner())) {
             throw ForbiddenException(GroupServiceErrorCode.GROUP_MEMBER_NOT_ENOUGH_PERMISSION)
         }
 
@@ -142,11 +153,11 @@ class NotificationGroup(
      * @param notification notification to make
      */
     fun addNotification(requestMemberId: UUID, notification: Notification) {
-        if(notification.groupId != id) {
+        if(notification.getGroupId() != id) {
             throw ForbiddenException(GroupServiceErrorCode.GROUP_NOTIFICATION_GROUP_ID_MISMATCH)
         }
 
-        val member = members.find { it.memberId == requestMemberId }
+        val member = members.find { member -> member.getMemberId() == requestMemberId }
             ?: throw NotFoundException(GroupServiceErrorCode.GROUP_MEMBER_NOT_FOUND)
 
         if(member.isGroupMember()) {
@@ -179,9 +190,9 @@ class NotificationGroup(
      * @param targetMemberId member ID want to remove
      */
     fun removeMember(requestMemberId: UUID, targetMemberId: UUID) {
-        val requestMember = members.find { it.memberId == requestMemberId }
+        val requestMember = members.find { member -> member.getMemberId() == requestMemberId }
             ?: throw NotFoundException(GroupServiceErrorCode.GROUP_MEMBER_NOT_FOUND)
-        val targetMember = members.find { it.memberId == targetMemberId }
+        val targetMember = members.find { member -> member.getMemberId() == targetMemberId }
             ?: throw NotFoundException(GroupServiceErrorCode.GROUP_MEMBER_NOT_FOUND)
 
         if ((requestMember != targetMember) &&

@@ -6,6 +6,7 @@ import java.time.Instant
 import java.util.UUID
 
 class GroupMemberDto(
+    val id: UUID,
     val groupId: UUID,
     val memberId: UUID,
     val nickname: String,
@@ -18,12 +19,13 @@ class GroupMemberDto(
 
         fun valueOf(entity: GroupMember): GroupMemberDto {
             return GroupMemberDto(
-                groupId = entity.groupId,
-                memberId = entity.memberId,
-                nickname = entity.nickname,
-                profileImageUrl = entity.profileImageUrl,
-                role = entity.memberRole,
-                createdAt = entity.createdAt
+                id = entity.id,
+                groupId = entity.getGroupId(),
+                memberId = entity.getMemberId(),
+                nickname = entity.getNickname(),
+                profileImageUrl = entity.getProfileImageUrl(),
+                role = entity.getMemberRole(),
+                createdAt = entity.getCreatedAt()
             )
         }
     }

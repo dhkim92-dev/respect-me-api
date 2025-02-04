@@ -1,18 +1,22 @@
-package kr.respectme.member.applications.adapter.command
+package kr.respectme.member.applications
 
 import kr.respectme.common.error.ConflictException
 import kr.respectme.common.error.ForbiddenException
 import kr.respectme.common.error.NotFoundException
+import kr.respectme.common.saga.SagaEvent
 import kr.respectme.common.utility.UUIDV7Generator
 import kr.respectme.member.applications.dto.CreateMemberCommand
 import kr.respectme.member.applications.usecase.command.MemberCommandUseCase
 import kr.respectme.member.common.code.MemberServiceErrorCode.*
+import kr.respectme.member.common.saga.SagaEventDefinition
 import kr.respectme.member.domain.dto.MemberDto
 import kr.respectme.member.domain.mapper.MemberMapper
 import kr.respectme.member.domain.model.Member
 import kr.respectme.member.domain.model.MemberRole
 import kr.respectme.member.common.saga.event.MemberDeleteSaga
-import kr.respectme.member.port.out.saga.MemberDeleteSagaEventPublishPort
+import kr.respectme.member.port.out.event.MemberDeleteTransaction
+import kr.respectme.member.port.out.event.MemberDeleteTransactionRepository
+import kr.respectme.member.port.out.event.SagaEventPublishPort
 import kr.respectme.member.port.out.persistence.command.MemberLoadPort
 import kr.respectme.member.port.out.persistence.command.MemberSavePort
 import org.slf4j.LoggerFactory
@@ -26,7 +30,8 @@ class MemberService(
     private val memberSavePort: MemberSavePort,
     private val memberLoadPort: MemberLoadPort,
     private val memberMapper: MemberMapper,
-    private val memberDeleteSavaPublishPort: MemberDeleteSagaEventPublishPort
+    private val sagaEventPublishPort: SagaEventPublishPort,
+    private val memberDeleteTransactionRepository: MemberDeleteTransactionRepository
 ): MemberCommandUseCase {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -69,7 +74,9 @@ class MemberService(
             member.setSoftDeleted(true)
             memberSavePort.save(member)
         } ?: throw NotFoundException(MEMBER_NOT_FOUND)
-        publishMemberDeletedEvent(targetId, memberId)
+
+        val transaction = createMemberDeleteSagaTransaction(targetId)
+        publishMemberDeletedEvent(transaction)
     }
 
     @Transactional(readOnly = true)
@@ -92,26 +99,40 @@ class MemberService(
     @Transactional
     override fun deleteMemberByService(serviceAccountId: UUID, memberId: UUID) {
         logger.info("[MemberDeleteEvent] Member delete event received. MemberId: $memberId, by $serviceAccountId")
-
         memberLoadPort.getMemberById(memberId)?.let { member ->
-                member.setSoftDeleted(true)
-                memberSavePort.save(member)
-                publishMemberDeletedEvent(memberId, serviceAccountId)
+            member.setSoftDeleted(true)
+            memberSavePort.save(member)
         } ?: throw NotFoundException(MEMBER_NOT_FOUND)
+        val transaction = createMemberDeleteSagaTransaction(memberId)
+        publishMemberDeletedEvent(transaction)
     }
 
-    private fun publishMemberDeletedEvent(memberId: UUID, deletedBy: UUID) {
+    private fun publishMemberDeletedEvent(transaction: MemberDeleteTransaction) {
         try {
-            memberDeleteSavaPublishPort.memberDeleteSagaStart(
-                MemberDeleteSaga(
-                    eventVersion = 1,
-                    memberId = memberId,
-                )
+            val memberDeleteSaga = MemberDeleteSaga(
+                eventVersion = 1,
+                memberId = transaction.getMemberId(),
             )
+            val event = SagaEvent(
+                transactionId = transaction.getId(),
+                timestamp = Instant.now().toEpochMilli(),
+                data = memberDeleteSaga
+            )
+            sagaEventPublishPort.publish(SagaEventDefinition.MEMBER_DELETE_SAGA, event)
         }catch(e: Exception) {
-            logger.error("[MemberDeleteEvent] Member delete event publish failed. MemberId: $memberId, by $deletedBy, reason: ${e.message}")
+            logger.error("[MemberDeleteEvent] Member delete event publish failed. MemberId: ${transaction.getMemberId()}, reason: ${e.message}")
             e.printStackTrace()
         }
-        logger.debug("[MemberDeleteEvent] Member delete event published. MemberId: $memberId, by $deletedBy")
+        logger.debug("[MemberDeleteEvent] Member delete event published. MemberId: ${transaction.getMemberId()}")
+    }
+
+    private fun createMemberDeleteSagaTransaction(memberId: UUID): MemberDeleteTransaction {
+        val transaction = memberDeleteTransactionRepository.save(
+            MemberDeleteTransaction(
+                id = UUIDV7Generator.generate(),
+                memberId = memberId,
+            )
+        )
+        return transaction
     }
 }

@@ -1,4 +1,4 @@
-package kr.respectme.member.applications.adapter.query
+package kr.respectme.member.applications
 
 import kr.respectme.common.error.ForbiddenException
 import kr.respectme.member.applications.dto.DeviceTokenDto
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class DeviceTokenQueryAdapter(
+class DeviceTokenQueryService(
     private val deviceTokenQueryRepository: DeviceTokenQueryRepository
 ): DeviceTokenQueryUseCase {
 

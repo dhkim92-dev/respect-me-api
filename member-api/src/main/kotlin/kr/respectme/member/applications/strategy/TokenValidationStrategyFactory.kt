@@ -1,4 +1,4 @@
-package kr.respectme.member.applications.adapter.command.strategy
+package kr.respectme.member.applications.strategy
 
 import com.google.firebase.FirebaseApp
 import kr.respectme.member.domain.model.DeviceTokenType

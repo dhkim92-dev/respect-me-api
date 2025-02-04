@@ -1,4 +1,4 @@
-package kr.respectme.member.port.out.saga
+package kr.respectme.member.port.out.event
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

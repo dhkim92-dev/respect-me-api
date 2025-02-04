@@ -17,7 +17,7 @@ class ScheduledNotification(
     createdAt: Instant = Instant.now(),
     updatedAt: Instant? = null,
     lastSentAt: Instant? = null,
-    scheduledAt: Instant = Instant.now()
+    private var scheduledAt: Instant = Instant.now()
 ) : Notification(
     id = id,
     groupId = groupId,
@@ -30,8 +30,9 @@ class ScheduledNotification(
     lastSentAt = lastSentAt,
 ) {
 
-    var scheduledAt: Instant = scheduledAt
-        private set
+    fun getScheduledAt(): Instant {
+        return scheduledAt
+    }
 
     fun setScheduledTime(scheduledAt: Instant?) {
         scheduledAt?.let {
@@ -41,7 +42,7 @@ class ScheduledNotification(
     }
 
     override fun validateType() {
-        if(type != NotificationType.SCHEDULED) {
+        if(getType() != NotificationType.SCHEDULED) {
             throw IllegalArgumentException("Notification type is not scheduled")
         }
 

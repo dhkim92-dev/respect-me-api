@@ -2,57 +2,54 @@ package kr.respectme.group.domain
 
 import kr.respectme.common.domain.BaseDomainEntity
 import kr.respectme.common.domain.annotations.DomainEntity
+import kr.respectme.common.utility.UUIDV7Generator
 import java.time.Instant
 import java.util.*
 
-/**
- * GroupMember Domain Entity
- * group member can leave group or if the member is owner or admin, can kick member.
- * can change member etc
- */
-
-class GroupMemberId(
-    val groupId: UUID,
-    val memberId: UUID
-){
-    override fun equals(other: Any?): Boolean {
-        if(other == null) return false
-        if(other !is GroupMemberId) return false
-        if(this === other) return true
-        return this.groupId == other.groupId && this.memberId == other.memberId
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hash(groupId, memberId)
-    }
-}
-
 @DomainEntity
 class GroupMember(
-    memberId: UUID = UUID.randomUUID(),
-    groupId: UUID = UUID.randomUUID(),
-    nickname: String = "",
-    memberRole: GroupMemberRole = GroupMemberRole.MEMBER,
-    profileImageUrl : String? = null,
-    createdAt: Instant = Instant.now()
-): BaseDomainEntity<GroupMemberId>(GroupMemberId(groupId, memberId)) {
+    id: UUID = UUIDV7Generator.generate(),
+    private val groupId: UUID = UUID.randomUUID(),
+    private val memberId: UUID = UUID.randomUUID(),
+    private var nickname: String = "",
+    private var memberRole: GroupMemberRole = GroupMemberRole.MEMBER,
+    private var profileImageUrl : String? = null,
+    private val createdAt: Instant = Instant.now(),
+    private var updatedAt: Instant? = null,
+    private var isDeleted : Boolean = false // 소프트 삭제용 필드
+): BaseDomainEntity<UUID>(id) {
 
-    val memberId: UUID
-        get() = id.memberId
+    fun getMemberId(): UUID {
+        return memberId
+    }
 
-    val groupId: UUID
-        get() = id.groupId
+    fun getGroupId(): UUID {
+        return groupId
+    }
 
-    var nickname: String = nickname
-        private set
+    fun getNickname(): String {
+        return nickname
+    }
 
-    var memberRole: GroupMemberRole = memberRole
-        private set
+    fun getMemberRole(): GroupMemberRole {
+        return memberRole
+    }
 
-    var profileImageUrl: String? = profileImageUrl
-        private set
+    fun getProfileImageUrl(): String? {
+        return profileImageUrl
+    }
 
-    val createdAt = createdAt
+    fun getCreatedAt(): Instant {
+        return createdAt
+    }
+
+    fun getUpdatedAt(): Instant? {
+        return updatedAt
+    }
+
+    fun getIsDeleted(): Boolean {
+        return isDeleted
+    }
 
     fun isGroupOwner(): Boolean {
         return memberRole == GroupMemberRole.OWNER
@@ -80,6 +77,10 @@ class GroupMember(
         nickname?.let{
             this.nickname = nickname
         }
+    }
+
+    fun setIsDeleted(isDeleted: Boolean) {
+        this.isDeleted = isDeleted
     }
 
     override fun equals(other: Any?): Boolean {

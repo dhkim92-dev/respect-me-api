@@ -1,8 +1,8 @@
 package kr.respectme.group.application.query.useCase
 
+import kr.respectme.group.application.dto.group.GroupQueryModelDto
 import kr.respectme.group.application.dto.member.GroupMemberDto
-import kr.respectme.group.application.dto.group.NotificationGroupDto
-import kr.respectme.group.application.dto.notification.NotificationDto
+import kr.respectme.group.application.dto.notification.NotificationQueryModelDto
 import java.util.UUID
 
 /***
@@ -37,7 +37,7 @@ interface NotificationGroupQueryUseCase {
      * @param size size for pagination
      * @return List<NotificationDto>
      */
-    fun retrieveGroupNotifications(loginId: UUID, groupId: UUID, cursor: UUID?, size: Int): List<NotificationDto>
+    fun retrieveGroupNotifications(loginId: UUID, groupId: UUID, cursor: UUID?, size: Int): List<NotificationQueryModelDto>
 
     /**
      * retrieve group by given group id
@@ -47,14 +47,14 @@ interface NotificationGroupQueryUseCase {
      * @param groupId group id
      * @return NotificationGroupDto
      */
-    fun retrieveGroup(loginId: UUID, groupId: UUID): NotificationGroupDto
+    fun retrieveGroup(loginId: UUID, groupId: UUID): GroupQueryModelDto
 
     /**
      * retrieve groups that login user is member of group
      * @param loginId login user id
      * @return List<NotificationGroupDto>
      */
-    fun retrieveMemberGroups(loginId: UUID): List<NotificationGroupDto>
+    fun retrieveMemberGroups(loginId: UUID): List<GroupQueryModelDto>
 
     /**
      * retrieve all groups that group type is public.
@@ -65,7 +65,7 @@ interface NotificationGroupQueryUseCase {
      */
     fun retrieveAllGroups(loginId: UUID,
                           cursorGroupId: UUID?,
-                          size: Int?): List<NotificationGroupDto>
+                          size: Int?): List<GroupQueryModelDto>
 
     /**
      * 특정 멤버가 속한 그룹의 모든 알림을 조회한다.
@@ -74,7 +74,7 @@ interface NotificationGroupQueryUseCase {
      * @param size 페이징을 위한 사이즈
      * @return List<NotificationDto>
      */
-    fun retrieveMemberNotifications(loginId: UUID, cursor: UUID?, size: Int): List<NotificationDto>
+    fun retrieveMemberNotifications(loginId: UUID, cursor: UUID?, size: Int): List<NotificationQueryModelDto>
 
     /**
      * 특정 알림을 상세 조회한다.
@@ -83,5 +83,5 @@ interface NotificationGroupQueryUseCase {
      * @param notificationId 알림 ID
      * @return NotificationDto
      */
-    fun retrieveNotification(loginId: UUID, groupId: UUID, notificationId: UUID): NotificationDto
+    fun retrieveNotification(loginId: UUID, groupId: UUID, notificationId: UUID): NotificationQueryModelDto
 }

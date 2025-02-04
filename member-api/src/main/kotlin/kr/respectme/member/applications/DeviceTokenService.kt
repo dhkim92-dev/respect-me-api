@@ -1,9 +1,9 @@
-package kr.respectme.member.applications.adapter.command
+package kr.respectme.member.applications
 
 import kr.respectme.common.error.BadRequestException
 import kr.respectme.common.error.ForbiddenException
 import kr.respectme.common.error.NotFoundException
-import kr.respectme.member.applications.adapter.command.strategy.TokenValidationStrategyFactory
+import kr.respectme.member.applications.strategy.TokenValidationStrategyFactory
 import kr.respectme.member.applications.dto.DeviceTokenDto
 import kr.respectme.member.applications.dto.RegisterDeviceTokenCommand
 import kr.respectme.member.applications.usecase.command.DeviceTokenCommandUseCase

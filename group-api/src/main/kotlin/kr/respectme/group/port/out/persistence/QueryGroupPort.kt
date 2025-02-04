@@ -1,5 +1,7 @@
 package kr.respectme.group.port.out.persistence
 
+import kr.respectme.group.adapter.out.persistence.entity.GroupNotificationQueryModel
+import kr.respectme.group.adapter.out.persistence.entity.NotificationGroupQueryModel
 import kr.respectme.group.application.dto.group.NotificationGroupDto
 import kr.respectme.group.application.dto.member.GroupMemberDto
 import kr.respectme.group.application.dto.notification.NotificationDto
@@ -15,14 +17,14 @@ interface QueryGroupPort {
      * @param groupId NotificationGroup ID
      * @return NotificationGroupDto
      */
-    fun getGroup(groupId: UUID): NotificationGroupDto?
+    fun getGroup(loginId: UUID, groupId: UUID): NotificationGroupQueryModel?
 
     /**
      * Get list of groups that login user is member of group
      * @param loginId login user ID
      * @return List<NotificationGroupDto>
      */
-    fun getMemberGroups(loginId: UUID): List<NotificationGroupDto>
+    fun getMemberGroups(loginId: UUID): List<NotificationGroupQueryModel>
 
     /**
      * Get GroupMember by GroupId and MemberId
@@ -46,7 +48,7 @@ interface QueryGroupPort {
      * @param size pagination size
      * @return List<NotificationDto>
      */
-    fun getPublishedNotifications(groupId: UUID, cursor: UUID?, size: Int): List<NotificationDto>
+    fun getPublishedNotifications(groupId: UUID, cursor: UUID?, size: Int): List<GroupNotificationQueryModel>
 
     /**
      * Get notification by GroupId and NotificationId
@@ -54,7 +56,7 @@ interface QueryGroupPort {
      * @param notificationId Notification ID
      * @return NotificationDto
      */
-    fun getNotification(groupId: UUID, notificationId: UUID): NotificationDto?
+    fun getNotification(groupId: UUID, notificationId: UUID): GroupNotificationQueryModel?
 
     /**
      * Get all groups that group type is public
@@ -62,7 +64,7 @@ interface QueryGroupPort {
      * @param size size for pagination
      * @return List<NotificationGroupDto>
      */
-    fun getAllGroups(cursor: UUID?, size: Int?): List<NotificationGroupDto>
+    fun getAllGroups(cursor: UUID?, size: Int?): List<NotificationGroupQueryModel>
 
     /**
      * return all notifications that login user is member of group
@@ -71,5 +73,5 @@ interface QueryGroupPort {
      * @param size size for pagination
      * @return List<NotificationDto>
      */
-    fun getMemberNotifications(loginId: UUID, cursor: UUID?, size: Int): List<NotificationDto>
+    fun getMemberNotifications(loginId: UUID, cursor: UUID?, size: Int): List<GroupNotificationQueryModel>
 }

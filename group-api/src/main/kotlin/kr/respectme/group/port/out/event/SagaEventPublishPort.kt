@@ -1,7 +1,6 @@
-package kr.respectme.group.port.out.saga
+package kr.respectme.group.port.out.event
 
 import kr.respectme.common.saga.SagaEvent
-import kr.respectme.group.application.event.MemberDeleteSaga
 
 interface SagaEventPublishPort {
 

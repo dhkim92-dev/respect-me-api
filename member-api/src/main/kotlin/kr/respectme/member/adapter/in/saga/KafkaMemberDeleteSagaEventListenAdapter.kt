@@ -1,22 +1,17 @@
 package kr.respectme.member.adapter.`in`.saga
 
-import kr.respectme.common.saga.Saga
+import kr.respectme.common.saga.SagaEvent
+import kr.respectme.member.adapter.out.persistence.jpa.JpaMemberRepository
+import kr.respectme.member.common.saga.SagaEventDefinition
 import kr.respectme.member.common.saga.event.MemberDeleteSaga
 import kr.respectme.member.port.`in`.saga.MemberDeleteSagaEventListenPort
-import kr.respectme.member.port.out.persistence.command.MemberLoadPort
-import kr.respectme.member.port.out.persistence.command.MemberSavePort
-import kr.respectme.member.port.out.saga.MemberDeleteTransaction
-import kr.respectme.member.port.out.saga.MemberDeleteTransactionRepository
-import kr.respectme.member.port.out.saga.MemberDeleteSagaEventPublishPort
-import kr.respectme.member.port.out.saga.TransactionStatus
+import kr.respectme.member.port.out.event.MemberDeleteTransaction
+import kr.respectme.member.port.out.event.MemberDeleteTransactionRepository
+import kr.respectme.member.port.out.event.SagaEventPublishPort
+import kr.respectme.member.port.out.event.TransactionStatus
 import org.slf4j.LoggerFactory
-import org.springframework.kafka.annotation.DltHandler
 import org.springframework.kafka.annotation.KafkaListener
-import org.springframework.kafka.annotation.RetryableTopic
 import org.springframework.kafka.support.Acknowledgment
-import org.springframework.kafka.support.KafkaHeaders
-import org.springframework.messaging.handler.annotation.Header
-import org.springframework.retry.annotation.Backoff
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
@@ -26,219 +21,140 @@ import java.util.UUID
  * @property memberLoadPort: MemberLoadPort
  * @property memberSavePort: MemberSavePort
  * @property memberDeleteTransactionRepository: MemberDeleteTransactionRepository
- * @property memberEventPublishPort: MemberEventPublishPort
+ * @property sagaEventPublishPort: MemberEventPublishPort
  */
 @Component
 class KafkaMemberDeleteSagaEventListenAdapter(
-    private val memberLoadPort: MemberLoadPort,
-    private val memberSavePort: MemberSavePort,
     private val memberDeleteTransactionRepository: MemberDeleteTransactionRepository,
-    private val memberEventPublishPort: MemberDeleteSagaEventPublishPort
+    private val memberRepository: JpaMemberRepository,
+    private val sagaEventPublishPort: SagaEventPublishPort,
+    private val memberDeleteSagaHandler: MemberDeleteSagaHandler
 ): MemberDeleteSagaEventListenPort {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    /**
-     * 멤버 탈퇴 사가 트랜잭션이 완료되었을 경우 실행할 로직, 소프트 삭제인 상태의 엔티티를 실제로 제거한다.
-     * 이 때 연관된 객체들까지 모두 제거된다.
-     * @param message: Saga<MemberDeleteSaga>
-     */
-    @RetryableTopic(
-        attempts = "3",
-        backoff = Backoff(delay = 1000),
-        autoCreateTopics = "false",
-    )
     @KafkaListener(topics = ["member-delete-completed-saga"])
     @Transactional
-    override fun onMemberDeleteSagaCompleted(
-        message: Saga<MemberDeleteSaga>,
-        acknowledgment: Acknowledgment
-    ) {
-        logger.debug("[member-delete-completed-saga] - transaction ${message.transactionId} handling")
+    override fun onMemberDeleteCompleted(event: SagaEvent<MemberDeleteSaga>, acknowledgment: Acknowledgment) {
         try {
-            val member = memberLoadPort.getMemberById(message.data?.memberId!!)
-
-            // 멤버가 이미 삭제된 경우라면 문제가 되지 않는다.
-            if(member != null) {
-                memberSavePort.delete(member)
-            }
-
-            logger.info("[member-delete-completed-saga] - delete member ${message.data?.memberId} completed")
-            commit(acknowledgment)
+            val transaction = getTransaction(event.transactionId)
+            transaction.setStatus(TransactionStatus.COMPLETED)
+            memberDeleteTransactionRepository.save(transaction)
+            memberRepository.deleteById(transaction.getMemberId())
+            logger.info("[member-delete-saga] - member delete completed ${event.transactionId}")
         } catch(e: Exception) {
-            logger.error("[member-delete-completed-saga] - delete member ${message.data?.memberId} failed")
-            throw e
+            logger.error("[member-delete-saga-auth-service-completed][CRITICAL] - fail to process transaction: ${event.transactionId} memberId : ${event.data?.memberId}")
+            // 여기에서까지 에러가 발생하는 경우 수동 개입이 필요하다.
+        } finally {
+            commit(acknowledgment)
         }
     }
 
-    /**
-     * 멤버 탈퇴 사가 트랜잭션이 실패했을 경우 실행할 로직, 소프트 삭제 상태인 엔티티를 원상 복구 시킨다.
-     * @param message: Saga<MemberDeleteSaga>
-     * @apram acknowledgment: Acknowledgment
-     */
-    @RetryableTopic(
-        attempts = "3",
-        backoff = Backoff(delay = 1000),
-        autoCreateTopics = "false",
-    )
     @KafkaListener(topics = ["member-delete-failed-saga"])
     @Transactional
-    override fun onMemberDeleteSagaFailed(
-        message: Saga<MemberDeleteSaga>,
-        acknowledgment: Acknowledgment
-    ) {
+    override fun onMemberDeleteFailed(event: SagaEvent<MemberDeleteSaga>, acknowledgment: Acknowledgment) {
         try {
-            compensation(message)
-            logger.info("[member-delete-failed-saga] - restore member ${message.data?.memberId} completed")
-            commit(acknowledgment)
+            val transaction = getTransaction(event.transactionId)
+            transaction.setStatus(TransactionStatus.FAILED)
+            memberDeleteTransactionRepository.save(transaction)
+            memberDeleteSagaHandler.compensate(event)
         } catch(e: Exception) {
-            logger.error("[member-delete-failed-saga] - restore member ${message.data?.memberId} failed")
-            throw e
+            logger.error("[member-delete-failed-saga-completed][CRITICAL] - fail to process transaction: ${event.transactionId} memberId : ${event.data?.memberId}")
+            // 여기에서까지 에러가 발생하는 경우 수동 개입이 필요하다.
+        } finally {
+            commit(acknowledgment)
         }
     }
 
     /**
-     * 멤버 탈퇴 사가 트랜잭션이 그룹 서비스에서 완료되면 실행할 로직.
-     * @param message: Saga<MemberDeleteSaga>
+     * 그룹 서비스의 멤버 삭제 처리 성공 이벤트를 구독
      */
-    @RetryableTopic(
-        attempts = "3",
-        backoff = Backoff(delay = 1000),
-        autoCreateTopics = "false",
-    )
     @KafkaListener(topics = ["member-delete-saga-group-service-completed"])
-    override fun onMemberDeleteSagaGroupServiceComplete(
-        message: Saga<MemberDeleteSaga>,
-        acknowledgment: Acknowledgment
-    ) {
-        logger.debug("[member-delete-saga-group-service-completed] - transaction ${message.transactionId} handling")
-        try {
-            var transaction = getTransaction(message.transactionId)
-            transaction.setGroupServiceCompleted(TransactionStatus.COMPLETED)
-
-            // 현재 연관된 서비스들의 상태가 모두 완료되어있으나, 현재 트랜잭션이 아직 완료되지 않은 상태라면
-            if(checkAllTransactionCompleted(transaction) &&
-                (transaction.getStatus() == TransactionStatus.PENDING)) {
-                transaction.setStatus(TransactionStatus.COMPLETED)
-                memberEventPublishPort.memberDeleteSagaCompleted(transaction.getId(), message.data!!)
-            }
-
-            transaction = memberDeleteTransactionRepository.save(transaction)
-            commit(acknowledgment)
-        } catch(e: Exception) {
-            logger.error("[member-delete-saga][group-service-completed] - transaction ${message.transactionId} failed")
-            throw e
-        }
-    }
-
-    /**
-     * 멤버 탈퇴 사가 트랜잭션이 인증 서비스에서 완료되면 실행할 로직.
-     */
-    @RetryableTopic(
-        attempts = "3",
-        backoff = Backoff(delay = 1000),
-        autoCreateTopics = "false",
-    )
-    @KafkaListener(topics=["member-delete-saga-auth-service-completed"])
     @Transactional
-    override fun onMemberDeleteSagaAuthServiceCompleted(
-        message: Saga<MemberDeleteSaga>,
-        acknowledgment: Acknowledgment
-    ) {
-        logger.debug("[member-delete-saga-auth-service-completed] - transaction ${message.transactionId} handling")
+    override fun onGroupServiceCompleted(event: SagaEvent<MemberDeleteSaga>, acknowledgment: Acknowledgment) {
         try {
-            var transaction = getTransaction(message.transactionId)
-            transaction.setAuthServiceCompleted(TransactionStatus.COMPLETED)
-
-            // 현재 연관된 서비스들의 상태가 모두 완료되어있으나, 현재 트랜잭션이 아직 완료되지 않은 상태라면
-            if(checkAllTransactionCompleted(transaction) &&
-                (transaction.getStatus() == TransactionStatus.PENDING)) {
-
-                transaction.setStatus(TransactionStatus.COMPLETED)
-                memberEventPublishPort.memberDeleteSagaCompleted(transaction.getId(), message.data!!)
+            val transaction = getTransaction(event.transactionId)
+            transaction.setGroupServiceCompleted(TransactionStatus.COMPLETED)
+            memberDeleteTransactionRepository.save(transaction)
+            logger.debug("[member-delete-saga] - group service completed ${event.transactionId}")
+            if(checkAllTransactionCompleted(transaction)) {
+                sagaEventPublishPort.publish(SagaEventDefinition.MEMBER_DELETE_COMPLETED_SAGA, event)
             }
-
-            transaction = memberDeleteTransactionRepository.save(transaction)
-            commit(acknowledgment)
         } catch(e: Exception) {
-            logger.error("[member-delete-saga][auth-service-completed] - transaction ${message.transactionId} failed")
-            throw e
+            logger.error("[member-delete-saga-group-service-completed][CRITICAL] - fail to process transaction: ${event.transactionId} memberId : ${event.data?.memberId}")
+            sagaEventPublishPort.publish(SagaEventDefinition.MEMBER_DELETE_FAILED_SAGA, event)
+        } finally {
+            commit(acknowledgment)
         }
     }
 
     /**
-     * 멤버 탈퇴 사가 트랜잭션이 그룹 서비스에서 실패하면 실행할 로직.
+     * 그룹 서비스의 멤버 삭제 실패 이벤트 구독
      */
-    @RetryableTopic(
-        attempts = "3",
-        backoff = Backoff(delay = 1000),
-        autoCreateTopics = "false",
-    )
     @KafkaListener(topics = ["member-delete-saga-group-service-failed"])
     @Transactional
-    override fun onMemberDeleteSagaGroupServiceFailed(
-        message: Saga<MemberDeleteSaga>,
-        acknowledgment: Acknowledgment
-    ) {
-        logger.info("[member-delete-saga-group-service-failed] - transaction ${message.transactionId} handling")
+    override fun onGroupServiceFailed(event: SagaEvent<MemberDeleteSaga>, acknowledgment: Acknowledgment) {
         try {
-            var transaction = getTransaction(message.transactionId)
-            val currentStatus = transaction.getStatus()
+            val transaction = getTransaction(event.transactionId)
             transaction.setGroupServiceCompleted(TransactionStatus.FAILED)
-            transaction.setStatus(TransactionStatus.FAILED)
-            transaction = memberDeleteTransactionRepository.save(transaction)
-            if(currentStatus != TransactionStatus.FAILED) {
-                memberEventPublishPort.memberDeleteSagaFailed(transaction.getId(), message.data!!)
-            }
-            commit(acknowledgment)
-        } catch(e: Exception) {
-            logger.error("[member-delete-saga][group-service-failed] - transaction ${message.transactionId} handling failed")
-            throw e
-        }
+            memberDeleteTransactionRepository.save(transaction)
 
+            if(transaction.getStatus() == TransactionStatus.PENDING) {
+                sagaEventPublishPort.publish(SagaEventDefinition.MEMBER_DELETE_FAILED_SAGA, event)
+            }
+        } catch(e: Exception) {
+            logger.error("[member-delete-saga-group-service-failed][CRITICAL] - fail to process transaction: ${event.transactionId} memberId : ${event.data?.memberId}")
+            // 여기에서까지 에러가 발생하는 경우 수동 개입이 필요하다.
+        } finally {
+            commit(acknowledgment)
+        }
     }
 
     /**
-     * 멤버 탈퇴 사가 트랜잭션이 인증 서비스에서 실패하면 실행할 로직.
+     * 인증 서비스의 멤버 삭제 성공 이벤트 구독
      */
-    @RetryableTopic(
-        attempts = "3",
-        backoff = Backoff(delay = 1000),
-        autoCreateTopics = "false",
-    )
-    @KafkaListener(topics = ["member-delete-saga-auth-service-failed"])
+    @KafkaListener(topics = ["member-delete-saga-auth-service-completed"])
     @Transactional
-    override fun onMemberDeleteSagaAuthServiceFailed(
-        message: Saga<MemberDeleteSaga>,
-        acknowledgment: Acknowledgment
-    ) {
+    override fun onAuthServiceCompleted(event: SagaEvent<MemberDeleteSaga>, acknowledgment: Acknowledgment) {
         try {
-            var transaction = getTransaction(message.transactionId)
-            val currentStatus = transaction.getStatus()
-            transaction.setAuthServiceCompleted(TransactionStatus.FAILED)
-            transaction.setStatus(TransactionStatus.FAILED)
-            transaction = memberDeleteTransactionRepository.save(transaction)
-            if(currentStatus != TransactionStatus.FAILED) {
-                memberEventPublishPort.memberDeleteSagaFailed(transaction.getId(), message.data!!)
+            val transaction = getTransaction(event.transactionId)
+            transaction.setAuthServiceCompleted(TransactionStatus.COMPLETED)
+            memberDeleteTransactionRepository.save(transaction)
+            logger.debug("[member-delete-saga] - auth service completed ${event.transactionId}")
+            if(checkAllTransactionCompleted(transaction)) {
+                sagaEventPublishPort.publish(SagaEventDefinition.MEMBER_DELETE_COMPLETED_SAGA, event)
             }
-            memberEventPublishPort.memberDeleteSagaFailed(transaction.getId(), message.data!!)
-            commit(acknowledgment)
         } catch(e: Exception) {
-            logger.error("[member-delete-saga][auth-service-failed] - transaction ${message.transactionId} handling failed")
-            throw e
+            logger.error("[member-delete-saga-auth-service-completed][CRITICAL] - fail to process transaction: ${event.transactionId} memberId : ${event.data?.memberId}")
+            sagaEventPublishPort.publish(SagaEventDefinition.MEMBER_DELETE_FAILED_SAGA, event)
+        } finally {
+            commit(acknowledgment)
         }
     }
 
-    @DltHandler
-    fun handleAllRetryFailed(
-        @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String,
-        message: Saga<MemberDeleteSaga>,
-        acknowledgment: Acknowledgment
-    ) {
-        logger.error("[${topic}][FATAL] all retry failed for transaction ${message.transactionId} memberId: ${message.data?.memberId}")
-        commit(acknowledgment)
+    /**
+     * 인증 서비스의 멤버 삭제 실패 이벤트 구독
+     */
+    @KafkaListener(topics = ["member-delete-saga-auth-service-failed"])
+    @Transactional
+    override fun onAuthServiceFailed(event: SagaEvent<MemberDeleteSaga>, acknowledgment: Acknowledgment) {
+        try {
+            val transaction = getTransaction(event.transactionId)
+            transaction.setAuthServiceCompleted(TransactionStatus.FAILED)
+            memberDeleteTransactionRepository.save(transaction)
+
+            if(transaction.getStatus() == TransactionStatus.PENDING) {
+                sagaEventPublishPort.publish(SagaEventDefinition.MEMBER_DELETE_FAILED_SAGA, event)
+            }
+        } catch(e: Exception) {
+            logger.error("[member-delete-saga-auth-service-failed][CRITICAL] - fail to process transaction: ${event.transactionId} memberId : ${event.data?.memberId}")
+            // 여기에서까지 에러가 발생하는 경우 수동 개입이 필요하다.
+        } finally {
+            commit(acknowledgment)
+        }
     }
 
+    @Transactional(readOnly = false)
     private fun getTransaction(transactionId: UUID): MemberDeleteTransaction {
         return try {
             val transaction = memberDeleteTransactionRepository.findById(transactionId)
@@ -246,24 +162,7 @@ class KafkaMemberDeleteSagaEventListenAdapter(
             logger.debug("[member-delete-saga] - get transaction ${transactionId}, memeberId: ${transaction.getMemberId()}")
             transaction
         } catch (e: Exception) {
-            logger.error("[member-delete-saga] - get transaction ${transactionId} failed")
-            throw e
-        }
-    }
-
-    /**
-     * 멤버 삭제 사가 트랜잭션 실패 시 보상 로직
-     */
-    private fun compensation(message: Saga<MemberDeleteSaga>) {
-        logger.info("[MemberDeleteSaga][Compensation] - member ${message.data?.memberId} should be restored")
-        try {
-            val memberId = message.data?.memberId
-            memberLoadPort.getMemberById(memberId!!)?.let { member ->
-                member.setSoftDeleted(false)
-                memberSavePort.save(member)
-            }
-        } catch(e: Exception) {
-            logger.error("[MemberDeleteSaga][Fatal] - member ${message.data?.memberId} should be restored manually failed")
+            logger.error("[member-delete-saga] - get transaction ${transactionId} failed + ${e.message}")
             throw e
         }
     }

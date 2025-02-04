@@ -1,4 +1,4 @@
-package kr.respectme.group.adapter.`in`.interfaces
+package kr.respectme.group.adapter.`in`.interfaces.command
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -114,9 +114,9 @@ class RestGroupCommandAdapter(
         @LoginMember loginId: UUID,
         @PathVariable groupId: UUID,
         @RequestBody @Valid request: NotificationCreateRequest
-    ): NotificationResponse {
+    ): NotificationCommandResponse {
         val command = NotificationCreateCommand.valueOf(groupId, loginId, request)
-        return NotificationResponse.valueOf(
+        return NotificationCommandResponse.valueOf(
             notificationGroupUseCase.createNotification(loginId, groupId, command)
         )
     }

@@ -1,5 +1,7 @@
 package kr.respectme.group.configs
 
+import kr.respectme.group.common.saga.SagaDefinitions
+import org.apache.kafka.clients.admin.NewTopic
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -13,44 +15,21 @@ import org.springframework.kafka.support.converter.StringJsonMessageConverter
 
 @Configuration
 class KafkaConfig(
-    @Value("\${spring.kafka.bootstrap-servers}")
-    private val bootstrapServer: String,
-    @Value("\${spring.kafka.consumer.group-id}")
-    private val groupId: String
 ){
-
     @Bean
-    fun producerFactory(): ProducerFactory<String, String> {
-        val configProps: Map<String, Any> = mapOf(
-            ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServer,
-            ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-            ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
-            ProducerConfig.PARTITIONER_CLASS_CONFIG to "org.apache.kafka.clients.producer.internals.DefaultPartitioner" // 기본 파티셔너 사용
-        )
-        return DefaultKafkaProducerFactory(configProps)
+    fun kafkaAdmin(): KafkaAdmin {
+        val configs: MutableMap<String, Any> = HashMap()
+        configs[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = "localhost:9092"
+        return KafkaAdmin(configs)
     }
 
     @Bean
-    fun kafkaTemplate(): KafkaTemplate<String, String> {
-        return KafkaTemplate(producerFactory())
+    fun memberDeleteSagaGroupServiceCompletedTopic(): NewTopic {
+        return NewTopic(SagaDefinitions.MEMBER_DELETE_SAGA_GROUP_SERVICE_COMPLETED, 1, 1.toShort())
     }
 
     @Bean
-    fun consumerFactory(): ConsumerFactory<String, String> {
-        val configProps: Map<String, Any> = mapOf(
-            ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServer,
-            ConsumerConfig.GROUP_ID_CONFIG to groupId,
-            ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-            ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java
-        )
-        return DefaultKafkaConsumerFactory(configProps)
-    }
-
-    @Bean
-    fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, String> {
-        val factory = ConcurrentKafkaListenerContainerFactory<String, String>()
-        factory.consumerFactory = consumerFactory()
-        factory.setRecordMessageConverter(StringJsonMessageConverter())
-        return factory
+    fun memberDeleteSagaGroupServiceFailedTopic(): NewTopic {
+        return NewTopic(SagaDefinitions.MEMBER_DELETE_SAGA_GROUP_SERVICE_FAILED, 1, 1.toShort())
     }
 }

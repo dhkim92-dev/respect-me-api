@@ -10,7 +10,7 @@ import io.mockk.mockk
 import kr.respectme.common.error.ConflictException
 import kr.respectme.common.error.ForbiddenException
 import kr.respectme.common.error.NotFoundException
-import kr.respectme.member.applications.adapter.command.MemberService
+import kr.respectme.member.applications.MemberService
 import kr.respectme.member.applications.dto.CreateMemberCommand
 import kr.respectme.member.applications.dto.ModifyNicknameCommand
 import kr.respectme.member.common.code.MemberServiceErrorCode

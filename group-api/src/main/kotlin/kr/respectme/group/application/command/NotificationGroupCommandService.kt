@@ -52,9 +52,14 @@ class NotificationGroupCommandService(
         )
         logger.info("[GroupCreateEvent] group create request member : ${loginId}\n command : $command")
         group.changePassword(passwordEncoder, command.groupPassword)
-        group.addMember(GroupMember(loginId, group.id, "group-owner", GroupMemberRole.OWNER))
+        group.addMember(GroupMember(
+            memberId = loginId,
+            groupId = group.id,
+            nickname = "group-owner",
+            memberRole = GroupMemberRole.OWNER)
+        )
         val savedGroup = saveGroupPort.save(group)
-        logger.info("[GroupCreateEvent] platform member : ${loginId} created new group : ${savedGroup.id} group name: ${savedGroup.name}")
+        logger.info("[GroupCreateEvent] platform member : ${loginId} created new group : ${savedGroup.id} group name: ${savedGroup.getName()}")
         return NotificationGroupDto.valueOf(savedGroup)
     }
 
@@ -65,7 +70,7 @@ class NotificationGroupCommandService(
             memberIds = listOf(loginId)
         ) ?: throw NotFoundException(GROUP_NOT_FOUND)
         logger.info("[GroupModifyEvent] group modify request member : ${loginId}\n command : $command")
-        val member = group.members.find { it.memberId == loginId } ?: throw NotFoundException(GROUP_MEMBER_NOT_FOUND)
+        val member = group.getMembers().find { member -> member.getMemberId() == loginId } ?: throw NotFoundException(GROUP_MEMBER_NOT_FOUND)
 
         if(member.isGroupMember()) {
             logger.info("[GroupModifyEvent] group modify request rejected, member : ${loginId} is not group owner or admin.")
@@ -77,7 +82,7 @@ class NotificationGroupCommandService(
         group.changeGroupDescription(command.description)
         group.changePassword(passwordEncoder, command.password)
         logger.info("[GroupModifyEvent] group modify request accepted, modified by member : ${loginId}" +
-                "group name : ${group.name} group type : ${group.type} group description : ${group.description}")
+                "group name : ${group.getName()} group type : ${group.getType()} group description : ${group.getDescription()}")
 
         return NotificationGroupDto.valueOf(saveGroupPort.save(group))
     }
@@ -91,13 +96,13 @@ class NotificationGroupCommandService(
             memberIds = listOf(loginId)
         ) ?: throw NotFoundException(GROUP_NOT_FOUND)
 
-        val member = group.members.find { it.memberId == loginId }
+        val member = group.getMembers().find { member -> member.getMemberId() == loginId }
         if(member != null) {
             logger.error("[GroupMemberAddEvent] group member add request rejected, member : ${loginId} already exists in group.")
             throw ConflictException(GROUP_MEMBER_ALREADY_EXISTS)
         }
 
-        if(group.password != null && !passwordEncoder.matches(command.password, group.password)) {
+        if(group.getPassword() != null && !passwordEncoder.matches(command.password, group.getPassword())) {
             logger.error("[GroupMemberAddEvent] group member add request rejected, member : ${loginId} password mismatch.")
             throw ForbiddenException(GROUP_PASSWORD_MISMATCH)
         }
@@ -110,9 +115,10 @@ class NotificationGroupCommandService(
             groupId = groupId,
             nickname = command.nickname,
         )
+        logger.info("[GroupMemberAddEvent] new member : ${loginId} added to group ${groupId} group name : ${group.getName()}.")
         group.addMember(newMember)
         saveGroupPort.save(group)
-        logger.info("[GroupMemberAddEvent] group member add request accepted, member : ${loginId} added to group ${groupId} group name : ${group.name}.")
+        logger.info("[GroupMemberAddEvent] group member add request accepted, member : ${loginId} added to group ${groupId} group name : ${group.getName()}.")
         return GroupMemberDto.valueOf(newMember)
     }
 
@@ -121,12 +127,12 @@ class NotificationGroupCommandService(
         logger.info("[GroupDeleteEvent] group delete request member : ${loginId} group id : ${groupId}")
         val group = loadGroupPort.loadGroup(groupId)
             ?: throw NotFoundException(GROUP_NOT_FOUND)
-        if(group.ownerId != loginId) {
-            logger.error("[GroupDeleteEvent] group delete request rejected, member : ${loginId} is not group owner. owner Id ${group.ownerId}")
+        if(group.getOwnerId() != loginId) {
+            logger.error("[GroupDeleteEvent] group delete request rejected, member : ${loginId} is not group owner. owner Id ${group.getOwnerId()}")
             throw ForbiddenException(GROUP_MEMBER_NOT_OWNER)
         }
         saveGroupPort.delete(group)
-        logger.info("[GroupDeleteEvent] group delete request accepted, member : ${loginId} deleted group ${groupId} group name : ${group.name}.")
+        logger.info("[GroupDeleteEvent] group delete request accepted, member : ${loginId} deleted group ${groupId} group name : ${group.getName()}.")
     }
 
     @Transactional
@@ -135,7 +141,7 @@ class NotificationGroupCommandService(
         // TODO Redis Lock 적용 필요
         val group = loadGroupPort.loadGroup(groupId, listOf(loginId, memberIdToRemove)) ?: throw NotFoundException(GROUP_NOT_FOUND)
         group.removeMember(loginId, memberIdToRemove)
-        logger.info("[GroupMemberRemoveEvent] group member remove request accepted, member : ${loginId} removed member : ${memberIdToRemove} from group ${groupId} group name : ${group.name}.")
+        logger.info("[GroupMemberRemoveEvent] group member remove request accepted, member : ${loginId} removed member : ${memberIdToRemove} from group ${groupId} group name : ${group.getName()}.")
         saveGroupPort.save(group)
     }
 
@@ -151,7 +157,7 @@ class NotificationGroupCommandService(
         val savedGroup = saveGroupPort.save(group)
         publishNotificationSentEvent(savedGroup, notification)
 
-        logger.info("[NotificationCreateEvent] notification create request accepted, member : ${loginId} created notification : ${notification.id} in group ${groupId} group name : ${group.name}.")
+        logger.info("[NotificationCreateEvent] notification create request accepted, member : ${loginId} created notification : ${notification.id} in group ${groupId} group name : ${group.getName()}.")
         return NotificationCreateResult.valueOf(notification)
     }
 
@@ -167,20 +173,20 @@ class NotificationGroupCommandService(
             memberIds = listOf(loginId),
             notificationIds = listOf(command.notificationId)
         ) ?: throw NotFoundException(GROUP_NOT_FOUND)
-        val member = group.members.find { it.memberId == loginId }
+        val member = group.getMembers().find { it.getMemberId() == loginId }
             ?: throw NotFoundException(GROUP_MEMBER_NOT_FOUND)
 
-        val notification = group.notifications.find { it.id == command.notificationId }
+        val notification = group.getNotifications().find { it.id == command.notificationId }
             ?: throw NotFoundException(GROUP_NOTIFICATION_CONTENTS_EMPTY)
 
-        if( (!member.isGroupOwner() && !member.isGroupAdmin()) || !member.isSameMember(notification.senderId) ) {
+        if( (!member.isGroupOwner() && !member.isGroupAdmin()) || !member.isSameMember(notification.getSenderId()) ) {
             throw ForbiddenException(GROUP_NOTIFICATION_SENDER_MISMATCH)
         }
 
         notification.updateContent(command.contents)
         notification.validate()
         saveGroupPort.save(group)
-        logger.info("[NotificationModifyContentsEvent] notification modify request accepted, member : ${loginId} modified notification : ${notification.id} in group ${groupId} group name : ${group.name}.")
+        logger.info("[NotificationModifyContentsEvent] notification modify request accepted, member : ${loginId} modified notification : ${notification.id} in group ${groupId} group name : ${group.getName()}.")
         return NotificationCreateResult.valueOf(notification)
     }
 
@@ -197,9 +203,9 @@ class NotificationGroupCommandService(
             memberIds = listOf(loginId),
             notificationIds = listOf(notificationId)
         ) ?: throw NotFoundException(GROUP_NOT_FOUND)
-        val member = group.members.find { it.memberId == loginId }
+        val member = group.getMembers().find { it.getMemberId() == loginId }
             ?: throw NotFoundException(GROUP_MEMBER_NOT_FOUND)
-        val notification = group.notifications.find { it.id == command.notificationId }
+        val notification = group.getNotifications().find { it.id == command.notificationId }
             ?: throw NotFoundException(GROUP_NOTIFICATION_CONTENTS_EMPTY)
 
         if(!member.isGroupOwner() && !member.isGroupAdmin()) {
@@ -210,23 +216,22 @@ class NotificationGroupCommandService(
         switchNotificationType(notification, command)
         notification.validate()
         saveGroupPort.save(group)
-        logger.info("[NotificationModifyTypeEvent] notification modify request accepted, member : ${loginId} modified notification : ${notification.id} in group ${groupId} group name : ${group.name}.")
+        logger.info("[NotificationModifyTypeEvent] notification modify request accepted, member : ${loginId} modified notification : ${notification.id} in group ${groupId} group name : ${group.getName()}.")
         return NotificationCreateResult.valueOf(notification)
     }
 
-
     private fun publishNotificationSentEvent(group: NotificationGroup, notification: Notification) {
-        if(notification.type != NotificationType.IMMEDIATE) return
+        if(notification.getType() != NotificationType.IMMEDIATE) return
 
-        val receivers = group.members.filter { it.memberId != notification.senderId }
         val event = NotificationCreateEvent(
-            groupId = notification.groupId,
-            groupName = group.name,
+            groupId = notification.getGroupId(),
+            groupName = group.getName(),
             notificationId = notification.id,
-            contents = notification.content.take(100),
-            createdAt = notification.createdAt,
-            receiverIds = loadGroupPort.loadGroupMemberIds(notification.groupId),
-            senderId = notification.senderId
+            contents = notification.getContent().take(100),
+            createdAt = notification.getCreatedAt(),
+            // TODO Slice 형태로 조정이 필요함. 그룹 회원이 많은 경우 에러가 발생할 가능성이 매우 높음
+            receiverIds = loadGroupPort.loadGroupMemberIds(notification.getGroupId()),
+            senderId = notification.getSenderId()
         )
 
         try {
@@ -246,7 +251,7 @@ class NotificationGroupCommandService(
     }
 
     private fun switchNotificationType(notification: Notification, command: NotificationModifyCommand) {
-        if(command.type == null || notification.type == command.type) {
+        if(command.type == null || notification.getType() == command.type) {
             return
         }
 

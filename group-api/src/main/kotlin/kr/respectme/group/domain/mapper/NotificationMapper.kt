@@ -56,11 +56,11 @@ class NotificationMapper {
     private fun createJpaImmediateNotification(notification: ImmediateNotification): JpaImmediateNotification {
         val entity = JpaImmediateNotification(
             id = notification.id,
-            groupId = notification.groupId,
-            memberId = notification.senderId,
-            content = notification.content,
-            status = notification.status,
-            lastSentAt = notification.lastSentAt,
+            groupId = notification.getGroupId(),
+            memberId = notification.getSenderId(),
+            content = notification.getContent(),
+            status = notification.getStatus(),
+            lastSentAt = notification.getLastSentAt()
         )
         return entity
     }
@@ -73,12 +73,12 @@ class NotificationMapper {
     private fun createJpaScheduledNotification(notification: ScheduledNotification): JpaScheduledNotification {
         return JpaScheduledNotification(
             id = notification.id,
-            groupId = notification.groupId,
-            memberId = notification.senderId,
-            content = notification.content,
-            status = notification.status,
-            lastSentAt = notification.lastSentAt,
-            scheduledAt = notification.scheduledAt,
+            groupId = notification.getGroupId(),
+            memberId = notification.getSenderId(),
+            content = notification.getContent(),
+            status = notification.getStatus(),
+            lastSentAt = notification.getLastSentAt(),
+            scheduledAt = notification.getScheduledAt(),
         )
     }
 
@@ -108,8 +108,8 @@ class NotificationMapper {
         jpaNotification: JpaGroupNotification
     ): JpaImmediateNotification {
         return (jpaNotification as JpaImmediateNotification).apply{
-            this.content = notification.content
-            this.lastSentAt = notification.lastSentAt
+            this.content = notification.getContent()
+            this.lastSentAt = notification.getLastSentAt()
         }
     }
 
@@ -124,9 +124,9 @@ class NotificationMapper {
         jpaNotification: JpaGroupNotification
     ): JpaScheduledNotification {
         return (jpaNotification as JpaScheduledNotification).apply{
-            this.content = notification.content
-            this.lastSentAt = notification.lastSentAt
-            this.scheduledAt = notification.scheduledAt
+            this.content = notification.getContent()
+            this.lastSentAt = notification.getLastSentAt()
+            this.scheduledAt = notification.getScheduledAt()
         }
     }
 
@@ -170,38 +170,38 @@ class NotificationMapper {
     /**
      * map JPA ImmediateNotification entity to NotificationDto
      */
-    fun mapToNotificationDto(jpaNotification: JpaImmediateNotification): NotificationDto {
-        return NotificationDto(
-            notificationId = jpaNotification.identifier,
-            groupId = jpaNotification.groupId,
-            content = jpaNotification.content,
-            type = jpaNotification.type,
-            state = jpaNotification.status,
-            scheduledAt = null,
-            dayOfWeeks = null,
-            dayInterval = null,
-            createdAt = jpaNotification.createdAt,
-            updatedAt = jpaNotification.updatedAt,
-            lastSentAt = jpaNotification.lastSentAt,
-        )
-    }
+//    fun mapToNotificationDto(jpaNotification: JpaImmediateNotification): NotificationDto {
+//        return NotificationDto(
+//            notificationId = jpaNotification.identifier,
+//            groupId = jpaNotification.groupId,
+//            content = jpaNotification.content,
+//            type = jpaNotification.type,
+//            state = jpaNotification.status,
+//            scheduledAt = null,
+//            dayOfWeeks = null,
+//            dayInterval = null,
+//            createdAt = jpaNotification.createdAt,
+//            updatedAt = jpaNotification.updatedAt,
+//            lastSentAt = jpaNotification.lastSentAt,
+//        )
+//    }
 
     /**
      * map JPA ScheduledNotification entity to NotificationDto
      */
-    fun mapToNotificationDto(jpaNotification: JpaScheduledNotification): NotificationDto {
-        return NotificationDto(
-            notificationId = jpaNotification.identifier,
-            groupId = jpaNotification.groupId,
-            content = jpaNotification.content,
-            type = jpaNotification.type,
-            state = jpaNotification.status,
-            scheduledAt = jpaNotification.scheduledAt,
-            createdAt = jpaNotification.createdAt,
-            updatedAt = jpaNotification.updatedAt,
-            lastSentAt = jpaNotification.lastSentAt,
-            dayInterval = null,
-            dayOfWeeks = null,
-        )
-    }
+//    fun mapToNotificationDto(jpaNotification: JpaScheduledNotification): NotificationDto {
+//        return NotificationDto(
+//            notificationId = jpaNotification.identifier,
+//            groupId = jpaNotification.groupId,
+//            content = jpaNotification.content,
+//            type = jpaNotification.type,
+//            state = jpaNotification.status,
+//            scheduledAt = jpaNotification.scheduledAt,
+//            createdAt = jpaNotification.createdAt,
+//            updatedAt = jpaNotification.updatedAt,
+//            lastSentAt = jpaNotification.lastSentAt,
+//            dayInterval = null,
+//            dayOfWeeks = null,
+//        )
+//    }
 }

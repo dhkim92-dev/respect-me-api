@@ -1,4 +1,4 @@
-package kr.respectme.member.port.out.saga
+package kr.respectme.member.port.out.event
 
 enum class TransactionStatus(val statusName: String, val value: Int) {
     PENDING(statusName = "PENDING", value = 1),

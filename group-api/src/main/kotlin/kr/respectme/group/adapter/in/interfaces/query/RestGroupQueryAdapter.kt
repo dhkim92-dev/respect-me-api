@@ -1,4 +1,4 @@
-package kr.respectme.group.adapter.`in`.interfaces
+package kr.respectme.group.adapter.`in`.interfaces.query
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -8,7 +8,7 @@ import kr.respectme.common.annotation.CursorPagination
 import kr.respectme.common.annotation.CursorParam
 import kr.respectme.common.annotation.LoginMember
 import kr.respectme.group.application.query.useCase.NotificationGroupQueryUseCase
-import kr.respectme.group.port.`in`.interfaces.dto.GroupMemberVo
+import kr.respectme.group.port.`in`.interfaces.vo.GroupMemberVo
 import kr.respectme.group.port.`in`.interfaces.dto.GroupNotificationQueryResponse
 import kr.respectme.group.port.`in`.interfaces.dto.NotificationGroupQueryResponse
 import kr.respectme.group.port.`in`.interfaces.NotificationGroupQueryPort
