@@ -18,7 +18,7 @@ class GroupMapper(
     fun toDomain(group: JpaNotificationGroup, members: List<JpaGroupMember>, notifications: List<JpaGroupNotification>): NotificationGroup {
         // Persistence Entity가 Domain Entity로 변환이 된다는 것은, 기본적으로 영속화가 되어 id가 존재한다는 의미이다.
         // id field는 기본적으로 nullable 이지만, 영속화 된 id field를 조회하기위해 identifier를 이용한다.
-
+        logger.debug("jpaGroup: ${group.identifier} will be cast to domainGroup")
         val domainGroup = NotificationGroup(
             id = group.identifier,
             name = group.name,
@@ -29,7 +29,7 @@ class GroupMapper(
             members = members.map { memberMapper.toDomain(it) }.toMutableSet(),
             notifications = notifications.map { notificationMapper.toDomain(it) }.toMutableSet()
         )
-//        domainGroup.loaded()
+        logger.debug("cast completed")
 
         return domainGroup
     }
@@ -40,16 +40,12 @@ class GroupMapper(
         // NEW 외의 상태에서는 id필드를 유지한다.
         val entity = JpaNotificationGroup(
             id = group.id,
-            name = group.name,
-            description = group.description,
-            ownerId = group.ownerId,
-            password = group.password,
-            type = group.type
+            name = group.getName(),
+            description = group.getDescription(),
+            ownerId = group.getOwnerId(),
+            password = group.getPassword(),
+            type = group.getType()
         )
-
-//        if(group.isNew()) {
-//            entity.created()
-//        }
 
         return entity
     }

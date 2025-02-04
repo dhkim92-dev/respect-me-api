@@ -30,7 +30,7 @@ class JpaGroupNotification(
     type: NotificationType = NotificationType.IMMEDIATE,
     status : NotificationStatus = NotificationStatus.PENDING,
     lastSentAt: Instant? = null,
-): BaseEntity(id) {
+): BaseEntity<Any?>(id) {
 
     @Column(name = "sender_id")
     var memberId= memberId

@@ -7,8 +7,6 @@ import kr.respectme.group.adapter.out.persistence.repository.JpaGroupRepository
 import kr.respectme.group.domain.GroupMember
 import kr.respectme.group.domain.NotificationGroup
 import kr.respectme.group.domain.mapper.GroupMapper
-import kr.respectme.group.domain.mapper.GroupMemberMapper
-import kr.respectme.group.domain.mapper.NotificationMapper
 import kr.respectme.group.domain.notifications.ImmediateNotification
 import kr.respectme.group.domain.notifications.Notification
 import kr.respectme.group.domain.notifications.NotificationType
@@ -36,11 +34,8 @@ class JpaLoadGroupAdapter(
             return null
         }
 
-        val members = if(memberIds.isEmpty()) {
-            emptyList()
-        } else {
-            groupMemberRepository.findByPkMemberIdInAndPkGroupId(memberIds, groupId)
-        }
+//        val searchMembers =  listOf(group.ownerId) + memberIds
+        val members = groupMemberRepository.findByMemberIdInAndGroupId(memberIds, groupId)
 
         val notifications = if(notificationIds.isEmpty()) {
             emptyList()
@@ -50,15 +45,17 @@ class JpaLoadGroupAdapter(
 
         val domainGroup = groupMapper.toDomain(group, members, notifications)
         entityCache.put(NotificationGroup::class.java, domainGroup)
-        cacheGroupMembers(domainGroup.members.toList())
-        cacheNotifications(domainGroup.notifications.toList())
+        cacheGroupMembers(domainGroup.getMembers().toList())
+        cacheNotifications(domainGroup.getNotifications().toList())
+
+        logger.debug("domain group converted")
 
         return domainGroup
     }
 
     override fun loadGroupMemberIds(groupId: UUID): List<UUID> {
-        return groupMemberRepository.findPkMemberIdByPkGroupId(groupId)
-            .map { it.pk!!.memberId }
+        return groupMemberRepository.findByGroupId(groupId)
+            .map { it.memberId }
     }
 
     private fun cacheGroupMembers(members: List<GroupMember>) {
@@ -69,12 +66,12 @@ class JpaLoadGroupAdapter(
 
     private fun cacheNotifications(notifications: List<Notification>) {
         notifications.forEach { notification ->
-            when(notification.type) {
+            when(notification.getType()) {
                 NotificationType.IMMEDIATE ->
                     entityCache.put(ImmediateNotification::class.java, notification as ImmediateNotification)
                 NotificationType.SCHEDULED ->
                     entityCache.put(ScheduledNotification::class.java, notification as ScheduledNotification)
-                else -> throw IllegalArgumentException("Unknown notification type: ${notification.type}")
+                else -> throw IllegalArgumentException("Unknown notification type: ${notification.getType()}")
             }
         }
     }

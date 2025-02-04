@@ -80,7 +80,7 @@ class JpaSaveGroupAdapter(
         }
 
         deletedMembers.forEach { member ->
-            groupMemberRepository.deleteById(JpaGroupMember.Pk(member.groupId, member.memberId))
+            groupMemberRepository.deleteById(member.id)
             entityCache.evict(GroupMember::class.java, member)
         }
 
@@ -95,7 +95,7 @@ class JpaSaveGroupAdapter(
 
         updatedNotifications.union(newNotifications).forEach { notification ->
             groupNotificationRepository.save(notificationMapper.toEntity(notification))
-            when(notification.type) {
+            when(notification.getType()) {
                 NotificationType.IMMEDIATE -> entityCache.put(ImmediateNotification::class.java, notification as ImmediateNotification)
                 NotificationType.SCHEDULED -> entityCache.put(ScheduledNotification::class.java, notification as ScheduledNotification)
                 else -> throw InternalServerError("Unknown notification type")
@@ -105,7 +105,7 @@ class JpaSaveGroupAdapter(
 
         deletedNotifications.forEach { notification ->
             groupNotificationRepository.deleteById(notification.id)
-            when(notification.type) {
+            when(notification.getType()) {
                 NotificationType.IMMEDIATE -> entityCache.evict(ImmediateNotification::class.java, notification)
                 NotificationType.SCHEDULED -> entityCache.evict(ScheduledNotification::class.java, notification)
                 else -> throw InternalServerError("Unknown notification type")
@@ -116,7 +116,7 @@ class JpaSaveGroupAdapter(
     }
 
     private fun <T: Notification> checkNotificationExistsInCache(entity: T): Boolean {
-        return when(entity.type) {
+        return when(entity.getType()) {
             NotificationType.IMMEDIATE -> entityCache.contains(ImmediateNotification::class.java, entity.id)
             NotificationType.SCHEDULED -> entityCache.contains(ScheduledNotification::class.java, entity.id)
             else -> false
@@ -124,7 +124,7 @@ class JpaSaveGroupAdapter(
     }
 
     private fun <T: Notification> checkNotificationUpdated(entity: T): EntityStatus{
-        return when(entity.type) {
+        return when(entity.getType()) {
             NotificationType.IMMEDIATE -> entityCache.isSameWithCache(ImmediateNotification::class.java, entity as ImmediateNotification)
             NotificationType.SCHEDULED -> entityCache.isSameWithCache(ScheduledNotification::class.java, entity as ScheduledNotification)
             else -> throw InternalServerError("Unknown notification type")
@@ -134,33 +134,33 @@ class JpaSaveGroupAdapter(
     private fun getDeletedNotifications(group: NotificationGroup): List<Notification> {
         return entityCache.get(NotificationGroup::class.java, group)?.let { cachedGroup ->
             // 현재 그룹 캐시가 존재하는 경우에만 이 로직이 유효하다.
-            cachedGroup.notifications.filter { notification -> group.notifications.none { it.id == notification.id } }
+            cachedGroup.getNotifications().filter { notification -> group.getNotifications().none { it.id == notification.id } }
         } ?: emptyList()
     }
 
     private fun getUpdatedNotifications(group: NotificationGroup): List<Notification> {
         // 현재 노티피케이션 중 캐시에 존재하고, 내용이 변한 경우
-        return group.notifications.filter { notification -> checkNotificationUpdated(notification) == EntityStatus.UPDATED }
+        return group.getNotifications().filter { notification -> checkNotificationUpdated(notification) == EntityStatus.UPDATED }
     }
 
     private fun getNewNotifications(group: NotificationGroup): List<Notification> {
-        return group.notifications.filter { notification -> !checkNotificationExistsInCache(notification) }
+        return group.getNotifications().filter { notification -> !checkNotificationExistsInCache(notification) }
     }
 
     private fun getDeletedMembers(group: NotificationGroup): List<GroupMember> {
         return entityCache.get(NotificationGroup::class.java, group)?.let { cachedGroup ->
-            cachedGroup.members.filter { member -> group.members.none { it.id == member.id } }
+            cachedGroup.getMembers().filter { member -> group.getMembers().none { it.id == member.id } }
         } ?: emptyList()
     }
 
     private fun getUpdatedMembers(group: NotificationGroup): List<GroupMember> {
         return entityCache.get(NotificationGroup::class.java, group)?.let { cachedGroup ->
-            cachedGroup.members.filter { member -> group.members.none { it.id == member.id } }
+            cachedGroup.getMembers().filter { member -> group.getMembers().none { it.id == member.id } }
         } ?: emptyList()
     }
 
     private fun getNewMembers(group: NotificationGroup): List<GroupMember> {
-        return group.members.filter { member -> !entityCache.contains(GroupMember::class.java, member) }
+        return group.getMembers().filter { member -> !entityCache.contains(GroupMember::class.java, member) }
     }
 
     override fun deleteById(id: UUID) {

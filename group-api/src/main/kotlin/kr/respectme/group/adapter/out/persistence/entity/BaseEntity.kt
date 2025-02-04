@@ -8,7 +8,7 @@ import java.util.UUID
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener::class)
-abstract class BaseEntity(id: UUID?=null): CreatedAtUpdatedAtEntity(), Persistable<UUID> {
+abstract class BaseEntity<T>(id: UUID?=null): CreatedAtUpdatedAtEntity(), Persistable<UUID> {
 
     @Id
     private val id: UUID? = id
@@ -41,7 +41,7 @@ abstract class BaseEntity(id: UUID?=null): CreatedAtUpdatedAtEntity(), Persistab
     override fun equals(other: Any?): Boolean {
         if(other == null) return false
         if(other !is HibernateProxy && this::class != other::class) return false
-        return id == (other as BaseEntity).id
+        return id == (other as BaseEntity<Any?>).id
     }
 
     override fun hashCode(): Int {

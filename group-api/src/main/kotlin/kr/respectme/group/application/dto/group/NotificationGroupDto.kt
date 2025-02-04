@@ -1,32 +1,32 @@
 package kr.respectme.group.application.dto.group
 
+import kr.respectme.group.domain.GroupMemberRole
 import kr.respectme.group.domain.GroupType
 import kr.respectme.group.domain.NotificationGroup
+import kr.respectme.group.port.`in`.interfaces.vo.GroupMemberVo
 import java.time.Instant
 import java.util.UUID
 
 data class NotificationGroupDto(
     val id: UUID=UUID.randomUUID(),
     val name: String="",
-    val ownerId: UUID=UUID.randomUUID(),
+    val ownerId: UUID = UUID.randomUUID(),
     val description: String="",
     val createdAt: Instant=Instant.now(),
     val imageUrl: String?=null,
-    val groupType: GroupType=GroupType.GROUP_PRIVATE,
-    val memberCount: Int = 0,
+    val groupType: GroupType=GroupType.GROUP_PRIVATE
 ) {
 
     companion object {
         fun valueOf(group: NotificationGroup): NotificationGroupDto {
             return NotificationGroupDto(
                 id = group.id,
-                name = group.name,
-                ownerId = group.ownerId,
-                description = group.description,
+                name = group.getName(),
+                ownerId = group.getOwnerId(),
+                description = group.getDescription(),
                 imageUrl = "",
-                groupType = group.type,
-                createdAt = group.createdAt,
-                memberCount = group.members.size
+                groupType = group.getType(),
+                createdAt = group.getCreatedAt(),
             )
         }
     }

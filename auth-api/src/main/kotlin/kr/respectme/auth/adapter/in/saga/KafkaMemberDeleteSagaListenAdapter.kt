@@ -5,16 +5,15 @@ import kr.respectme.auth.domain.MemberAuthInfoRepository
 import kr.respectme.auth.domain.MemberId
 import kr.respectme.auth.port.`in`.saga.MemberDeleteSagaListenPort
 import kr.respectme.auth.port.`in`.saga.event.MemberDeleteSaga
-import kr.respectme.auth.port.out.persistence.saga.AuthInfoDeleteSagaPublishPort
-import kr.respectme.common.saga.Saga
+import kr.respectme.auth.port.out.persistence.saga.SagaDefinitions
+import kr.respectme.auth.port.out.persistence.saga.SagaEventPublishPort
+import kr.respectme.common.saga.SagaEvent
+import kr.respectme.common.saga.SagaEventHandler
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.kafka.annotation.DltHandler
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.annotation.RetryableTopic
 import org.springframework.kafka.support.Acknowledgment
-import org.springframework.kafka.support.KafkaHeaders
-import org.springframework.messaging.handler.annotation.Header
 import org.springframework.retry.annotation.Backoff
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -22,90 +21,62 @@ import org.springframework.transaction.annotation.Transactional
 @Component
 class KafkaMemberDeleteSagaListenAdapter(
     private val authInfoRepository: MemberAuthInfoRepository,
-    private val authInfoDeleteSagaPublishPort: AuthInfoDeleteSagaPublishPort,
+    private val authInfoDeleteSagaPublishPort: SagaEventPublishPort,
+    private val memberDeleteSagaHandler: SagaEventHandler<SagaEvent<MemberDeleteSaga>>
 ): MemberDeleteSagaListenPort {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @KafkaListener(topics=["member-delete-saga"])
     @Transactional
-    override fun onMemberDelete(message: Saga<MemberDeleteSaga>, acknowledgment: Acknowledgment) {
-        logger.debug("[member-delete-saga] - delete member auth info started")
+    override fun onMemberDelete(message: SagaEvent<MemberDeleteSaga>, acknowledgment: Acknowledgment) {
         try {
-            val authInfo = getAuthInfo(message)
-            authInfo.setIsDeleted(true)
-            authInfoRepository.save(authInfo)
-            authInfoDeleteSagaPublishPort.publishAuthInfoDeleteCompletedSaga(
-                transactionId = message.transactionId,
-                memberId = MemberId(message.data!!.memberId)
-            )
-            commit(acknowledgment)
+            logger.info("[member-delete-saga] received message : $message")
+            memberDeleteSagaHandler.handleEvent(message)
+            authInfoDeleteSagaPublishPort.publish(SagaDefinitions.MEMBER_DELETE_SAGA_AUTH_DELETE_COMPLETED, message)
         } catch(e: Exception) {
-            logger.error("[member-delete-saga] - delete member auth info failed")
-            authInfoDeleteSagaPublishPort.publishAuthInfoDeleteFailedSaga(
-                transactionId = message.transactionId,
-                memberId = MemberId(message.data!!.memberId)
-            )
-            throw e
+            logger.error("[member-delete-saga] failed to handle message : $message", e)
+            // 여기서 메시지를 발행해야한다.
+            authInfoDeleteSagaPublishPort.publish(SagaDefinitions.MEMBER_DELETE_SAGA_AUTH_DELETE_FAILED, message)
+        } finally {
+            commit(acknowledgment)
         }
     }
 
-    @RetryableTopic(
-        attempts = "3",
-        backoff = Backoff(delay = 1000),
-        autoCreateTopics = "false",
-    )
     @KafkaListener(topics=["member-delete-failed-saga"])
     @Transactional
-    override fun onMemberDeleteFailed(message: Saga<MemberDeleteSaga>, acknowledgment: Acknowledgment) {
-        logger.info("[member-delete-failed-saga] transaction: ${message.transactionId} - rollback delete member auth info started")
+    override fun onMemberDeleteFailed(message: SagaEvent<MemberDeleteSaga>, acknowledgment: Acknowledgment) {
         try {
-            val authInfo = getAuthInfo(message)
-            authInfo.setIsDeleted(false)
-            authInfoRepository.save(authInfo)
-            commit(acknowledgment)
-            logger.info("[member-delete-failed-saga] - rollback delete member auth info completed")
+            logger.info("[member-delete-failed-saga] received message : $message")
+            memberDeleteSagaHandler.compensate(message)
         } catch(e: Exception) {
-            logger.error("[member-delete-failed-saga] - rollback delete member auth info failed")
-            throw e
+            logger.error("[member-delete-failed-saga][CRITICAL] failed to handle message : $message", e)
+        } finally {
+            commit(acknowledgment)
         }
     }
 
-    @RetryableTopic(
-        attempts = "3",
-        backoff = Backoff(delay = 1000),
-        autoCreateTopics = "false",
-    )
     @KafkaListener(topics=["member-delete-completed-saga"])
     @Transactional
-    override fun onMemberDeleteCompleted(message: Saga<MemberDeleteSaga>, acknowledgment: Acknowledgment) {
-        logger.info("[member-delete-completed-saga] - transactionId: ${message.transactionId} delete member auth info started")
+    override fun onMemberDeleteCompleted(message: SagaEvent<MemberDeleteSaga>, acknowledgment: Acknowledgment) {
         try {
-            val authInfo = getAuthInfo(message)
-            authInfoRepository.delete(authInfo)
-            logger.info("[member-delete-completed-saga] - transactionId: ${message.transactionId} delete member auth info completed")
-            commit(acknowledgment)
+            logger.info("[member-delete-completed-saga] received message : $message")
+            authInfoRepository.deleteById(MemberId.of(message.data!!.memberId))
         } catch(e: Exception) {
-            logger.error("[member-delete-completed-saga] - delete member auth info failed.")
-            throw e
+            logger.error("[member-delete-completed-saga][CRITICAL] failed to handle message : $message", e)
+        } finally {
+            commit(acknowledgment)
         }
     }
 
-    @DltHandler
-    fun handleDlt(message: Saga<MemberDeleteSaga>,
-                  @Header(KafkaHeaders.RECEIVED_TOPIC) topic: String,
-                  @Header(KafkaHeaders.KEY) key: String,
-                  acknowledgment: Acknowledgment
-    ) {
-        logger.error("[${topic}][FATAL] - transactionId: ${message.transactionId} - ${message.data} failed to process. handle it manually.")
-    }
-
-    private fun getAuthInfo(message: Saga<MemberDeleteSaga>): MemberAuthInfo {
+    @Transactional
+    private fun getAuthInfo(message: SagaEvent<MemberDeleteSaga>): MemberAuthInfo {
         val memberId = MemberId.of(message.data!!.memberId)
         return authInfoRepository.findByIdOrNull(memberId)
             ?: throw IllegalStateException("MemberAuthInfo not found. memberId: $memberId")
     }
 
+    @Transactional
     private fun commit(acknowledgment: Acknowledgment) {
         acknowledgment.acknowledge()
     }

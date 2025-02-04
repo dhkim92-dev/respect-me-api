@@ -4,6 +4,7 @@ import kr.respectme.group.domain.notifications.NotificationStatus
 import kr.respectme.group.domain.notifications.NotificationType
 import kr.respectme.group.adapter.out.persistence.entity.notifications.JpaImmediateNotification
 import kr.respectme.group.adapter.out.persistence.entity.notifications.JpaScheduledNotification
+import kr.respectme.group.port.`in`.interfaces.vo.Writer
 import java.time.Instant
 import java.util.UUID
 
@@ -19,6 +20,7 @@ class NotificationDto(
     val createdAt: Instant,
     val updatedAt: Instant?,
     val lastSentAt: Instant?,
+    val writer: Writer,
 ) {
 
     companion object {
@@ -28,6 +30,7 @@ class NotificationDto(
                 notificationId = entity.identifier,
                 groupId = entity.groupId,
                 content = entity.content,
+                writer = Writer(),
                 type = entity.type,
                 state = entity.status,
                 scheduledAt = null,
@@ -44,6 +47,7 @@ class NotificationDto(
                 notificationId = entity.identifier,
                 groupId = entity.groupId,
                 content = entity.content,
+                writer = Writer(),
                 type = entity.type,
                 state = entity.status,
                 scheduledAt = entity.scheduledAt,

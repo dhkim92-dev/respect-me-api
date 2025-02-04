@@ -19,36 +19,47 @@ import java.util.*
 )
 abstract class Notification(
     id: UUID = UUIDV7Generator.generate(),
-    groupId: UUID = UUID.randomUUID(),
-    senderId: UUID = UUID.randomUUID(),
-    content: String = "",
-    status : NotificationStatus = NotificationStatus.PENDING,
-    type: NotificationType = IMMEDIATE,
-    createdAt: Instant = Instant.now(),
-    updatedAt: Instant? = null,
-    lastSentAt: Instant? = null
+    private val groupId: UUID = UUID.randomUUID(),
+    private val senderId: UUID = UUID.randomUUID(),
+    private var content: String = "",
+    private var status : NotificationStatus = NotificationStatus.PENDING,
+    private var type: NotificationType = IMMEDIATE,
+    private val createdAt: Instant = Instant.now(),
+    private var updatedAt: Instant? = null,
+    private var lastSentAt: Instant? = null
 ): BaseDomainEntity<UUID>(id) {
 
-    val groupId = groupId
+    fun getGroupId(): UUID {
+        return groupId
+    }
 
-    val senderId = senderId
+    fun getSenderId(): UUID {
+        return senderId
+    }
 
-    var status: NotificationStatus = status
-        private set
+    fun getContent(): String {
+        return content
+    }
 
-    var type: NotificationType = type
-        private set
+    fun getStatus(): NotificationStatus {
+        return status
+    }
 
-    var content: String = content
-        private set
+    fun getType(): NotificationType {
+        return type
+    }
 
-    val createdAt: Instant = createdAt
+    fun getCreatedAt(): Instant {
+        return createdAt
+    }
 
-    var updatedAt: Instant? = updatedAt
-        private set
+    fun getUpdatedAt(): Instant? {
+        return updatedAt
+    }
 
-    var lastSentAt: Instant? = lastSentAt
-        private set
+    fun getLastSentAt(): Instant? {
+        return lastSentAt
+    }
 
     fun updateContent(content: String?) {
 

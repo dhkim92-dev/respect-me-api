@@ -21,21 +21,18 @@ import java.util.*
 @Entity(name = "notification_group")
 class JpaNotificationGroup(
     id: UUID?= null,
-    description: String = "",
-    name: String = "",
-    password: String? = null,
-    type: GroupType = GroupType.GROUP_PRIVATE,
-    ownerId: UUID = UUID.randomUUID()
-): BaseEntity(id) {
-
-    @Column(length = 64)
-    var name: String = name
-    @Column(length = 512)
-    var description : String = description
+    @Column(length=512)
+    var description: String = "",
+    @Column(length=64)
+    var name: String = "",
+    @Column(length=255)
+    var password: String? = null,
     @Convert(converter = GroupTypeConverter::class)
-    var type: GroupType = type
+    var type: GroupType = GroupType.GROUP_PRIVATE,
     @Column
-    var ownerId: UUID = ownerId
-    @Column(nullable = true)
-    var password: String? = password
+    var ownerId: UUID = UUID.randomUUID(),
+    @Column
+    var isDeleted: Boolean = false
+): BaseEntity<Any?>(id) {
+
 }

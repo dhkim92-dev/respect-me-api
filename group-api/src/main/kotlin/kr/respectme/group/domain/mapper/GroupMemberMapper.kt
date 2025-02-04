@@ -9,26 +9,26 @@ class GroupMemberMapper {
 
     fun toDomain(member: JpaGroupMember): GroupMember {
         val groupMember = GroupMember(
-            memberId = member.pk!!.memberId,
-            groupId = member.pk!!.groupId,
+            id = member.id!!,
+            memberId = member.memberId,
+            groupId = member.groupId,
             nickname = member.nickname,
             memberRole = member.memberRole,
             createdAt = member.createdAt,
             profileImageUrl = member.profileImageUrl
         )
-//        groupMember.loaded()
+
         return groupMember
     }
 
     fun toEntity(member: GroupMember): JpaGroupMember {
         return JpaGroupMember(
-            pk = JpaGroupMember.Pk(
-                memberId = member.memberId,
-                groupId = member.groupId
-            ),
-            nickname = member.nickname,
-            memberRole = member.memberRole,
-            profileImageUrl = member.profileImageUrl
+            id = member.id,
+            memberId = member.getMemberId(),
+            groupId = member.getGroupId(),
+            nickname = member.getNickname(),
+            memberRole = member.getMemberRole(),
+            profileImageUrl = member.getProfileImageUrl()
         )
     }
 }

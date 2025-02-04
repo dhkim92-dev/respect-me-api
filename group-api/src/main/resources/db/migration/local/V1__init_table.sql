@@ -1,4 +1,5 @@
 CREATE TABLE IF NOT EXISTS notification_group_member(
+    id UUID,
     group_id UUID,
     member_id UUID,
     profile_image_url varchar(255),
@@ -6,7 +7,8 @@ CREATE TABLE IF NOT EXISTS notification_group_member(
     member_role smallint default 3,
     created_at timestamp(6) default current_timestamp,
     updated_at timestamp(6) default current_timestamp,
-    PRIMARY KEY (group_id, member_id)
+    is_deleted boolean default false,
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS notification_group(
@@ -18,6 +20,7 @@ CREATE TABLE IF NOT EXISTS notification_group(
     password varchar(255),
     created_at timestamp(6) default current_timestamp,
     updated_at timestamp(6) default current_timestamp,
+    is_deleted boolean default false,
     PRIMARY KEY (id)
 );
 
@@ -49,9 +52,3 @@ ALTER TABLE IF EXISTS notification_group_member
 ALTER TABLE IF EXISTS group_notification
     ADD CONSTRAINT fk_group_notification_group_id
     FOREIGN KEY (group_id) REFERENCES notification_group(id) ON DELETE CASCADE;
-
--- group_notification 테이블에서 group_id와 sender_id를 notification_group_member 테이블의 group_id와 member_id로 참조
-ALTER TABLE IF EXISTS group_notification
-    ADD CONSTRAINT fk_group_notification_group_id_and_sender_id
-    FOREIGN KEY (group_id, sender_id) REFERENCES notification_group_member(group_id, member_id)
-    ON DELETE SET NULL;

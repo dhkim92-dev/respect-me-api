@@ -20,7 +20,7 @@ class KafkaEventSubscribeAdapter(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @KafkaListener(topics = ["notification-sent-event"], groupId="respect-me")
+    @KafkaListener(topics = ["notification-sent-event"])
     @Transactional
     override fun onReceiveNotificationSent(event: NotificationSentEvent) {
         logger.info("push-notification-success: ${objectMapper.writeValueAsString(event)}")
@@ -34,7 +34,7 @@ class KafkaEventSubscribeAdapter(
         logger.debug("event target notification id : ${event.notificationId}")
         logger.debug("notification status : ${event.result}")
 
-        val notification = group.notifications.find { it.id == event.notificationId }
+        val notification = group.getNotifications().find { it.id == event.notificationId }
 
         if(notification == null) {
             logger.error("notification-sent-event handle failed. notification not found, notification id : ${event.notificationId}")
@@ -48,7 +48,7 @@ class KafkaEventSubscribeAdapter(
 
         logger.debug("notification status updated : ${notification.toString()}")
 
-        group.addNotification(notification.senderId ,notification)
+        group.addNotification(notification.id ,notification)
         
         saveGroupPort.save(group)
     }

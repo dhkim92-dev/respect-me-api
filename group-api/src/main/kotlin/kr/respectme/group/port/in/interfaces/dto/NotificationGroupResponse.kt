@@ -1,6 +1,7 @@
 package kr.respectme.group.port.`in`.interfaces.dto
 
 import kr.respectme.group.application.dto.group.NotificationGroupDto
+import kr.respectme.group.domain.GroupMemberRole
 import java.util.*
 
 data class NotificationGroupResponse(
@@ -19,10 +20,10 @@ data class NotificationGroupResponse(
             return NotificationGroupResponse(
                 groupId = groupDto.id,
                 groupName = groupDto.name,
+                ownerId = groupDto.ownerId,
                 groupDescription = groupDto.description,
                 groupImageUrl = groupDto.imageUrl,
                 groupType = groupDto.groupType.name,
-                ownerId = groupDto.ownerId
             )
         }
     }

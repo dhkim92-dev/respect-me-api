@@ -2,13 +2,12 @@ package kr.respectme.group.application.query
 
 import kr.respectme.common.error.ForbiddenException
 import kr.respectme.common.error.NotFoundException
-import kr.respectme.group.application.dto.group.NotificationGroupDto
+import kr.respectme.group.application.dto.group.GroupQueryModelDto
 import kr.respectme.group.application.dto.member.GroupMemberDto
 import kr.respectme.group.application.dto.notification.NotificationDto
+import kr.respectme.group.application.dto.notification.NotificationQueryModelDto
 import kr.respectme.group.application.query.useCase.NotificationGroupQueryUseCase
-import kr.respectme.group.common.errors.GroupServiceErrorCode
-import kr.respectme.group.common.errors.GroupServiceErrorCode.GROUP_MEMBER_NOT_MEMBER
-import kr.respectme.group.common.errors.GroupServiceErrorCode.GROUP_NOT_FOUND
+import kr.respectme.group.common.errors.GroupServiceErrorCode.*
 import kr.respectme.group.domain.GroupType
 import kr.respectme.group.port.out.persistence.QueryGroupPort
 import org.slf4j.LoggerFactory
@@ -23,26 +22,27 @@ class NotificationGroupQueryService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-//    @Transactional(readOnly = true)
-//    fun retrieveMemberNotifications(loginId: UUID, cursor: UUID?, size: Int): List<NotificationDto> {
-//        return queryGroupPort.getMemberNotifications(loginId, cursor, size+1)
-//            .sortedBy { it.notificationId }
-//            .reversed()
-//    }
-
+    /**
+     * 회원의 그룹 알림 목록을 조회한다.
+     * @param loginId 로그인 ID
+     * @param groupId 그룹 ID
+     * @param cursor 페이징 커서, CursorPagination의 next 필드에 포함된 cursor 값
+     * @param size 조회할 알림 개수
+     */
     @Transactional(readOnly = true)
     override fun retrieveGroupNotifications(
         loginId: UUID,
         groupId: UUID,
         cursor: UUID?,
         size: Int
-    ): List<NotificationDto> {
+    ): List<NotificationQueryModelDto> {
         val groupMember = queryGroupPort.getGroupMember(groupId, loginId)
             ?: throw ForbiddenException(GROUP_MEMBER_NOT_MEMBER)
         logger.info("group member : ${groupMember.memberId} query group $groupId members")
         return queryGroupPort.getPublishedNotifications(groupId, cursor, size+1)
-            .sortedBy { it.notificationId }
+            .sortedBy { it.id }
             .reversed()
+            .map{ it -> NotificationQueryModelDto.valueOf(it) }
     }
 
     @Transactional(readOnly = true)
@@ -62,40 +62,51 @@ class NotificationGroupQueryService(
     }
 
     @Transactional(readOnly = true)
-    override fun retrieveGroup(loginId: UUID, groupId: UUID): NotificationGroupDto {
-        val group = queryGroupPort.getGroup(groupId)
+    override fun retrieveGroup(loginId: UUID, groupId: UUID): GroupQueryModelDto {
+        val group = queryGroupPort.getGroup(loginId, groupId)
             ?: throw NotFoundException(GROUP_NOT_FOUND)
-        if(group.groupType == GroupType.GROUP_PRIVATE) {
+
+        if(group.type == GroupType.GROUP_PRIVATE) {
             val groupMember = queryGroupPort.getGroupMember(groupId, loginId)
-                ?: throw ForbiddenException(GroupServiceErrorCode.GROUP_MEMBER_NOT_MEMBER)
+                ?: throw ForbiddenException(GROUP_MEMBER_NOT_MEMBER)
         }
 
-        return group
+        return GroupQueryModelDto.valueOf(group)
     }
 
     @Transactional(readOnly = true)
-    override fun retrieveMemberGroups(loginId: UUID): List<NotificationGroupDto> {
+    override fun retrieveMemberGroups(loginId: UUID): List<GroupQueryModelDto> {
         return queryGroupPort.getMemberGroups(loginId)
             .sortedBy { it.id }
             .reversed()
+            .map{ GroupQueryModelDto.valueOf(it) }
     }
 
     @Transactional(readOnly = true)
-    override fun retrieveAllGroups(loginId: UUID, cursorGroupId: UUID?, size: Int?): List<NotificationGroupDto> {
-        return queryGroupPort.getAllGroups(cursorGroupId, size ?: 21)
+    override fun retrieveAllGroups(loginId: UUID, cursorGroupId: UUID?, size: Int?): List<GroupQueryModelDto> {
+        val querySize = size?.let{ it + 1 } ?: 21
+        return queryGroupPort.getAllGroups(cursorGroupId, querySize)
+            .sortedBy { it.id }
+            .reversed()
+            .map{ GroupQueryModelDto.valueOf(it) }
     }
 
     @Transactional(readOnly = true)
-    override fun retrieveMemberNotifications(loginId: UUID, cursor: UUID?, size: Int): List<NotificationDto> {
+    override fun retrieveMemberNotifications(loginId: UUID, cursor: UUID?, size: Int): List<NotificationQueryModelDto> {
         return queryGroupPort.getMemberNotifications(loginId, cursor, size+1)
+            .sortedBy { it.id }
+            .reversed()
+            .map { it -> NotificationQueryModelDto.valueOf(it) }
     }
 
     @Transactional(readOnly = true)
-    override fun retrieveNotification(loginId: UUID, groupId: UUID, notificationId: UUID): NotificationDto {
+    override fun retrieveNotification(loginId: UUID, groupId: UUID, notificationId: UUID): NotificationQueryModelDto {
+        logger.info("################### 단건 조회 콜 ####################")
         val groupMember = queryGroupPort.getGroupMember(groupId, loginId)
             ?: throw ForbiddenException(GROUP_MEMBER_NOT_MEMBER)
+
         val notification = queryGroupPort.getNotification(groupId, notificationId)
-            ?: throw NotFoundException(GroupServiceErrorCode.GROUP_NOTIFICATION_NOT_EXISTS)
-        return notification
+            ?: throw NotFoundException(GROUP_NOTIFICATION_NOT_EXISTS)
+        return NotificationQueryModelDto.valueOf(notification)
     }
 }

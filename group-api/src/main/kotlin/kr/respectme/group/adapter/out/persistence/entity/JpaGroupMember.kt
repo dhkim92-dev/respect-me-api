@@ -15,38 +15,19 @@ import java.util.*
  */
 @Entity(name = "notification_group_member")
 class JpaGroupMember(
-    pk: Pk? = null,
-    nickname: String = "",
+    id: UUID = UUIDV7Generator.generate(),
+    @Column
+    var groupId: UUID = UUID.randomUUID(),
+    @Column
+    var memberId: UUID = UUID.randomUUID(),
+    @Column
+    var nickname: String = "",
     @Convert(converter = GroupMemberRoleConverter::class)
     var memberRole: GroupMemberRole = GroupMemberRole.MEMBER,
-    profileImageUrl: String? = null,
-): CreatedAtUpdatedAtEntity() {
-
-    @EmbeddedId
-    val pk: Pk? = pk
-
     @Column
-    var nickname: String = nickname
-
+    var profileImageUrl: String? = null,
     @Column
-    var profileImageUrl: String? = profileImageUrl
+    var isDeleted : Boolean = false
+): BaseEntity<UUID>(id) {
 
-    @Embeddable
-    class Pk(
-        @Column(name="group_id")
-        var groupId: UUID = UUIDV7Generator.generate(),
-        @Column(name="member_id")
-        var memberId: UUID = UUIDV7Generator.generate()
-    ): Serializable {
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (other !is Pk) return false
-            return groupId == other.groupId && memberId == other.memberId
-        }
-
-        override fun hashCode(): Int {
-            return Objects.hash(groupId, memberId)
-        }
-    }
 }

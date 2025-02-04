@@ -15,5 +15,5 @@ interface NotificationGroupCommandPort {
 
     fun deleteNotificationGroup(loginId: UUID,groupID: UUID)
 
-    fun createNotification(loginId: UUID, groupId: UUID, request: NotificationCreateRequest): NotificationResponse
+    fun createNotification(loginId: UUID, groupId: UUID, request: NotificationCreateRequest): NotificationCommandResponse
 }

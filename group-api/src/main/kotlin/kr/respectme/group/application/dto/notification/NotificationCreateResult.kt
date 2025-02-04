@@ -25,25 +25,25 @@ data class NotificationCreateResult(
                 is ImmediateNotification -> {
                     NotificationCreateResult(
                         notificationId = notification.id,
-                        groupId = notification.groupId,
-                        senderId = notification.senderId,
-                        content = notification.content,
-                        status = notification.status,
-                        type = notification.type,
-                        createdAt = notification.createdAt,
-                        lastSentAt = notification.lastSentAt
+                        groupId = notification.getGroupId(),
+                        senderId = notification.getSenderId(),
+                        content = notification.getContent(),
+                        status = notification.getStatus(),
+                        type = notification.getType(),
+                        createdAt = notification.getCreatedAt(),
+                        lastSentAt = notification.getLastSentAt()
                     )
                 }
                 is ScheduledNotification -> {
                     NotificationCreateResult(
                         notificationId = notification.id,
-                        groupId = notification.groupId,
-                        senderId = notification.senderId,
-                        content = notification.content,
-                        status = notification.status,
-                        type = notification.type,
-                        createdAt = notification.createdAt,
-                        scheduledAt = notification.scheduledAt
+                        groupId = notification.getGroupId(),
+                        senderId = notification.getSenderId(),
+                        content = notification.getContent(),
+                        status = notification.getStatus(),
+                        type = notification.getType(),
+                        createdAt = notification.getCreatedAt(),
+                        scheduledAt = notification.getScheduledAt()
                     )
                 }
                 else -> throw IllegalArgumentException("Invalid notification type")

@@ -8,6 +8,7 @@ import kr.respectme.common.domain.annotations.IgnoreField
 import kr.respectme.common.domain.enums.EntityStatus
 import org.slf4j.LoggerFactory
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaField
 import kotlin.reflect.jvm.javaMethod
 
@@ -36,10 +37,12 @@ class InMemoryDomainEntityCache(private val objectMapper: ObjectMapper): DomainE
     }
 
     override fun <T: BaseDomainEntity<*>> get(clazz: Class<T>, obj: T): T? {
+        logger.debug("${clazz.name} get called")
         obj.id?.let {
             val key = getKey(clazz, it)
             return this.get(clazz, key)
         }
+        logger.debug("${clazz.name} got ${obj}")
         return null
     }
 
@@ -62,8 +65,8 @@ class InMemoryDomainEntityCache(private val objectMapper: ObjectMapper): DomainE
         val key = getKey(clazz, value.id)
         key?.let{
             snapshot[key] = copyObject(value)
-//            logger.debug("${clazz.name} instance ${key} will be cached.")
-//            logger.debug("cache info ${objectMapper.writeValueAsString(snapshot[key])}")
+            logger.debug("${clazz.name} instance ${key} will be cached.")
+            logger.debug("cache info ${objectMapper.writeValueAsString(snapshot[key])}")
             return true
         }
         return false
@@ -118,6 +121,7 @@ class InMemoryDomainEntityCache(private val objectMapper: ObjectMapper): DomainE
      * @return 변경된 프로퍼티가 있으면 true, 없으면 false
      */
     private fun <T: BaseDomainEntity<*>> compareProperties(obj: T, cached: T): Boolean {
+        logger.debug("compareProperties called")
         if(obj::class != cached::class) {
             logger.error("Class is not same")
             return false
@@ -135,7 +139,10 @@ class InMemoryDomainEntityCache(private val objectMapper: ObjectMapper): DomainE
                 !hasDomainRelationAnnotation && !hasIgnoreFieldAnnotation
             }
 
+        logger.debug("targetProperties size : ${targetProperties.size}")
+
         val result =  targetProperties.any { property ->
+            property.isAccessible = true
             val objValue = property.getter.call(obj)
             val cachedValue = property.getter.call(cached)
             val propertyCompareResult = objValue != cachedValue
@@ -143,11 +150,12 @@ class InMemoryDomainEntityCache(private val objectMapper: ObjectMapper): DomainE
             propertyCompareResult
         }
 
-//        logger.debug("compare result : $result")
+        logger.debug("compare result : $result")
         return result
     }
 
     private fun <T> copyObject(obj: T): T {
+        logger.debug("copyObject called")
         return objectMapper.writeValueAsString(obj).let { objectMapper.readValue(it, obj!!::class.java) }
     }
 }
