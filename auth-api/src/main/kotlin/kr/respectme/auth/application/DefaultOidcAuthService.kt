@@ -43,17 +43,20 @@ class DefaultOidcAuthService(
 
     @Transactional
     override fun loginWithOidc(command: OidcMemberLoginCommand): AuthenticationResult {
+        logger.debug("OIDC Login Request: ${command}")
         val payload = idTokenVerifier.verifyToken(command.idToken)
         var memberAuthInfo = authInfoRepository.findByOidcAuthPlatformAndOidcAuthUserIdentifier(command.platform, payload.sub)
-
         if(memberAuthInfo == null) {
+            logger.debug("OIDC Login Request: ${command} - MemberAuthInfo not found, process member registration")
             val member = processMemberRegistration(command, payload)
             memberAuthInfo = createMemberAuthInfo(member.id, command.platform, payload)
         }
 
         val memberInfo = memberLoadPort.loadMemberById(memberAuthInfo.getMemberId().id).data
+        logger.debug("OIDC Login Request: ${command} - MemberInfo found, process login")
 
         if(memberInfo == null) {
+            logger.debug("OIDC Login Request: ${command} - MemberInfo found, process login")
             processMemberRegistration(command, payload)
         }
 

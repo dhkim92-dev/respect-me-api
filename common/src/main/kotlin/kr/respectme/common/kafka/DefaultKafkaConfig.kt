@@ -18,8 +18,6 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ContainerProperties
 import org.springframework.kafka.support.converter.StringJsonMessageConverter
-import org.springframework.kafka.support.serializer.JsonDeserializer
-import org.springframework.kafka.support.serializer.JsonSerializer
 
 @AutoConfiguration
 @Configuration
@@ -29,10 +27,12 @@ open class DefaultKafkaConfig(
     private val bootstrapServer: String,
     @Value("\${respect-me.kafka.consumer.group-id}")
     private val groupId: String,
-    @Value("\${respect-me.kafka.auto-commit-reset:latest}")
+    @Value("\${respect-me.kafka.auto-commit-reset:earliest}")
     private val autoCommitReset: String,
     @Value("\${respect-me.kafka.enable-auto-commit:false}")
-    private val enableAutoCommit: Boolean
+    private val enableAutoCommit: Boolean,
+    @Value("\${respect-me.kafka.producer.id}")
+    private val producerId: String,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -40,17 +40,17 @@ open class DefaultKafkaConfig(
     @Bean
     fun producerFactory(): ProducerFactory<String, String> {
         logger.debug("kafka bootstrapServer: $bootstrapServer")
-        logger.debug("Kafka Producer Factory created")
         val configProps: Map<String, Any> = mapOf(
             ProducerConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServer,
             ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
             ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.java,
             ProducerConfig.PARTITIONER_CLASS_CONFIG to "org.apache.kafka.clients.producer.internals.DefaultPartitioner", // 기본 파티셔너 사용
             ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG to true,
-            ProducerConfig.INTERCEPTOR_CLASSES_CONFIG to listOf(TraceIdProducerInterceptor::class.java)
+            ProducerConfig.INTERCEPTOR_CLASSES_CONFIG to listOf(TraceIdProducerInterceptor::class.java),
         )
-
-        return DefaultKafkaProducerFactory(configProps)
+        val producer = DefaultKafkaProducerFactory<String, String>(configProps)
+        producer.setTransactionIdPrefix("${producerId}-tx") // 카프카 트랜잭션 이용
+        return producer
     }
 
     @Bean
@@ -69,8 +69,11 @@ open class DefaultKafkaConfig(
             ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to autoCommitReset,
             ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to enableAutoCommit,
             ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
-            ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG to listOf(TraceIdConsumerInterceptor::class.java)
+            ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG to listOf(TraceIdConsumerInterceptor::class.java),
+            ConsumerConfig.ISOLATION_LEVEL_CONFIG to "read_committed"
         )
+
+        // consumer kafka transaction
         return DefaultKafkaConsumerFactory(configProps)
     }
 

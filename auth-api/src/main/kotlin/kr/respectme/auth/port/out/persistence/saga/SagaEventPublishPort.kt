@@ -1,11 +1,10 @@
 package kr.respectme.auth.port.out.persistence.saga
 
 import kr.respectme.auth.domain.MemberId
+import kr.respectme.common.saga.SagaEvent
 import java.util.UUID
 
-interface AuthInfoDeleteSagaPublishPort {
+interface SagaEventPublishPort {
 
-    fun publishAuthInfoDeleteCompletedSaga(transactionId: UUID, memberId: MemberId)
-
-    fun publishAuthInfoDeleteFailedSaga(transactionId: UUID, memberId: MemberId)
+    fun publish(eventName: String, payload: SagaEvent<*>)
 }

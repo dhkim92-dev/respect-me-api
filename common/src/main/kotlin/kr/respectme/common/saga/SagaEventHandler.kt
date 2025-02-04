@@ -1,21 +1,24 @@
 package kr.respectme.common.saga
 
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.util.backoff.BackOff
 import kotlin.math.pow
 
-abstract class SagaHandler {
+abstract class SagaEventHandler<T: SagaEvent<*>> {
 
     @Transactional
-    fun <T> handleEvent(event: SagaEvent<T>,
-                        maxRetry: Int = 1,
-                        delay: Long = 100,
-                        maxTimeout: Long = 5000,
-                        multiplier: Double = 2.0
+    fun handleEvent(event: T,
+                    maxRetry: Int = 1,
+                    delay: Long = 100,
+                    maxTimeout: Long = 5000,
+                    multiplier: Double = 2.0
     ) {
 
-        if(maxRetry < 1) {
-            throw IllegalArgumentException("retryCount must be greater than 0")
+        if(maxRetry < 1 || delay < 1 || multiplier < 1 || maxTimeout < 1) {
+            throw IllegalArgumentException("maxRetry, delay, multiplier, maxTimeout must be greater than 0")
+        }
+
+        if(maxTimeout < delay) {
+            throw IllegalArgumentException("maxTimeout must be greater than delay")
         }
 
         var retryCount = 0
@@ -25,20 +28,18 @@ abstract class SagaHandler {
                 handle(event)
                 return
             } catch (e: Exception) {
-                retryCount++
 
-                if(retryCount >= maxRetry) {
-                    doOnFailed(event)
+                if(retryCount >= maxRetry-1) {
                     throw e
                 }
                 val nextDelay = (delay * multiplier.pow(retryCount)).toLong()
-
                 Thread.sleep(if(nextDelay > maxTimeout) maxTimeout else nextDelay)
             }
+            retryCount++
         }
     }
 
-    protected abstract fun <T> handle(event: SagaEvent<T>)
+    abstract fun compensate(event: T)
 
-    protected abstract fun <T> doOnFailed(event: SagaEvent<T>)
+    protected abstract fun handle(event: T)
 }
