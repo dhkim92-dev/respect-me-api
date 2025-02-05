@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 class KafkaEventSubscribeAdapter(
@@ -26,7 +27,8 @@ class KafkaEventSubscribeAdapter(
     private val MESSAGE_TITLE_MAX_LENGTH = 22
     private val MESSAGE_BODY_MAX_LENGTH = 100
 
-    @KafkaListener(topics = ["notification-create-event"], groupId = "respect-me")
+    @KafkaListener(topics = ["notification-create-event"])
+    @Transactional
     override fun onNotificationCreateEvent(event: NotificationCreateEvent): Boolean {
         logger.info("Group Notification Create Event Received: \n" +
                 "groupId: ${event.groupId}\n" +
@@ -34,9 +36,13 @@ class KafkaEventSubscribeAdapter(
                 "senderId: ${event.senderId}\n"
         )
 
+        event.receiverIds.forEach { receiverId ->
+            logger.info("receiverId: $receiverId")
+        }
+
         val response = memberQueryPort.loadMembers(MemberQueryRequest(event.receiverIds))
         val deviceTokens: MutableSet<String> = mutableSetOf()
-        response.data.data.filter { member -> member.blocked.not() }
+        response.data.data.filter { member -> member.isBlocked.not() }
             .forEach { member -> deviceTokens.addAll(member.deviceTokens) }
         val groupMessage = createGroupMessage(event)
 
