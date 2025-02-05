@@ -21,33 +21,16 @@ data class NotificationCreateResult(
 
     companion object {
         fun valueOf(notification: Notification): NotificationCreateResult {
-            return when(notification) {
-                is ImmediateNotification -> {
-                    NotificationCreateResult(
-                        notificationId = notification.id,
-                        groupId = notification.getGroupId(),
-                        senderId = notification.getSenderId(),
-                        content = notification.getContent(),
-                        status = notification.getStatus(),
-                        type = notification.getType(),
-                        createdAt = notification.getCreatedAt(),
-                        lastSentAt = notification.getLastSentAt()
-                    )
-                }
-                is ScheduledNotification -> {
-                    NotificationCreateResult(
-                        notificationId = notification.id,
-                        groupId = notification.getGroupId(),
-                        senderId = notification.getSenderId(),
-                        content = notification.getContent(),
-                        status = notification.getStatus(),
-                        type = notification.getType(),
-                        createdAt = notification.getCreatedAt(),
-                        scheduledAt = notification.getScheduledAt()
-                    )
-                }
-                else -> throw IllegalArgumentException("Invalid notification type")
-            }
+            return NotificationCreateResult(
+                notificationId = notification.id,
+                groupId = notification.getGroupId(),
+                senderId = notification.getSenderId(),
+                content = notification.getContent(),
+                status = notification.getStatus(),
+                type = notification.getType(),
+                createdAt = notification.getCreatedAt(),
+                lastSentAt = notification.getLastSentAt()
+            )
         }
     }
 }

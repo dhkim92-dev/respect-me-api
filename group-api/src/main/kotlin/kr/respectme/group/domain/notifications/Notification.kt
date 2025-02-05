@@ -12,12 +12,7 @@ import java.time.Instant
 import java.util.*
 
 @DomainEntity
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@type")
-@JsonSubTypes(
-    JsonSubTypes.Type(value = ImmediateNotification::class, name = "ImmediateNotification"),
-    JsonSubTypes.Type(value = ScheduledNotification::class, name = "ScheduledNotification")
-)
-abstract class Notification(
+class Notification(
     id: UUID = UUIDV7Generator.generate(),
     private val groupId: UUID = UUID.randomUUID(),
     private val senderId: UUID = UUID.randomUUID(),
@@ -103,7 +98,11 @@ abstract class Notification(
         }
     }
 
-    abstract fun validateType()
+    private fun validateType() {
+        if(this.getType() != NotificationType.IMMEDIATE) {
+            throw IllegalArgumentException("Notification type is not immediate")
+        }
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

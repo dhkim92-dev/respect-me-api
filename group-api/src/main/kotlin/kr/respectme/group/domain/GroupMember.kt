@@ -93,4 +93,8 @@ class GroupMember(
     override fun hashCode(): Int {
         return id.hashCode()
     }
+
+    override fun toString(): String {
+        return "GroupMember(id=$id, groupId=$groupId, memberId=$memberId, nickname='$nickname', memberRole=$memberRole, profileImageUrl=$profileImageUrl, createdAt=$createdAt, updatedAt=$updatedAt, isDeleted=$isDeleted)"
+    }
 }

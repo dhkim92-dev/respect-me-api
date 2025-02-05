@@ -4,7 +4,7 @@ import kr.respectme.group.port.`in`.interfaces.dto.GroupMemberCreateRequest
 
 class GroupMemberCreateCommand(
     val nickname: String,
-    val password: String?
+//    val password: String?
 ) {
 
     companion object {
@@ -12,7 +12,7 @@ class GroupMemberCreateCommand(
         fun of(request: GroupMemberCreateRequest): GroupMemberCreateCommand {
             return GroupMemberCreateCommand(
                 nickname = request.nickname,
-                password = request.groupPassword
+//                password = request.groupPassword
             )
         }
     }

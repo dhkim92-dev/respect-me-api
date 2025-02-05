@@ -19,7 +19,7 @@ interface NotificationQueryUseCase {
      * @param notificationId - notification id
      * @return NotificationDetail
      */
-    fun getNotification(memberId: UUID, notificationId: UUID): NotificationQueryModelDto
+    fun retrieveNotification(memberId: UUID, groupId: UUID, notificationId: UUID): NotificationQueryModelDto
 
     /**
      * get a list of notifications with summarized content.
@@ -28,12 +28,20 @@ interface NotificationQueryUseCase {
      * @param size - page size
      * @return List<NotificationSummary>
      */
-    fun getNotifications(memberId: UUID, groupId: UUID, pageable: Pageable): List<NotificationQueryModelDto>
+    fun retrieveGroupNotifications(memberId: UUID,
+                                   groupId: UUID,
+                                   cursorId: UUID?,
+                                   size: Int): List<NotificationQueryModelDto>
+
+    /**
+     * get a list of unread notifications with summarized content.
+     */
+    fun retrieveUnreadNotifications(memberId: UUID, cursorId: UUID?, size: Int): List<NotificationQueryModelDto>
 
     /**
      * get a count of notifications that are created today based on UTC.
      * @param groupId - group id
      * @return Int
      */
-    fun getTodayNotificationCount(groupId: UUID): NotificationCountDto
+    fun retrieveTodayLeftNotificationCount(groupId: UUID): NotificationCountDto
 }

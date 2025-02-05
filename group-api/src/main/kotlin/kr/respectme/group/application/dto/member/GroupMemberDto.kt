@@ -23,7 +23,7 @@ class GroupMemberDto(
                 groupId = entity.getGroupId(),
                 memberId = entity.getMemberId(),
                 nickname = entity.getNickname(),
-                profileImageUrl = entity.getProfileImageUrl(),
+                profileImageUrl = null,
                 role = entity.getMemberRole(),
                 createdAt = entity.getCreatedAt()
             )

@@ -9,10 +9,8 @@ import jakarta.validation.Valid
 import kr.respectme.common.annotation.ApplicationResponse
 import kr.respectme.common.annotation.LoginMember
 import kr.respectme.group.application.dto.group.GroupCreateCommand
-import kr.respectme.group.application.dto.member.GroupMemberCreateCommand
 import kr.respectme.group.application.dto.group.GroupModifyCommand
-import kr.respectme.group.application.dto.notification.NotificationCreateCommand
-import kr.respectme.group.application.command.useCase.NotificationGroupUseCase
+import kr.respectme.group.application.command.useCase.NotificationGroupCommandUseCase
 import kr.respectme.group.port.`in`.interfaces.NotificationGroupCommandPort
 import kr.respectme.group.port.`in`.interfaces.dto.*
 import org.slf4j.LoggerFactory
@@ -22,10 +20,10 @@ import java.util.*
 
 @RestController
 @RequestMapping("/api/v1/")
-@Tag(name = "NotificationGroup", description = "알림 그룹 API")
+@Tag(name = "Group Command API", description = "알림 그룹 조작 API, 그룹의 생성, 수정, 삭제를 담당 합니다.")
 @SecurityRequirement(name = "bearer-jwt")
 class RestGroupCommandAdapter(
-    private val notificationGroupUseCase: NotificationGroupUseCase
+    private val notificationGroupUseCase: NotificationGroupCommandUseCase
 ): NotificationGroupCommandPort {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -64,60 +62,6 @@ class RestGroupCommandAdapter(
         val command = GroupModifyCommand.of(request)
         return NotificationGroupResponse.valueOf(
             notificationGroupUseCase.updateNotificationGroup(loginId, groupId, command)
-        )
-    }
-
-    @Operation(summary = "그룹 멤버 삭제", description = "그룹 멤버 삭제")
-    @ApiResponses(
-        value = [
-            ApiResponse(responseCode = "204", description = "그룹 멤버 삭제 성공")
-        ]
-    )
-    @DeleteMapping("notification-groups/{groupId}/members/{targetMemberId}")
-    @ApplicationResponse(status = HttpStatus.NO_CONTENT, message = "group member removed.")
-    override fun removeGroupMember(
-        @LoginMember loginId: UUID,
-        @PathVariable groupId: UUID,
-        @PathVariable targetMemberId: UUID
-    ) {
-        notificationGroupUseCase.removeMember(loginId, groupId, targetMemberId)
-    }
-
-    @Operation(summary = "그룹 멤버 추가", description = "그룹 멤버 추가")
-    @ApiResponses(
-        value = [
-            ApiResponse(responseCode = "201", description = "그룹 멤버 추가 성공")
-        ]
-    )
-    @PostMapping("notification-groups/{groupId}/members")
-    @ApplicationResponse(status = HttpStatus.CREATED, message = "group member added.")
-    override fun addGroupMember(
-        @LoginMember loginId: UUID,
-        @PathVariable groupId: UUID,
-        @RequestBody @Valid request: GroupMemberCreateRequest
-    ): GroupMemberResponse {
-        val command = GroupMemberCreateCommand.of(request)
-        return GroupMemberResponse.of(
-            notificationGroupUseCase.addMember(loginId, groupId, command)
-        )
-    }
-
-    @Operation(summary = "알림 생성", description = "알림 생성")
-    @ApiResponses(
-        value = [
-            ApiResponse(responseCode = "201", description = "알림 생성 성공")
-        ]
-    )
-    @PostMapping("notification-groups/{groupId}/notifications")
-    @ApplicationResponse(status = HttpStatus.CREATED, message = "notification created.")
-    override fun createNotification(
-        @LoginMember loginId: UUID,
-        @PathVariable groupId: UUID,
-        @RequestBody @Valid request: NotificationCreateRequest
-    ): NotificationCommandResponse {
-        val command = NotificationCreateCommand.valueOf(groupId, loginId, request)
-        return NotificationCommandResponse.valueOf(
-            notificationGroupUseCase.createNotification(loginId, groupId, command)
         )
     }
 

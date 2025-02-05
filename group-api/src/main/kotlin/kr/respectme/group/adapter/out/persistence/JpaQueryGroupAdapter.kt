@@ -27,80 +27,9 @@ import java.util.*
 @Repository
 class JpaQueryGroupAdapter(
     private val qf: JPAQueryFactory
-): QueryGroupPort{
+): QueryGroupPort {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-
-    /**
-     * 그룹 멤버 단건 조회
-     */
-    override fun getGroupMember(groupId: UUID, memberId: UUID): GroupMemberDto? {
-        val groupMember = QJpaGroupMember.jpaGroupMember
-
-        return qf.select(
-            Projections.constructor(
-                GroupMemberDto::class.java,
-                groupMember.id,
-                groupMember.groupId,
-                groupMember.memberId,
-                groupMember.nickname,
-//                groupMember.profileImageUrl,
-                Expressions.nullExpression(String::class.java),
-                groupMember.createdAt,
-                groupMember.memberRole
-            ))
-            .from(groupMember)
-            .where(groupMember.groupId.eq(groupId).and(groupMember.memberId.eq(memberId)))
-            .fetchOne()
-    }
-
-    /**
-     * 그룹 멤버 목록 조회
-     */
-    override fun getGroupMembers(groupId: UUID): List<GroupMemberDto> {
-        val groupMember = QJpaGroupMember.jpaGroupMember
-        return qf.select(
-            Projections.constructor(
-                GroupMemberDto::class.java,
-                groupMember.id,
-                groupMember.groupId,
-                groupMember.memberId,
-                groupMember.nickname,
-//                groupMember.profileImageUrl,
-                Expressions.nullExpression(String::class.java),
-                groupMember.createdAt,
-                groupMember.memberRole
-            ))
-            .from(groupMember)
-            .where(groupMember.groupId.eq(groupId))
-            .fetch()
-    }
-
-
-    override fun getNotification(groupId: UUID, notificationId: UUID): GroupNotificationQueryModel? {
-        val notification = QJpaGroupNotification.jpaGroupNotification
-        val member = QJpaGroupMember.jpaGroupMember
-
-        return selectForGroupNotificationQueryModel(2000)
-            .where(notification.id.eq(notificationId))
-            .fetchOne()
-    }
-
-
-    override fun getPublishedNotifications(groupId: UUID, cursor: UUID?, size: Int): List<GroupNotificationQueryModel> {
-        logger.debug("getPublishedNotifications groupId: $groupId, cursor: $cursor, size: $size")
-        val notification = QJpaGroupNotification.jpaGroupNotification
-        val group = QJpaNotificationGroup.jpaNotificationGroup
-
-        return selectForGroupNotificationQueryModel()
-            .where(
-                isPublishedNotification().and(
-                    lessOrEqualNotificationId(cursor)
-                )
-            ).limit(size.toLong())
-            .fetch()
-
-    }
 
     override fun getGroup(loginId: UUID, groupId: UUID): NotificationGroupQueryModel? {
         val group = QJpaNotificationGroup.jpaNotificationGroup
@@ -127,7 +56,8 @@ class JpaQueryGroupAdapter(
                 group.createdAt,
                 Expressions.nullExpression(String::class.java),
                 me.memberRole.coalesce(GroupMemberRole.GUEST)
-            ))
+            )
+        )
             .from(group)
             .leftJoin(member).on(member.groupId.eq(group.id))
             .leftJoin(owner).on(owner.groupId.eq(group.id).and(owner.memberRole.eq(GroupMemberRole.OWNER)))
@@ -140,6 +70,7 @@ class JpaQueryGroupAdapter(
             )
             .fetchOne()
     }
+
     /**
      * 사용자가 가입한 그룹 목록을 조회
      * @param loginId 사용자 ID
@@ -177,7 +108,8 @@ class JpaQueryGroupAdapter(
                 group.createdAt,
                 Expressions.nullExpression(String::class.java),
                 me.memberRole.coalesce(GroupMemberRole.GUEST)
-            ))
+            )
+        )
             .from(group)
             .leftJoin(member).on(member.groupId.eq(group.id))
             .leftJoin(owner).on(owner.groupId.eq(group.id).and(owner.memberRole.eq(GroupMemberRole.OWNER)))
@@ -217,40 +149,18 @@ class JpaQueryGroupAdapter(
                 group.createdAt,
                 Expressions.nullExpression(String::class.java),
                 Expressions.asEnum(GroupMemberRole.GUEST)
-            ))
+            )
+        )
             .from(group)
             .leftJoin(member).on(member.groupId.eq(group.id))
             .leftJoin(owner).on(owner.groupId.eq(group.id).and(owner.memberRole.eq(GroupMemberRole.OWNER)))
-            .where( lessOrEqualGroupId(cursor) )
+            .where(lessOrEqualGroupId(cursor))
             .limit(size?.toLong() ?: 21)
             .groupBy(
                 group.id,
                 owner.id,
             )
             .orderBy(group.id.desc())
-            .fetch()
-    }
-
-    override fun getMemberNotifications(loginId: UUID, cursor: UUID?, size: Int): List<GroupNotificationQueryModel> {
-        val notification = QJpaGroupNotification.jpaGroupNotification
-        val immediateNotification = QJpaImmediateNotification.jpaImmediateNotification
-        val scheduledNotification = QJpaScheduledNotification.jpaScheduledNotification
-        val group = QJpaNotificationGroup.jpaNotificationGroup
-        val groupMember = QJpaGroupMember.jpaGroupMember
-        val member = QJpaGroupMember.jpaGroupMember
-
-        // 1. 사용자가 가입한 그룹 목록을 먼저 조회
-        val groupList = qf.select(member.groupId)
-            .from(member)
-            .where(member.memberId.eq(loginId))
-            .fetch()
-
-         return selectForGroupNotificationQueryModel()
-            .where(notification.groupId.`in`(groupList)
-                .and(lessOrEqualNotificationId(cursor))
-                .and(isPublishedNotification()))
-            .orderBy(notification.id.desc())
-            .limit(size.toLong())
             .fetch()
     }
 
@@ -261,68 +171,5 @@ class JpaQueryGroupAdapter(
         } else {
             Expressions.TRUE
         }
-    }
-
-    private fun lessOrEqualNotificationId(cursor: UUID?): BooleanExpression {
-        val notification = QJpaGroupNotification.jpaGroupNotification
-        return if (cursor != null) {
-            notification.id.loe(cursor)
-        } else {
-            Expressions.TRUE
-        }
-    }
-
-    private fun isPublishedNotification(): BooleanExpression {
-        val notification = QJpaGroupNotification.jpaGroupNotification
-        return notification.status.eq(NotificationStatus.PUBLISHED)
-    }
-
-    private fun selectForGroupNotificationQueryModel(contentLen: Int = 256): JPAQuery<GroupNotificationQueryModel> {
-        val notification = QJpaGroupNotification.jpaGroupNotification
-        val immediateNotification = QJpaImmediateNotification.jpaImmediateNotification
-        val scheduledNotification = QJpaScheduledNotification.jpaScheduledNotification
-        val weeklyNotification = QJpaWeeklyNotification.jpaWeeklyNotification
-        val dayIntervalNotification = QJpaDayIntervalNotification.jpaDayIntervalNotification
-        val member = QJpaGroupMember.jpaGroupMember
-        val group = QJpaNotificationGroup.jpaNotificationGroup
-
-        logger.debug("selectForGroupNotificationQueryModel contentLen: $contentLen")
-
-        return qf.select(
-            Projections.constructor(
-                GroupNotificationQueryModel::class.java,
-                notification.id,
-                notification.type,
-                Projections.constructor(
-                    NotificationGroupVo::class.java,
-                    notification.groupId,
-                    group.name,
-                    // TODO 그룹 이미지 URL 추가 후 수정 필요
-                    Expressions.nullExpression(String::class.java)
-                ),
-                notification.status,
-                Projections.constructor(
-                    Writer::class.java,
-                    notification.memberId,
-                    member.nickname,
-                    member.profileImageUrl
-                ),
-                notification.content.substring(0, contentLen),
-                scheduledNotification.scheduledAt,
-                weeklyNotification.dayOfWeeks,
-                dayIntervalNotification.dayInterval,
-                notification.createdAt,
-                notification.updatedAt,
-                notification.lastSentAt,
-            ))
-            .from(notification)
-            .leftJoin(immediateNotification).on(notification.id.eq(immediateNotification.id))
-            .leftJoin(scheduledNotification).on(notification.id.eq(scheduledNotification.id))
-            .leftJoin(weeklyNotification).on(notification.id.eq(weeklyNotification.id))
-            .leftJoin(dayIntervalNotification).on(notification.id.eq(dayIntervalNotification.id))
-            .leftJoin(member).on(notification.groupId.eq(member.groupId).and(notification.memberId.eq(member.memberId)))
-            .leftJoin(group).on(notification.groupId.eq(group.id))
-            .distinct()
-            .fetchJoin()
     }
 }

@@ -20,8 +20,8 @@ import java.util.*
  * @property status state of notification (CREATED, PUBLISHED, FAIL)
  */
 @Entity(name = "group_notification")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.INTEGER)
+//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+//@DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.INTEGER)
 class JpaGroupNotification(
     id: UUID = UUIDV7Generator.generate(),
     memberId: UUID = UUIDV7Generator.generate(),
