@@ -3,6 +3,7 @@ package kr.respectme.group.domain.mapper
 import kr.respectme.group.adapter.out.persistence.entity.JpaGroupMember
 import kr.respectme.group.adapter.out.persistence.entity.JpaNotificationGroup
 import kr.respectme.group.adapter.out.persistence.entity.notifications.JpaGroupNotification
+import kr.respectme.group.domain.GroupMember
 import kr.respectme.group.domain.NotificationGroup
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -15,19 +16,16 @@ class GroupMapper(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun toDomain(group: JpaNotificationGroup, members: List<JpaGroupMember>, notifications: List<JpaGroupNotification>): NotificationGroup {
+    fun toDomain(group: JpaNotificationGroup, groupOwner: JpaGroupMember): NotificationGroup {
         // Persistence Entity가 Domain Entity로 변환이 된다는 것은, 기본적으로 영속화가 되어 id가 존재한다는 의미이다.
         // id field는 기본적으로 nullable 이지만, 영속화 된 id field를 조회하기위해 identifier를 이용한다.
-        logger.debug("jpaGroup: ${group.identifier} will be cast to domainGroup")
         val domainGroup = NotificationGroup(
             id = group.identifier,
             name = group.name,
             description = group.description,
-            ownerId = group.ownerId,
+            owner = memberMapper.toDomain(groupOwner),
             password = group.password,
             type = group.type,
-            members = members.map { memberMapper.toDomain(it) }.toMutableSet(),
-            notifications = notifications.map { notificationMapper.toDomain(it) }.toMutableSet()
         )
         logger.debug("cast completed")
 

@@ -10,23 +10,23 @@ import java.util.UUID
  */
 interface NotificationGroupQueryUseCase {
 
-    /**
-     * retrieve group member
-     * @param loginId login user id
-     * @param groupId group id
-     * @param memberId target member id want to retrieve info
-     * @return GroupMemberDto
-     */
-    fun retrieveGroupMember(loginId: UUID, groupId: UUID, memberId: UUID): GroupMemberDto
-
-    /**
-     * retrieve group members
-     * if group doesn't contain login user, throw ForbiddenException
-     * @param loginId login user id
-     * @param groupId group id
-     * @return List<GroupMemberDto>
-     */
-    fun retrieveGroupMembers(loginId: UUID, groupId: UUID): List<GroupMemberDto>
+//    /**
+//     * retrieve group member
+//     * @param loginId login user id
+//     * @param groupId group id
+//     * @param memberId target member id want to retrieve info
+//     * @return GroupMemberDto
+//     */
+//    fun retrieveGroupMember(loginId: UUID, groupId: UUID, memberId: UUID): GroupMemberDto
+//
+//    /**
+//     * retrieve group members
+//     * if group doesn't contain login user, throw ForbiddenException
+//     * @param loginId login user id
+//     * @param groupId group id
+//     * @return List<GroupMemberDto>
+//     */
+//    fun retrieveGroupMembers(loginId: UUID, groupId: UUID): List<GroupMemberDto>
 
     /**
      * retrieve group notifications

@@ -25,10 +25,12 @@ enum class GroupServiceErrorCode(
     GROUP_NOTIFICATION_CONTENTS_EMPTY(HttpStatus.BAD_REQUEST, "GRPN-002", "Group notification contents is empty"),
     GROUP_NOTIFICATION_CONTENTS_TOO_LONG(HttpStatus.BAD_REQUEST, "GRPN-003", "Group notification contents length must smaller than 1000 characters"),
     GROUP_NOTIFICATION_RESERVED_AT_EMPTY(HttpStatus.BAD_REQUEST, "GRPN-004", "Group notification type is schedules, but scheduledAt is empty."),
-    GROUP_NOTIFICATION_GROUP_ID_MISMATCH(HttpStatus.BAD_REQUEST, "GRPN-005", "Group notification group id mismatch"),
+    GROUP_NOTIFICATION_GROUP_ID_MISMATCH(HttpStatus.FORBIDDEN, "GRPN-005", "Group notification group id mismatch"),
     GROUP_NOTIFICATION_CANNOT_UPDATE_CONTENTS(HttpStatus.BAD_REQUEST, "GRPN-006", "Group notification is immediately type, so cannot update contents"),
     GROUP_NOTIFICATION_SENDER_MISMATCH(HttpStatus.FORBIDDEN, "GRPN-007", "Group notification sender mismatch"),
     GROUP_NOTIFICATION_INVALID_TYPE(HttpStatus.BAD_REQUEST, "GRPN-008", "Group notification type is invalid"),
     GROUP_NOTIFICATION_RESERVED_AT_INVALID(HttpStatus.BAD_REQUEST, "GRPN-009", "ReservedAt must be future time"),
     GROUP_NOTIFICATION_NOT_EXISTS(HttpStatus.NOT_FOUND, "GRPN-010", "Group notification not exists"),
+    GROUP_NOTIFICATION_EXCEED_LIMIT(HttpStatus.FORBIDDEN, "GRPN-011", "Group notification exceed today's limit"),
+    GROUP_NOTIFICATION_MEMBER_ID_MISTMATCH(HttpStatus.FORBIDDEN, "GRPN-012", "Group notification member id mismatch"),
 }

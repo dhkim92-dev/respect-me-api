@@ -13,7 +13,9 @@ import java.util.UUID
 @Repository
 interface JpaGroupMemberRepository: JpaRepository<JpaGroupMember, UUID> {
 
-    fun findByMemberIdInAndGroupId(memberIds: List<UUID>, groupId: UUID): List<JpaGroupMember>
+    fun findByMemberIdInAndGroupId(memberId: List<UUID>, groupId: UUID): List<JpaGroupMember>
+
+    fun findByGroupIdAndMemberId(groupId: UUID, memberId: UUID): JpaGroupMember?
 
     fun findByGroupId(groupId: UUID): List<JpaGroupMember>
 

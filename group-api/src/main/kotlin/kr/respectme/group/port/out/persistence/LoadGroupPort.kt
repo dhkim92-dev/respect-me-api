@@ -19,7 +19,7 @@ interface LoadGroupPort {
      * @param memberIds list of member id want to load
      * @param notificationIds list of notification id want to load
      */
-    fun loadGroup(groupId: UUID, memberIds: List<UUID> = emptyList(), notificationIds: List<UUID> = emptyList()): NotificationGroup?
+    fun loadGroup(groupId: UUID): NotificationGroup?
 
     /**
      * load Group Members

@@ -26,7 +26,7 @@ class JpaMemberLoadAdapter(
     }
 
     override fun getMembersInList(memberIds: List<UUID>): List<Member> {
-        return jpaMemberRepository.findAllById(memberIds)
+        return jpaMemberRepository.findByIds(memberIds)
             .map{ memberMapper.toDomainEntity(it) }
     }
 

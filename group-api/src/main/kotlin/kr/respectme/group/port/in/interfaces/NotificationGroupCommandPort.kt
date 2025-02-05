@@ -9,11 +9,5 @@ interface NotificationGroupCommandPort {
 
     fun updateNotificationGroup(loginId: UUID, groupId: UUID, request: GroupModifyRequest): NotificationGroupResponse
 
-    fun addGroupMember(loginId: UUID, groupId: UUID, request: GroupMemberCreateRequest): GroupMemberResponse
-
-    fun removeGroupMember(loginId: UUID, groupId: UUID, targetMemberId: UUID)
-
     fun deleteNotificationGroup(loginId: UUID,groupID: UUID)
-
-    fun createNotification(loginId: UUID, groupId: UUID, request: NotificationCreateRequest): NotificationCommandResponse
 }

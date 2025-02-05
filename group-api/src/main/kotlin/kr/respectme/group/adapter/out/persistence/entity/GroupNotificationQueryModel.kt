@@ -1,5 +1,6 @@
 package kr.respectme.group.adapter.out.persistence.entity
 
+import kr.respectme.group.domain.notifications.Notification
 import kr.respectme.group.domain.notifications.NotificationStatus
 import kr.respectme.group.domain.notifications.NotificationType
 import kr.respectme.group.port.`in`.interfaces.vo.NotificationGroupVo
@@ -20,6 +21,4 @@ data class GroupNotificationQueryModel(
     val createdAt: Instant = Instant.now(),
     val updatedAt: Instant? = null,
     val lastSentAt: Instant? = null,
-) {
-
-}
+) {}

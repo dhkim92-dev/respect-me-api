@@ -5,8 +5,7 @@ import io.kotest.core.extensions.Extension
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.shouldBe
-import jakarta.persistence.EntityManager
-import kr.respectme.group.adapter.out.persistence.JpaQueryNotificationAdapter
+import kr.respectme.group.adapter.out.persistence.JpaLoadNotificationAdapter
 import kr.respectme.group.adapter.out.persistence.entity.JpaGroupMember
 import kr.respectme.group.adapter.out.persistence.entity.JpaNotificationGroup
 import kr.respectme.group.adapter.out.persistence.entity.notifications.JpaGroupNotification
@@ -16,12 +15,9 @@ import kr.respectme.group.adapter.out.persistence.repository.JpaGroupNotificatio
 import kr.respectme.group.adapter.out.persistence.repository.JpaGroupRepository
 import kr.respectme.group.domain.GroupMemberRole
 import kr.respectme.group.domain.notifications.NotificationStatus
-import kr.respectme.group.port.out.persistence.QueryNotificationPort
 import kr.respectme.group.support.config.TestConfig
 import kr.respectme.group.support.createJpaGroup
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import java.util.UUID
 
@@ -37,7 +33,7 @@ class JpaQueryNotificationAdapterTest(
     private lateinit var members: List<JpaGroupMember>
     private lateinit var groups: List<JpaNotificationGroup>
     private lateinit var notifications: List<JpaGroupNotification>
-    private val jpaQueryNotificationAdapter = JpaQueryNotificationAdapter(qf)
+    private val jpaQueryNotificationAdapter = JpaLoadNotificationAdapter(qf)
 
     override fun extensions(): List<Extension> {
         return listOf(SpringExtension)
@@ -86,7 +82,7 @@ class JpaQueryNotificationAdapterTest(
 
     @Test()
     fun `그룹에 발행된 오늘 메시지 수를 조회한다`() {
-        val result = jpaQueryNotificationAdapter.findTodayNotificationCount(groups[0].identifier)
+        val result = jpaQueryNotificationAdapter.countTodayGroupNotification(groups[0].identifier)
         result shouldBe 3
     }
 
