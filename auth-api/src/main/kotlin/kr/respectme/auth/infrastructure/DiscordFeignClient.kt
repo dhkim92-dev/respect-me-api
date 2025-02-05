@@ -1,4 +1,4 @@
-package kr.respectme.group.infrastructures.discord
+package kr.respectme.auth.infrastructure
 
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.PostMapping

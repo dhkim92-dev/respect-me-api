@@ -12,4 +12,12 @@ interface JpaMemberRepository: JpaRepository<JpaMemberEntity, UUID> {
 
     @Query("SELECT m FROM member m LEFT JOIN FETCH m.deviceTokens WHERE m.id = :memberId")
     fun findByIdWithDeviceTokens(memberId: UUID): JpaMemberEntity?
+
+    @Query("""
+        SELECT m 
+        FROM member m 
+        JOIN FETCH m.deviceTokens
+        WHERE m.id IN :memberIds
+    """)
+    fun findByIds(memberIds: List<UUID>): List<JpaMemberEntity>
 }

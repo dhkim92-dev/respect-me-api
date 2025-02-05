@@ -1,4 +1,4 @@
-package kr.respectme.group.infrastructures.discord
+package kr.respectme.auth.infrastructure
 
 data class Embed(
     val title: String,
