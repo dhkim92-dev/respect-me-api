@@ -6,12 +6,15 @@ package kr.respectme.file.domain
 //import jakarta.persistence.Id
 //
 //@Entity
-//class FileAccessPoint(
+//class ImageFileMetadata(
 //    @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
 //    val id: Long? = null,
-//    val storageType: FileStorateType = FileStorageType.Local,
-//    val origin: String,
-//    val uri: String
-//){
+//    val type: ImageType,
+//    val fileSize: Long,
+//    val fileName: String,
+//    val width: Int,
+//    val height: Int
+//) {
+//
 //}

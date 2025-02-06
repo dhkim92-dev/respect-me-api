@@ -7,7 +7,7 @@ import java.io.ByteArrayInputStream
 import javax.imageio.ImageIO
 
 
-class MultipartFileImageValidateProcessor: ConstraintValidator<MultipartFileImageValidate, MultipartFile> {
+class ThumbnailImageValidator: ConstraintValidator<ThumbnailImageValidate, MultipartFile> {
 
     private final val TARGET_WIDTH = 128
     private final val TARGET_HEIGHT = 128

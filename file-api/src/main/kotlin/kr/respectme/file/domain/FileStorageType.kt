@@ -1,4 +1,4 @@
-package domain
+package kr.respectme.file.domain
 
 enum class FileStorageType {
     Local,
