@@ -16,7 +16,7 @@ data class GroupQueryModelDto(
     val ownerInfo: GroupMemberVo = GroupMemberVo(),
     val memberCount: Int = 0,
     val createdAt: Instant = Instant.now(),
-    val groupThumbnail: String? = null,
+    val thumbnail: String? = null,
     val myRole: GroupMemberRole = GroupMemberRole.MEMBER
 ){
 
@@ -30,7 +30,7 @@ data class GroupQueryModelDto(
             ownerInfo = model.ownerInfo,
             memberCount = model.memberCount,
             createdAt = model.createdAt,
-            groupThumbnail = model.groupThumbnail,
+            thumbnail = model.groupThumbnail,
             myRole = model.myRole
         )
     }

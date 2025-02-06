@@ -44,7 +44,16 @@ class NotificationGroup(
     private var description: String,
     private var password: String? = null,
     private var type: GroupType = GroupType.GROUP_PRIVATE,
+    private var thumbnail: String? = null
 ): BaseDomainEntity<UUID>(id) {
+
+    fun changeThumbnail(thumbnail: String?) {
+        this.thumbnail = thumbnail
+    }
+
+    fun getThumbnail(): String? {
+        return thumbnail
+    }
 
     fun getCreatedAt(): Instant {
         return createdAt

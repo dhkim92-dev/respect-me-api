@@ -33,12 +33,13 @@ class NotificationGroupCommandService(
             name = command.groupName,
             description = command.groupDescription,
             type = command.groupType,
+            thumbnail = command.groupImageUrl
         )
 
         val owner = GroupMember(
             memberId = loginId,
             groupId = group.id,
-            nickname = "group-owner",
+            nickname = command.groupOwnerNickname,
             memberRole = GroupMemberRole.OWNER
         )
 
@@ -65,6 +66,8 @@ class NotificationGroupCommandService(
         group.changeGroupType(command.type)
         group.changeGroupDescription(command.description)
         group.changePassword(passwordEncoder, command.password)
+        group.changeThumbnail(command.thumbnail)
+
         logger.info("[GroupModifyEvent] group modify request accepted, modified by member : ${loginId}" +
                 "group name : ${group.getName()} group type : ${group.getType()} group description : ${group.getDescription()}")
 

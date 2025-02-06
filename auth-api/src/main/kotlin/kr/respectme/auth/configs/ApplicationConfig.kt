@@ -22,21 +22,21 @@ class ApplicationConfig(private val objectMapper: ObjectMapper) {
             .clientConnector(ReactorClientHttpConnector(HttpClient.create().followRedirect(true)))
             .build()
     }
-
-    @Bean
-    fun exceptionHandler() : GeneralExceptionHandlerAdvice {
-        return GeneralExceptionHandlerAdvice(objectMapper)
-    }
-
-    @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    fun envelopResponseAdvice(): EnvelopPatternResponseBodyAdvice {
-        return EnvelopPatternResponseBodyAdvice()
-    }
-
-    @Bean
-    @Order(Ordered.LOWEST_PRECEDENCE)
-    fun cursorPaginationAdvice(): CursorPaginationAdvice {
-        return CursorPaginationAdvice()
-    }
+//
+//    @Bean
+//    fun exceptionHandler() : GeneralExceptionHandlerAdvice {
+//        return GeneralExceptionHandlerAdvice(objectMapper)
+//    }
+//
+//    @Bean
+//    @Order(Ordered.HIGHEST_PRECEDENCE)
+//    fun envelopResponseAdvice(): EnvelopPatternResponseBodyAdvice {
+//        return EnvelopPatternResponseBodyAdvice()
+//    }
+//
+//    @Bean
+//    @Order(Ordered.LOWEST_PRECEDENCE)
+//    fun cursorPaginationAdvice(): CursorPaginationAdvice {
+//        return CursorPaginationAdvice()
+//    }
 }

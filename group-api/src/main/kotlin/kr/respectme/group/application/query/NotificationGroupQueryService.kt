@@ -43,9 +43,8 @@ class NotificationGroupQueryService(
             ?: throw ForbiddenException(GROUP_MEMBER_NOT_MEMBER)
 
         return loadNotificationPort.findNotificationsByGroupId(groupId, cursor, PageRequest.of(0, size+1))
-            .sortedBy { it.id }
-            .reversed()
-            .map{ it -> NotificationQueryModelDto.valueOf(it) }
+            .content
+            .map{ NotificationQueryModelDto.valueOf(it) }
     }
 
     @Transactional(readOnly = true)
@@ -64,8 +63,6 @@ class NotificationGroupQueryService(
     @Transactional(readOnly = true)
     override fun retrieveMemberGroups(loginId: UUID): List<GroupQueryModelDto> {
         return queryGroupPort.getMemberGroups(loginId)
-            .sortedBy { it.id }
-            .reversed()
             .map{ GroupQueryModelDto.valueOf(it) }
     }
 
@@ -73,8 +70,6 @@ class NotificationGroupQueryService(
     override fun retrieveAllGroups(loginId: UUID, cursorGroupId: UUID?, size: Int?): List<GroupQueryModelDto> {
         val querySize = size?.let{ it + 1 } ?: 21
         return queryGroupPort.getAllGroups(cursorGroupId, querySize)
-            .sortedBy { it.id }
-            .reversed()
             .map{ GroupQueryModelDto.valueOf(it) }
     }
 

@@ -27,10 +27,9 @@ data class NotificationCreateCommand(
                 memberId = memberId,
                 content = request.content,
                 type = request.type,
-                scheduledAt = request.scheduledAt,
-                dayOfWeeks = request.dayOfWeeks,
-                dayInterval = request.dayInterval,
-//                triggerTime = request.triggerTime?.let{ it.withOffsetSameInstant(ZoneOffset.UTC) }
+                scheduledAt = null,
+                dayOfWeeks = null,
+                dayInterval = null
             )
         }
     }
