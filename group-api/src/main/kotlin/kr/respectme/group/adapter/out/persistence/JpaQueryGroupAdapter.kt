@@ -54,7 +54,7 @@ class JpaQueryGroupAdapter(
                 ),
                 member.id.countDistinct().intValue(),
                 group.createdAt,
-                Expressions.nullExpression(String::class.java),
+                group.thumbnail,
                 me.memberRole.coalesce(GroupMemberRole.GUEST)
             )
         )
@@ -106,7 +106,7 @@ class JpaQueryGroupAdapter(
                 ),
                 member.id.countDistinct().intValue(),
                 group.createdAt,
-                Expressions.nullExpression(String::class.java),
+                group.thumbnail,
                 me.memberRole.coalesce(GroupMemberRole.GUEST)
             )
         )
@@ -147,7 +147,7 @@ class JpaQueryGroupAdapter(
                 ),
                 member.id.countDistinct().intValue(),
                 group.createdAt,
-                Expressions.nullExpression(String::class.java),
+                group.thumbnail,
                 Expressions.asEnum(GroupMemberRole.GUEST)
             )
         )

@@ -24,7 +24,7 @@ data class NotificationGroupDto(
                 name = group.getName(),
                 ownerId = group.getOwnerId(),
                 description = group.getDescription(),
-                imageUrl = "",
+                imageUrl = group.getThumbnail(),
                 groupType = group.getType(),
                 createdAt = group.getCreatedAt(),
             )

@@ -7,6 +7,7 @@ data class GroupCreateCommand(
     val groupType: GroupType,
     val groupName: String,
     val groupDescription: String,
+    val groupOwnerNickname: String,
     val groupPassword: String?=null,
     val groupImageUrl: String?=null
 ) {
@@ -17,7 +18,9 @@ data class GroupCreateCommand(
             return GroupCreateCommand(
                 groupType = request.type!!,
                 groupName = request.name,
-                groupDescription = request.description
+                groupDescription = request.description,
+                groupOwnerNickname = request.ownerNickname,
+                groupImageUrl = request.thumbnail,
             )
         }
     }

@@ -7,6 +7,7 @@ import java.util.*
 data class GroupModifyCommand(
     val name: String?,
     val description: String?,
+    val thumbnail: String?,
     val type: GroupType?,
     val password: String?,
 ) {
@@ -19,6 +20,7 @@ data class GroupModifyCommand(
                 description = request.description,
                 type = request.type,
                 password = request.password,
+                thumbnail = request.thumbnail
             )
         }
     }

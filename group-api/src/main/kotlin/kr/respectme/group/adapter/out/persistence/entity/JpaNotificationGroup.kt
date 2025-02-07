@@ -23,7 +23,7 @@ class JpaNotificationGroup(
     id: UUID?= null,
     @Column(length=512)
     var description: String = "",
-    @Column(length=64)
+    @Column(length=12)
     var name: String = "",
     @Column(length=255)
     var password: String? = null,
@@ -32,7 +32,9 @@ class JpaNotificationGroup(
     @Column
     var ownerId: UUID = UUID.randomUUID(),
     @Column
-    var isDeleted: Boolean = false
+    var isDeleted: Boolean = false,
+    @Column(nullable = true)
+    var thumbnail: String? = null
 ): BaseEntity<Any?>(id) {
 
 }

@@ -199,7 +199,7 @@ class JpaLoadNotificationAdapter(
             NotificationGroupVo::class.java,
             group.id,
             group.name,
-            NullExpression<String>(String::class.java) // TODO Thumbnil 적용 필요
+            group.thumbnail
         )
     }
 

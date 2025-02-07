@@ -7,23 +7,25 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 
-@AutoConfiguration
+
 @Configuration
-class RespectMeDefaultAdviceConfig(private val objectMapper: ObjectMapper) {
+@AutoConfiguration
+class AdviceConfig(private val objectMapper: ObjectMapper) {
+
     @Bean
-    fun exceptionHandler() : GeneralExceptionHandlerAdvice {
+    fun generalExceptionHandler(): GeneralExceptionHandlerAdvice {
         return GeneralExceptionHandlerAdvice(objectMapper)
     }
 
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
-    fun envelopResponseAdvice(): EnvelopPatternResponseBodyAdvice {
+    fun envelopPatternResponseBodyAdvice(): EnvelopPatternResponseBodyAdvice {
         return EnvelopPatternResponseBodyAdvice()
     }
 
     @Bean
     @Order(Ordered.LOWEST_PRECEDENCE)
-    fun cursorPaginationAdvice(): CursorPaginationAdvice {
+    fun cursorPaginationResponseBodyAdvice(): CursorPaginationAdvice {
         return CursorPaginationAdvice()
     }
 }

@@ -1,7 +1,5 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
-import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     kotlin("jvm") version "1.9.24"
@@ -104,4 +102,3 @@ tasks {
 tasks.test {
     useJUnitPlatform()
 }
-

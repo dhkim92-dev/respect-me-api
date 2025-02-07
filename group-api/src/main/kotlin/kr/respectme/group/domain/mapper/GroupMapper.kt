@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component
 @Component
 class GroupMapper(
     private val memberMapper: GroupMemberMapper,
-    private val notificationMapper: NotificationMapper
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -26,6 +25,7 @@ class GroupMapper(
             owner = memberMapper.toDomain(groupOwner),
             password = group.password,
             type = group.type,
+            thumbnail = group.thumbnail
         )
         logger.debug("cast completed")
 
@@ -42,7 +42,8 @@ class GroupMapper(
             description = group.getDescription(),
             ownerId = group.getOwnerId(),
             password = group.getPassword(),
-            type = group.getType()
+            type = group.getType(),
+            thumbnail = group.getThumbnail()
         )
 
         return entity

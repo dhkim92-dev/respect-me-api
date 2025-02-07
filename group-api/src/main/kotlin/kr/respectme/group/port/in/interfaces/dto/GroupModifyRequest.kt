@@ -15,7 +15,9 @@ data class GroupModifyRequest(
     @Schema(example = "PUBLIC", description = "그룹 타입, 수정하지 않는다면 null 또는 field를 제외")
     val type: GroupType?,
     @Schema(example = "password", description = "그룹 비밀번호, 수정하지 않는다면 null 또는 field를 제외")
-    val password: String?
+    val password: String?,
+    @Schema(example = "thumbnail", description = "그룹 썸네일, 썸네일 삭제 시 null 그외 수정은 URL 입력")
+    val thumbnail: String?
 ) {
 
 }

@@ -1,6 +1,7 @@
 package kr.respectme.group.port.`in`.interfaces.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.annotation.Nullable
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import kr.respectme.group.domain.notifications.DayOfWeek
@@ -20,13 +21,13 @@ data class NotificationCreateRequest(
             "REPEATED_DAY_INTERVAL: 매일 일정 간격 <br/>")
     @field: NotNull(message = "Notification type must not be null or empty.")
     val type: NotificationType,
-    @Schema(required = false, example = "2021-08-01T00:00:00Z", description = "예약 알람 시간, 타입이 SCHEDULED 일 때 필수")
-    val scheduledAt: Instant? = null,
+//    @Schema(required = false, example = "2021-08-01T00:00:00Z", description = "예약 알람 시간, 타입이 SCHEDULED 일 때 필수")
+//    val scheduledAt: Instant? = null,
 //    @Schema(required = false, example = "12:00:00Z", description = "반복 알람 시간, 타입이 REPEATED_WEEKLY 또는 REPEATED_INTERVAL 일 때 필수")
 //    val triggerTime: OffsetTime? = null,
-    @Schema(required = false, example = "[MONDAY, TUESDAY]", description = "반복 알람 요일, 타입이 REPEATED_WEEKLY 일 때 필수")
-    val dayOfWeeks: List<DayOfWeek>? = null,
-    @Schema(required = false, example = "1", description = "반복 알람 일 간격, 타입이 REPEATED_DAY_INTERVAL 일 때 필수")
-    val dayInterval: Int? = null
+//    @Schema(required = false, example = "[MONDAY, TUESDAY]", description = "반복 알람 요일, 타입이 REPEATED_WEEKLY 일 때 필수")
+//    val dayOfWeeks: List<DayOfWeek>? = null,
+//    @Schema(required = false, example = "1", description = "반복 알람 일 간격, 타입이 REPEATED_DAY_INTERVAL 일 때 필수")
+//    val dayInterval: Int? = null
 ) {
 }

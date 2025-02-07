@@ -18,7 +18,7 @@ data class NotificationGroupQueryResponse(
     @Schema(description = "그룹 설명")
     val description: String,
     @Schema(description = "그룹 이미지 URL")
-    val imageUrl: String?,
+    val thumbnail: String?,
     @Schema(description = "그룹 타입", example = "GROUP_PUBLIC")
     val groupType: GroupType = GroupType.GROUP_PUBLIC,
     @Schema(description = "그룹 멤버 수")
@@ -35,7 +35,7 @@ data class NotificationGroupQueryResponse(
                 name = dto.name,
                 groupOwner = dto.ownerInfo,
                 description = dto.description,
-                imageUrl = dto.groupThumbnail,
+                thumbnail = dto.thumbnail,
                 groupType = dto.type,
                 memberCount = dto.memberCount,
                 myRole = dto.myRole

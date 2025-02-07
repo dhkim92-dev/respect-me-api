@@ -1,15 +1,16 @@
 package kr.respectme.group.port.`in`.interfaces.dto
 
+import io.swagger.v3.oas.annotations.media.Schema
 import kr.respectme.group.application.dto.group.NotificationGroupDto
-import kr.respectme.group.domain.GroupMemberRole
 import java.util.*
 
+@Schema(name = "NotificationGroupResponse", description = "알림 그룹 커맨드 요청에 대한 응답 객체")
 data class NotificationGroupResponse(
     val groupId: UUID,
     val groupName: String,
     val ownerId: UUID,
     val groupDescription: String,
-    val groupImageUrl: String? = null,
+    val groupThumbnail: String? = null,
     val groupType: String,
 ) {
     companion object {
@@ -22,7 +23,7 @@ data class NotificationGroupResponse(
                 groupName = groupDto.name,
                 ownerId = groupDto.ownerId,
                 groupDescription = groupDto.description,
-                groupImageUrl = groupDto.imageUrl,
+                groupThumbnail = groupDto.imageUrl,
                 groupType = groupDto.groupType.name,
             )
         }
