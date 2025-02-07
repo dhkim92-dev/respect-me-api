@@ -72,8 +72,9 @@ class ErrorResponse(
                     .map { error ->
                         val invalidValue = error.invalidValue?.toString() ?: ""
                         val index = error.propertyPath.toString().indexOf(".")
-                        val propertyPath = error.propertyPath.toString().substring(index + 1)
-                        FieldError(propertyPath, invalidValue, error.message)
+//                        val propertyPath = error.propertyPath.toString().substring(index + 1)
+                        val propertyPath = error.propertyPath.toString().split(".").last()
+                        FieldError(propertyPath, invalidValue, error.message ?: "Validation error")
                     }
             }
         }

@@ -22,15 +22,21 @@ class MemberAuthInfoTest : AnnotationSpec() {
 
         // When
         // MemberAuthInfo를 생성하면
-        val member = MemberAuthInfo(id, email, password, oidcAuth, lastLoginAt)
+        val member = MemberAuthInfo(
+            memberId = id,
+            email = email,
+            password = password,
+            oidcAuth = oidcAuth,
+            lastLoginAt = lastLoginAt
+        )
 
         // Then
         // 객체가 정상적으로 생성된다.
-        member.memberId shouldBe id
-        member.email shouldBe email
-        member.password shouldBe password
-        member.oidcAuth shouldBe oidcAuth
-        member.lastLoginAt shouldBe lastLoginAt
+        member.getMemberId() shouldBe id
+        member.getEmail() shouldBe email
+        member.getPassword() shouldBe password
+        member.getOidcAuth() shouldBe oidcAuth
+        member.getLastLoginAt() shouldBe lastLoginAt
     }
 
     @Test
@@ -44,8 +50,20 @@ class MemberAuthInfoTest : AnnotationSpec() {
         val oidcAuth = OidcAuth()
         val lastLoginAt = Instant.now()
 
-        val member1 = MemberAuthInfo(id1, email, password, oidcAuth, lastLoginAt)
-        val member2 = MemberAuthInfo(id2, email, password, oidcAuth, lastLoginAt)
+        val member1 = MemberAuthInfo(
+            memberId = id1,
+            email = email,
+            password = password,
+            oidcAuth = oidcAuth,
+            lastLoginAt = lastLoginAt
+        )
+        val member2 = MemberAuthInfo(
+            memberId = id2,
+            email = email,
+            password = password,
+            oidcAuth = oidcAuth,
+            lastLoginAt = lastLoginAt
+        )
 
         // When
         // 두 객체를 비교하면
@@ -69,7 +87,18 @@ class MemberAuthInfoTest : AnnotationSpec() {
 
         // When
         // 두 객체의 hashCode를 비교하면
-        val result = MemberAuthInfo(id1, email, password, oidcAuth, lastLoginAt).hashCode() == MemberAuthInfo(id2, email, password, oidcAuth, lastLoginAt).hashCode()
+        val result = MemberAuthInfo(
+            memberId = id1,
+            email = email,
+            password = password,
+            oidcAuth = oidcAuth,
+            lastLoginAt = lastLoginAt
+        ).hashCode() == MemberAuthInfo(
+            memberId = id2,
+            email = email,
+            password = password,
+            oidcAuth = oidcAuth,
+            lastLoginAt = lastLoginAt).hashCode()
 
         // Then
         // 다르다고 나온다.

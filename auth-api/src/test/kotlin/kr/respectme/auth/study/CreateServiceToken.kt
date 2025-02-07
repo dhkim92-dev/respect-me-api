@@ -82,6 +82,40 @@ class CreateServiceToken {
         println("RESPECT_ME_SERVICE_ACCOUNT_TOKEN: ${Base64.Default.encode(token.encodeToByteArray())}")
     }
 
+    @OptIn(ExperimentalEncodingApi::class)
+    @Test
+    fun `파일 서비스 Access Token 생성`() {
+        val token = JWT.create()
+            .withIssuer(jwtConfigs.issuer)
+            .withSubject("0194e02c-8cef-70bf-a45b-ec1501f7c679")
+            .withClaim("email", "file_service@respect-me.kr")
+            .withClaim("nickname", "file_service")
+            .withArrayClaim("roles", arrayOf("ROLE_SERVICE"))
+            .withClaim("isActivated", true)
+            .withIssuedAt(Instant.now())
+            .withExpiresAt(Instant.now().plusMillis(jwtConfigs.accessTokenExpiry*1000L))
+            .sign(accessTokenAlgorithm)
+        println("Message Service Access token : ${token}")
+        println("RESPECT_ME_SERVICE_ACCOUNT_TOKEN: ${Base64.Default.encode(token.encodeToByteArray())}")
+    }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    @Test
+    fun `신고 서비스 Access Token 생성`() {
+        val token = JWT.create()
+            .withIssuer(jwtConfigs.issuer)
+            .withSubject("0194e02e-5a79-77f0-90df-03d6e7bab1b6")
+            .withClaim("email", "report_service@respect-me.kr")
+            .withClaim("nickname", "report_service")
+            .withArrayClaim("roles", arrayOf("ROLE_SERVICE"))
+            .withClaim("isActivated", true)
+            .withIssuedAt(Instant.now())
+            .withExpiresAt(Instant.now().plusMillis(jwtConfigs.accessTokenExpiry*1000L))
+            .sign(accessTokenAlgorithm)
+        println("Message Service Access token : ${token}")
+        println("RESPECT_ME_SERVICE_ACCOUNT_TOKEN: ${Base64.Default.encode(token.encodeToByteArray())}")
+    }
+
     private fun createMemberAccessToken(member: TestMember) {
         val token = JWT.create()
             .withIssuer(jwtConfigs.issuer)

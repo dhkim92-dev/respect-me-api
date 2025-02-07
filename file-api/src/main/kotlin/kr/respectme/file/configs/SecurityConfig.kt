@@ -1,6 +1,10 @@
 package kr.respectme.file.configs
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import kr.respectme.common.security.handler.EntrypointUnauthorizedHandler
+import kr.respectme.common.security.handler.JwtAccessDeniedHandler
+import kr.respectme.common.security.jwt.JwtAuthenticationFilter
+import kr.respectme.common.security.jwt.JwtAuthenticationProvider
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -11,8 +15,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
 import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.access.ExceptionTranslationFilter
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher
+import org.springframework.security.web.util.matcher.OrRequestMatcher
+import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -21,33 +28,45 @@ import org.springframework.web.filter.CorsFilter
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
+    @Value("\${respect-me.msa.auth-api.url}")
+    private val authUrl: String,
     private val objectMapper: ObjectMapper,
     @Value("\${server.cors.allowed-origins}")
-    private val allowedOriginsString: String
+    private val allowedOriginsString: String,
+    private val jwtAuthenticationProvider: JwtAuthenticationProvider
 ) {
-
-    private val allowedOrigins = allowedOriginsString.split(",")
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    private val allowedOrigins: List<String> by lazy {
+        allowedOriginsString.split(",")
+    }
 
+    fun excludePathMatcher(): RequestMatcher {
+        val pathMatchers = listOf(
+//            AntPathRequestMatcher("/api/v1/notification-groups", "POST"),
+//            AntPathRequestMatcher("/api/v1/notification-groups", "GET"),
+            AntPathRequestMatcher("/static/**"),
+            AntPathRequestMatcher("/swagger-ui/**"),
+            AntPathRequestMatcher("/v3/**"),
+            AntPathRequestMatcher("/api-docs/**"),
+        )
+        return OrRequestMatcher(*pathMatchers.toTypedArray())
+    }
+
+    fun jwtAuthenticationFilter(): JwtAuthenticationFilter {
+        return JwtAuthenticationFilter(excludePathMatcher(), jwtAuthenticationProvider, objectMapper)
+    }
+
+    //
     @Bean
-    fun corsConfig(): CorsConfiguration {
-        val config = CorsConfiguration()
-        //allowedOrigins.forEach { origin -> config.addAllowedOrigin(origin) }
-        logger.info("allowedOrigins: ${allowedOrigins.joinToString(", ") }")
-        config.allowedOrigins = allowedOrigins
-        config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
-        config.allowedHeaders = listOf("*")
-        config.allowCredentials = true
-        return config
+    fun unauthorizedEntryPoint(): EntrypointUnauthorizedHandler {
+        return EntrypointUnauthorizedHandler()
     }
 
     @Bean
-    fun corsConfigurationSource(): CorsConfigurationSource {
-        val source = UrlBasedCorsConfigurationSource()
-        source.registerCorsConfiguration("/**", corsConfig())
-        return source
+    fun accessDeniedHandler(): JwtAccessDeniedHandler {
+        return JwtAccessDeniedHandler()
     }
 
     @Bean
@@ -59,20 +78,44 @@ class SecurityConfig(
     }
 
     @Bean
+    fun corsConfig(): CorsConfiguration {
+        val config = CorsConfiguration()
+        config.allowedOrigins = allowedOrigins;
+        config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS");
+        config.allowedHeaders = listOf("*");
+        return config;
+    }
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", corsConfig())
+        return source
+    }
+
+    @Bean
     fun corsFilter(): CorsFilter {
         return CorsFilter(corsConfigurationSource())
     }
 
     @Bean
     fun httpSecurity(http: HttpSecurity): SecurityFilterChain {
-        http.httpBasic { it.disable() }
-            .formLogin { it.disable() }
-            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
-            .cors { it.configurationSource(corsConfigurationSource()) }
+        logger.debug("httpSecurity called.")
+        return http.httpBasic { it.disable() }
             .csrf { it.disable() }
-            .authorizeHttpRequests{
+            .formLogin { it.disable() }
+            .cors { it -> it.configurationSource(corsConfigurationSource()) }
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .addFilterAfter(jwtAuthenticationFilter(), ExceptionTranslationFilter::class.java)
+            .exceptionHandling { it ->
+                it.accessDeniedHandler(accessDeniedHandler())
+                it.authenticationEntryPoint(unauthorizedEntryPoint())
+            }
+            .authorizeHttpRequests {
+                it.requestMatchers("/internal/**").hasRole("SERVICE")
+                it.requestMatchers("/api/v1/**").hasAnyRole("MEMBER", "ADMIN", "SERVICE")
                 it.anyRequest().permitAll()
             }
-        return http.build()
+            .build()
     }
 }

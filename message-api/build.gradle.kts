@@ -10,7 +10,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.2.1"
+version = "0.2.2"
 
 repositories {
     mavenCentral()
@@ -38,7 +38,7 @@ dependencies {
     implementation(project(":common"))
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
     implementation("org.springframework.kafka:spring-kafka")
-    implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
+//    implementation("jakarta.servlet:jakarta.servlet-api:6.0.0")
     implementation("com.google.firebase:firebase-admin:9.3.0")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
 

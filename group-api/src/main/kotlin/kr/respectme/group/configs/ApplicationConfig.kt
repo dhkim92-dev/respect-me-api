@@ -19,7 +19,7 @@ class ApplicationConfig: WebMvcConfigurer {
         resolvers.add(LoginMemberResolver())
         super.addArgumentResolvers(resolvers)
     }
-
+//
 //    @Bean
 //    fun envelopPatternResponseBodyAdvice(): EnvelopPatternResponseBodyAdvice {
 //        return EnvelopPatternResponseBodyAdvice()

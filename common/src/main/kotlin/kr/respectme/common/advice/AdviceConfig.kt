@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
 
 
 @Configuration
@@ -16,11 +18,13 @@ class AdviceConfig(private val objectMapper: ObjectMapper) {
     }
 
     @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     fun envelopPatternResponseBodyAdvice(): EnvelopPatternResponseBodyAdvice {
         return EnvelopPatternResponseBodyAdvice()
     }
 
     @Bean
+    @Order(Ordered.LOWEST_PRECEDENCE)
     fun cursorPaginationResponseBodyAdvice(): CursorPaginationAdvice {
         return CursorPaginationAdvice()
     }

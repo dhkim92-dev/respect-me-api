@@ -22,7 +22,7 @@ class ApplicationConfig(private val objectMapper: ObjectMapper) {
             .clientConnector(ReactorClientHttpConnector(HttpClient.create().followRedirect(true)))
             .build()
     }
-//
+
 //    @Bean
 //    fun exceptionHandler() : GeneralExceptionHandlerAdvice {
 //        return GeneralExceptionHandlerAdvice(objectMapper)
