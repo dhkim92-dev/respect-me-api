@@ -25,19 +25,13 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 @RestControllerAdvice
 class GeneralExceptionHandlerAdvice(
     private val objectMapper: ObjectMapper,
-    private val messageExporter: ErrorExporter? = null
 ){
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private fun exportMessage() {
-
-    }
-
     @ExceptionHandler(value = [BusinessException::class])
     fun handleBusinessException(e: BusinessException): ResponseEntity<ErrorResponse> {
         logger.error("BusinessException occured: ${e.message}")
-        exportMessage()
         return ResponseEntity.status(e.status).body(ErrorResponse.of(status = e.status, code = e.code, message = e.message))
     }
 

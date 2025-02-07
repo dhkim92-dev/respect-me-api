@@ -20,20 +20,20 @@ class ApplicationConfig: WebMvcConfigurer {
         super.addArgumentResolvers(resolvers)
     }
 
-    @Bean
-    fun envelopPatternResponseBodyAdvice(): EnvelopPatternResponseBodyAdvice {
-        return EnvelopPatternResponseBodyAdvice()
-    }
-
-    @Bean
-    fun cursorPaginationAdvice(): CursorPaginationAdvice {
-        return CursorPaginationAdvice()
-    }
-
-    @Bean
-    fun generalErrorHandler(objectMapper: ObjectMapper): GeneralExceptionHandlerAdvice {
-        return GeneralExceptionHandlerAdvice(objectMapper)
-    }
+//    @Bean
+//    fun envelopPatternResponseBodyAdvice(): EnvelopPatternResponseBodyAdvice {
+//        return EnvelopPatternResponseBodyAdvice()
+//    }
+//
+//    @Bean
+//    fun cursorPaginationAdvice(): CursorPaginationAdvice {
+//        return CursorPaginationAdvice()
+//    }
+//
+//    @Bean
+//    fun generalErrorHandler(objectMapper: ObjectMapper): GeneralExceptionHandlerAdvice {
+//        return GeneralExceptionHandlerAdvice(objectMapper)
+//    }
 
     @Bean
     fun passwordEncoder(): PasswordEncoder {
