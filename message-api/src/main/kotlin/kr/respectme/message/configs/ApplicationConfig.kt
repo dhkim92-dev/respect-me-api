@@ -28,19 +28,19 @@ class ApplicationConfig(
     fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder(10)
     }
-
-    @Bean
-    fun envelopPatternResponseBodyAdvice(): EnvelopPatternResponseBodyAdvice {
-        return EnvelopPatternResponseBodyAdvice()
-    }
-
-    @Bean
-    fun cursorPaginationAdvice(): CursorPaginationAdvice {
-        return CursorPaginationAdvice()
-    }
-
-    @Bean
-    fun generalExceptionHandler(): GeneralExceptionHandlerAdvice {
-        return GeneralExceptionHandlerAdvice(objectMapper)
-    }
+//
+//    @Bean
+//    fun envelopPatternResponseBodyAdvice(): EnvelopPatternResponseBodyAdvice {
+//        return EnvelopPatternResponseBodyAdvice()
+//    }
+//
+//    @Bean
+//    fun cursorPaginationAdvice(): CursorPaginationAdvice {
+//        return CursorPaginationAdvice()
+//    }
+//
+//    @Bean
+//    fun generalExceptionHandler(): GeneralExceptionHandlerAdvice {
+//        return GeneralExceptionHandlerAdvice(objectMapper)
+//    }
 }
