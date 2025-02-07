@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kr.respectme.common.annotation.LoginMember
 import kr.respectme.common.error.NotFoundException
@@ -16,10 +17,13 @@ import kr.respectme.file.common.errors.FileErrorCode
 import kr.respectme.file.domain.enum.ImageFormat
 import kr.respectme.file.domain.enum.ImageType
 import kr.respectme.file.port.`in`.interfaces.ThumbnailPort
+import kr.respectme.file.port.`in`.interfaces.dto.ThumbnailUploadRequest
 import kr.respectme.file.port.`in`.interfaces.dto.ThumbnailUploadResponse
 import kr.respectme.file.port.`in`.interfaces.vo.FileOwner
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
@@ -28,6 +32,7 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/v1/files")
+@Tag(name = "File API", description = "파일 CRUD API 모음")
 class RestImageFileUploadAdapter(
     private val thumbnailUseCase: ThumbnailUseCase
 ): ThumbnailPort {
@@ -41,13 +46,11 @@ class RestImageFileUploadAdapter(
     override fun createThumbnail(
         @LoginMember
         loginId: UUID,
-        @Schema(description = "이미지 파일", required = true, type = "string", format = "binary")
-        @RequestPart(required = true)
-        @ImageBytes
-        image: MultipartFile
+        @ModelAttribute
+        @Valid request: ThumbnailUploadRequest
     ): ThumbnailUploadResponse {
         return ThumbnailUploadResponse.valueOf(
-            thumbnailUseCase.createThumbnail(loginId, command = ImageFileCreateCommand.of(image))
+            thumbnailUseCase.createThumbnail(loginId, command = ImageFileCreateCommand.of(request.image))
         )
     }
 }

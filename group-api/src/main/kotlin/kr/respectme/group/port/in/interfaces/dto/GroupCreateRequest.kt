@@ -18,7 +18,7 @@ data class GroupCreateRequest(
     val description: String = "",
 
     @Schema(required = true, example = "PRIVATE", description = "그룹 타입")
-    @field: NotBlank(message = "Group type must not be null or empty.")
+//    @field: NotBlank(message = "Group type must not be null or empty.")
     val type: GroupType = GroupType.GROUP_PRIVATE,
 
     @Schema(required = true, description = "그룹 썸네일 URL")

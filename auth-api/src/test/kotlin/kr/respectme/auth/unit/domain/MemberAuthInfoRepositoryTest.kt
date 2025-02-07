@@ -27,7 +27,7 @@ class MemberAuthInfoRepositoryTest(
     @Test
     fun `findByEmail Success Test`() {
         // Given
-        val email = memberInfos.get(0).email;
+        val email = memberInfos.get(0).getEmail();
 
         // When
         val member = memberAuthInfoRepository.findByEmail(email)
@@ -52,8 +52,8 @@ class MemberAuthInfoRepositoryTest(
     fun `findByOidcAuthPlatformAndOidcAuthUserIdentifier Success Test`() {
         // Given
         val member = memberInfos.get(0)
-        val platform = member.oidcAuth.platform
-        val identifier = member.oidcAuth.userIdentifier
+        val platform = member.getOidcAuth().platform
+        val identifier = member.getOidcAuth().userIdentifier
 
         // When
         val result = memberAuthInfoRepository.findByOidcAuthPlatformAndOidcAuthUserIdentifier(platform, identifier!!)
@@ -80,8 +80,8 @@ class MemberAuthInfoRepositoryTest(
     fun `existsByOidcAuthPlatformAndOidcAuthUserIdentifier Success Test`() {
         // Given
         val member = memberInfos.get(0)
-        val platform = member.oidcAuth.platform
-        val identifier = member.oidcAuth.userIdentifier
+        val platform = member.getOidcAuth().platform
+        val identifier = member.getOidcAuth().userIdentifier
 
         // When
         val result = memberAuthInfoRepository.existsByOidcAuthPlatformAndOidcAuthUserIdentifier(platform, identifier!!)

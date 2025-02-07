@@ -38,7 +38,7 @@ class RestGroupCommandAdapter(
     @ApplicationResponse(status = HttpStatus.CREATED, message = "notification group created.")
     override fun createNotificationGroup(
         @LoginMember loginId: UUID,
-        @RequestBody request: GroupCreateRequest
+        @RequestBody @Valid request: GroupCreateRequest
     ): NotificationGroupResponse {
         val command = GroupCreateCommand.of(request)
         return NotificationGroupResponse.valueOf(

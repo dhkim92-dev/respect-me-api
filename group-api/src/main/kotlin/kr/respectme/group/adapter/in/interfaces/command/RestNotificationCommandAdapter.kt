@@ -53,7 +53,7 @@ class RestNotificationCommandAdapter(
         @LoginMember loginId: UUID,
         @PathVariable groupId: UUID,
         @PathVariable notificationId: UUID,
-        @RequestBody request: NotificationModifyRequest
+        @RequestBody @Valid request: NotificationModifyRequest
     ): NotificationCommandResponse {
         val command = NotificationModifyCommand.valueOf(request)
         return NotificationCommandResponse.valueOf(

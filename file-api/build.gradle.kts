@@ -10,7 +10,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.2.2"
+version = "0.0.4"
 
 repositories {
     mavenCentral()
@@ -73,19 +73,19 @@ kapt {
         arg("querydsl.jpa", true)
     }
 }
-//
-//tasks.register<DockerBuildImage>("buildTestImage") {
-//    dependsOn("bootJar")
-//    inputDir.set(file(".")) // Dockerfile이 위치한 경로 (프로젝트 root 경로)
-//    images.add("elensar92/respect-me-file-api:${version}-test")
-//    file = "docker"
-//}
-//
-//tasks.register<DockerPushImage>("pushTestImage") {
-//    dependsOn("buildTestImage")
-//    images.add("elensar92/respect-me-file-api:${version}-test")
-//    file = "docker"
-//}
+
+tasks.register<DockerBuildImage>("buildTestImage") {
+    dependsOn("bootJar")
+    inputDir.set(file(".")) // Dockerfile이 위치한 경로 (프로젝트 root 경로)
+    images.add("elensar92/respect-me-file-api:${version}-test")
+    group = "docker"
+}
+
+tasks.register<DockerPushImage>("pushTestImage") {
+    dependsOn("buildTestImage")
+    images.add("elensar92/respect-me-file-api:${version}-test")
+    group = "docker"
+}
 
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
     archiveBaseName.set("${rootProject.group}.file-api")

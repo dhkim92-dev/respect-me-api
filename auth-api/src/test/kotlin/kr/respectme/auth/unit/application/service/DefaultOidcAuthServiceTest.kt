@@ -45,14 +45,14 @@ class DefaultOidcAuthServiceTest: BehaviorSpec({
         val keyPair = createRSAKeyPair()
         val idToken = createSampleGoogleIdToken(
             keyPair = keyPair,
-            sub = memberAuthInfo.memberId!!.id.toString(),
-            email = memberAuthInfo.email,
+            sub = memberAuthInfo.getMemberId().id.toString(),
+            email = memberAuthInfo.getEmail()
         )
 
         When("회원 정보가 존재하지 않으면") {
             val member = createMemberEntityFromMemberService(
-                id = memberAuthInfo.memberId!!.id,
-                email = memberAuthInfo.email,
+                id = memberAuthInfo.getMemberId().id,
+                email = memberAuthInfo.getEmail()
             )
 
             every { authInfoRepository.findByEmail(any()) } returns null
@@ -76,8 +76,8 @@ class DefaultOidcAuthServiceTest: BehaviorSpec({
 
         When("회원 정보가 존재하면") {
             val member = createMemberEntityFromMemberService(
-                id = memberAuthInfo.memberId!!.id,
-                email = memberAuthInfo.email,
+                id = memberAuthInfo.getMemberId()!!.id,
+                email = memberAuthInfo.getEmail(),
             )
 
             every { authInfoRepository.findByEmail(any()) } returns memberAuthInfo
