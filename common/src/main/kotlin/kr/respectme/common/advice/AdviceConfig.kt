@@ -18,13 +18,13 @@ class AdviceConfig(private val objectMapper: ObjectMapper) {
     }
 
     @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
+    @Order(Ordered.LOWEST_PRECEDENCE)
     fun envelopPatternResponseBodyAdvice(): EnvelopPatternResponseBodyAdvice {
         return EnvelopPatternResponseBodyAdvice()
     }
 
     @Bean
-    @Order(Ordered.LOWEST_PRECEDENCE)
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     fun cursorPaginationResponseBodyAdvice(): CursorPaginationAdvice {
         return CursorPaginationAdvice()
     }

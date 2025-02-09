@@ -38,15 +38,19 @@ class CursorPaginationAdvice: ResponseBodyAdvice<Any?> {
         val handler = servletRequestAttributes?.getAttribute("org.springframework.web.servlet.HandlerMapping.bestMatchingHandler", 0)
                 as? HandlerMethod
         val params = handler?.methodParameters?.filter { it.hasParameterAnnotation(CursorParam::class.java) }
+        logger.debug("cursor pagination param : ${params.toString()}")
         val queryMap = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes)
             .request
             .parameterMap
         logger.debug(params?.map{it.parameterName}.toString())
 
+        logger.debug("body : ${body.toString()}")
         return if (body is List<*>) {
+            logger.debug("cursor pagination advice beforeBodyWrite body is list")
             params?.let { PaginationUtility.toCursorList(body, params.toList(), queryMap) }
                 ?: body
         } else {
+            logger.debug("cursor pagination advice beforeBodyWrite body is not list")
             body
         }
     }
