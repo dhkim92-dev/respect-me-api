@@ -164,6 +164,48 @@ class JpaQueryGroupAdapter(
             .fetch()
     }
 
+    override fun getGroupsByNameContainsKeyword(
+        keyword: String,
+        cursor: UUID?,
+        size: Int
+    ): List<NotificationGroupQueryModel> {
+        val group = QJpaNotificationGroup.jpaNotificationGroup
+        val member = QJpaGroupMember.jpaGroupMember
+        val owner = QJpaGroupMember("owner")
+
+        return qf.select(
+            Projections.constructor(
+                NotificationGroupQueryModel::class.java,
+                group.id,
+                group.type,
+                group.name,
+                group.description,
+                Projections.constructor(
+                    GroupMemberVo::class.java,
+                    owner.memberId,
+                    owner.nickname,
+                    owner.profileImageUrl,
+                    owner.createdAt,
+                    owner.memberRole
+                ),
+                member.id.countDistinct().intValue(),
+                group.createdAt,
+                group.thumbnail,
+                Expressions.asEnum(GroupMemberRole.GUEST)
+            ))
+            .from(group)
+            .leftJoin(member).on(member.groupId.eq(group.id))
+            .leftJoin(owner).on(owner.groupId.eq(group.id).and(owner.memberRole.eq(GroupMemberRole.OWNER)))
+            .where(group.name.contains(keyword))
+            .limit(size.toLong())
+            .groupBy(
+                group.id,
+                owner.id,
+            )
+            .orderBy(group.id.desc())
+            .fetch()
+    }
+
     private fun lessOrEqualGroupId(cursor: UUID?): BooleanExpression {
         val group = QJpaNotificationGroup.jpaNotificationGroup
         return if (cursor != null) {
