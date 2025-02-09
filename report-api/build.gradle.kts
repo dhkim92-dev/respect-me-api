@@ -12,28 +12,16 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.2.3"
-
-repositories {
-    mavenCentral()
-}
-
 allOpen {
     annotation("jakarta.persistence.Entity")
     annotation("jakarta.persistence.MappedSuperclass")
     annotation("jakarta.persistence.Embeddable")
 }
 
-kotlin {
-    compilerOptions {
-        freeCompilerArgs.add("-Xjsr305=strict")
-    }
-}
+version = "0.0.1"
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
+repositories {
+    mavenCentral()
 }
 
 dependencies {
@@ -57,7 +45,7 @@ dependencies {
     // query dsl
     implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
     implementation("com.querydsl:querydsl-apt:5.1.0:jakarta")
-    kapt("com.querydsl:querydsl-apt:5.1.0:jakarta")
+
     kapt("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -66,45 +54,39 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core:4.4.3")
     testImplementation("io.kotest:kotest-extensions-spring:4.4.3")
     testImplementation("com.ninja-squad:springmockk:4.0.2")
-
 }
 
-kapt {
-    correctErrorTypes = true
-    arguments {
-        arg("querydsl.jpa", true)
-    }
-}
 
 tasks.register<DockerBuildImage>("buildTestImage") {
     dependsOn("bootJar")
     inputDir.set(file(".")) // Dockerfile이 위치한 경로 (프로젝트 root 경로)
-    images.add("elensar92/respect-me-group-api:${version}-test")
+    images.add("elensar92/respect-me-report-api:${version}-test")
     group = "docker"
 }
 
 tasks.register<DockerPushImage>("pushTestImage") {
     dependsOn("buildTestImage")
-    images.add("elensar92/respect-me-group-api:${version}-test")
+    images.add("elensar92/respect-me-report-api:${version}-test")
     group = "docker"
 }
 
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
-    archiveBaseName.set("${rootProject.group}.group-api")
+    archiveBaseName.set("${rootProject.group}.report-api")
     archiveVersion.set("latest")
 }
-
-
-
-tasks {
-    bootRun {
-        jvmArgs = listOf("-Dspring.profiles.active=local")
-    }
-}
-
-
 
 tasks.test {
     useJUnitPlatform()
 }
 
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xjsr305=strict")
+    }
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
