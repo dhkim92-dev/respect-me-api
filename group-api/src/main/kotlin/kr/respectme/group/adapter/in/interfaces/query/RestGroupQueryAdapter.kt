@@ -7,6 +7,7 @@ import kr.respectme.common.annotation.ApplicationResponse
 import kr.respectme.common.annotation.CursorPagination
 import kr.respectme.common.annotation.CursorParam
 import kr.respectme.common.annotation.LoginMember
+import kr.respectme.group.application.dto.group.GroupSearchParams
 import kr.respectme.group.application.query.useCase.NotificationGroupQueryUseCase
 import kr.respectme.group.port.`in`.interfaces.vo.GroupMemberVo
 import kr.respectme.group.port.`in`.interfaces.dto.GroupNotificationQueryResponse
@@ -56,17 +57,34 @@ class RestGroupQueryAdapter(private val queryUseCase: NotificationGroupQueryUseC
         )
     }
 
+//    @GetMapping("notification-groups")
+//    @Operation(summary = "모든 그룹 목록을 반환.", description = "모든 그룹 목록을 CursorList 타입으로 래핑하여 반환합니다." +
+//            "<br/> CursorList 는 다음 페이지가 있을 경우 next 필드에 다음 페이지 조회 URL을 포함합니다.")
+//    @ApplicationResponse(status = HttpStatus.OK, message = "all groups retrieved.")
+//    @CursorPagination
+//    override fun getAllGroups(
+//        @LoginMember loginId: UUID,
+//        @CursorParam(key="id") @RequestParam(required = false) cursor: UUID?,
+//        @RequestParam(required = false, defaultValue = "20") size: Int?
+//    ): List<NotificationGroupQueryResponse> {
+//        return queryUseCase.retrieveAllGroups(loginId, cursor, size)
+//            .map { it -> NotificationGroupQueryResponse.valueOf(it) }
+//    }
+
     @GetMapping("notification-groups")
-    @Operation(summary = "모든 그룹 목록을 반환.", description = "모든 그룹 목록을 CursorList 타입으로 래핑하여 반환합니다." +
+    @Operation(summary = "그룹 검색 결과 목록을 반환.", description = "검색 대상 그룹을 CursorList 타입으로 래핑하여 반환합니다." +
             "<br/> CursorList 는 다음 페이지가 있을 경우 next 필드에 다음 페이지 조회 URL을 포함합니다.")
     @ApplicationResponse(status = HttpStatus.OK, message = "all groups retrieved.")
     @CursorPagination
-    override fun getAllGroups(
+    override fun getGroupsBySearchParams(
         @LoginMember loginId: UUID,
-        @CursorParam(key="id") @RequestParam(required = false) cursor: UUID?,
-        @RequestParam(required = false, defaultValue = "20") size: Int?
+        @RequestParam(required = true)
+        keyword: String,
+        @RequestParam(required = false)
+        cursor: UUID?,
+        @RequestParam(defaultValue = "20") size: Int?
     ): List<NotificationGroupQueryResponse> {
-        return queryUseCase.retrieveAllGroups(loginId, cursor, size)
+        return queryUseCase.retrieveGroupsBySearchParam(GroupSearchParams(keyword = keyword), cursor, size)
             .map { it -> NotificationGroupQueryResponse.valueOf(it) }
     }
 }
