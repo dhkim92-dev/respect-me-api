@@ -12,7 +12,7 @@ import java.util.UUID
 data class NotificationQueryModelDto(
     val id: UUID = UUID.randomUUID(),
     val type: NotificationType = NotificationType.IMMEDIATE,
-    val groupInfo: NotificationGroupVo,
+    var groupInfo: NotificationGroupVo,
     val status: NotificationStatus = NotificationStatus.PENDING,
     val writer: Writer = Writer(),
     val content: String = "",
@@ -26,11 +26,15 @@ data class NotificationQueryModelDto(
 
     companion object {
 
-        fun valueOf(model: GroupNotificationQueryModel): NotificationQueryModelDto {
+        fun valueOf(model: GroupNotificationQueryModel, url: String?): NotificationQueryModelDto {
             return NotificationQueryModelDto(
                 id = model.id,
                 type = model.type,
-                groupInfo = model.groupInfo,
+                groupInfo = NotificationGroupVo(
+                    model.groupInfo.id,
+                    model.groupInfo.name,
+                    url
+                ),
                 status = model.status,
                 writer = model.writer,
                 content = model.content,

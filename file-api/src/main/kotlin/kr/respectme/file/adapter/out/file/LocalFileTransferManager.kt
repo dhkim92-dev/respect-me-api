@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import java.io.File
+import java.util.*
 
 @Service
 @Profile("local", "test")
@@ -45,5 +46,10 @@ class LocalFileTransferManager(
             logger.error("파일 삭제 실패, full path : ${fullPath} error message : ${e.message}")
             throw e
         }
+    }
+
+    override fun getFileAccessUrl(rootDir: String, accessKey: UUID?): String? {
+
+        return accessKey?.let{cdnAccessPointBuilder.buildAccessUrl(rootDir, accessKey.toString(), "jpg")} ?: null
     }
 }

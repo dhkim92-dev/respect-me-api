@@ -34,7 +34,7 @@ class JpaNotificationGroup(
     @Column
     var isDeleted: Boolean = false,
     @Column(nullable = true)
-    var thumbnail: String? = null
+    var thumbnail: Long? = null
 ): BaseEntity<Any?>(id) {
 
 }

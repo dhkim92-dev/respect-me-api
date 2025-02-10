@@ -1,9 +1,7 @@
 package kr.respectme.group.application.dto.group
 
-import kr.respectme.group.domain.GroupMemberRole
 import kr.respectme.group.domain.GroupType
 import kr.respectme.group.domain.NotificationGroup
-import kr.respectme.group.port.`in`.interfaces.vo.GroupMemberVo
 import java.time.Instant
 import java.util.UUID
 
@@ -13,7 +11,7 @@ data class NotificationGroupDto(
     val ownerId: UUID = UUID.randomUUID(),
     val description: String="",
     val createdAt: Instant=Instant.now(),
-    val imageUrl: String?=null,
+    val thumbnail: Long?=null,
     val groupType: GroupType=GroupType.GROUP_PRIVATE
 ) {
 
@@ -24,7 +22,7 @@ data class NotificationGroupDto(
                 name = group.getName(),
                 ownerId = group.getOwnerId(),
                 description = group.getDescription(),
-                imageUrl = group.getThumbnail(),
+                thumbnail = group.getThumbnail(),
                 groupType = group.getType(),
                 createdAt = group.getCreatedAt(),
             )

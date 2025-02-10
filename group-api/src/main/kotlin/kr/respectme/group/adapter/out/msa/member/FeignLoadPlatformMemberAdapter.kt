@@ -1,7 +1,7 @@
-package kr.respectme.group.adapter.`in`.msa.member
+package kr.respectme.group.adapter.out.msa.member
 
-import kr.respectme.group.port.`in`.msa.member.dto.PlatformMember
-import kr.respectme.group.port.`in`.msa.member.LoadPlatformMemberPort
+import kr.respectme.group.port.out.msa.member.dto.PlatformMember
+import kr.respectme.group.port.out.msa.member.LoadPlatformMemberPort
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

@@ -4,6 +4,7 @@ import feign.RequestInterceptor
 import io.micrometer.tracing.Tracer
 import jakarta.servlet.http.HttpServletResponse
 import kr.respectme.common.annotation.ServiceAccount
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.cloud.openfeign.FeignClientFactory
@@ -20,6 +21,8 @@ class FeignClientConfig(
     private val tracer: Tracer
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @Bean
     fun headerInterceptor(): RequestInterceptor {
 
@@ -30,13 +33,17 @@ class FeignClientConfig(
                 template.header("X-B3-SpanId", it.context().spanId())
             }
 
-            if(template.url().startsWith("/internal/api/**")) {
+
+            if(template.url().startsWith("/internal/api/")
+                || template.url().startsWith("/api/v1/auth/jwt/verification/requirements")) {
+                logger.debug("FeignClientConfig headerInterceptor: {}", serviceConfig.accessToken)
                 template.header("Authorization", "Bearer ${serviceConfig.accessToken}")
-            } else if(template.url().startsWith("/api/**")) {
+            } else if(template.url().startsWith("/api/v1/")) {
                 (RequestContextHolder.getRequestAttributes() as ServletRequestAttributes)
                 .request
                 .getHeader("Authorization")
                 ?.let { bearer ->
+                    logger.debug("FeignClientConfig headerInterceptor: {}", bearer)
                     template.header("Authorization", bearer)
                 }
             }

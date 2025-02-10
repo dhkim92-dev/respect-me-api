@@ -194,9 +194,9 @@ class JpaLoadNotificationAdapter(
 
     private fun getGroupInfo(
         group: QJpaNotificationGroup
-    ): ConstructorExpression<NotificationGroupVo> {
+    ): ConstructorExpression<GroupInfoVo> {
         return Projections.constructor(
-            NotificationGroupVo::class.java,
+            GroupInfoVo::class.java,
             group.id,
             group.name,
             group.thumbnail

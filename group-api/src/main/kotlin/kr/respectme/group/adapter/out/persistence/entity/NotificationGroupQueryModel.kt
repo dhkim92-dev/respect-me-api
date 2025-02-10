@@ -14,7 +14,7 @@ data class NotificationGroupQueryModel(
     var ownerInfo: GroupMemberVo = GroupMemberVo(),
     val memberCount: Int = 0,
     val createdAt: Instant = Instant.now(),
-    val groupThumbnail: String? = null,
+    var groupThumbnail: Long? = null,
     var myRole: GroupMemberRole = GroupMemberRole.GUEST
 ) {
 

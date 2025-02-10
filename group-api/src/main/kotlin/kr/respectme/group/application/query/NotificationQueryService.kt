@@ -6,6 +6,8 @@ import kr.respectme.group.application.dto.notification.NotificationCountDto
 import kr.respectme.group.application.dto.notification.NotificationQueryModelDto
 import kr.respectme.group.application.query.useCase.NotificationQueryUseCase
 import kr.respectme.group.common.errors.GroupServiceErrorCode
+import kr.respectme.group.port.out.msa.file.LoadImagePort
+import kr.respectme.group.port.out.msa.file.dto.LoadImagesRequest
 import kr.respectme.group.port.out.persistence.LoadMemberPort
 import kr.respectme.group.port.out.persistence.LoadNotificationPort
 import org.springframework.data.domain.PageRequest
@@ -17,7 +19,8 @@ import java.util.*
 @Service
 class NotificationQueryService(
     private val loadNotificationPort: LoadNotificationPort,
-    private val loadMemberPort: LoadMemberPort
+    private val loadMemberPort: LoadMemberPort,
+    private val loadImagePort: LoadImagePort
 ): NotificationQueryUseCase {
 
     private final val GROUP_ALARM_LIMIT_PER_DAYS = 5
@@ -33,8 +36,13 @@ class NotificationQueryService(
 
         val member = loadMemberPort.findByGroupIdAndMemberId(notification.groupInfo.id, memberId)
             ?: throw ForbiddenException(GroupServiceErrorCode.GROUP_MEMBER_NOT_MEMBER)
-
-        return NotificationQueryModelDto.valueOf(notification)
+        val response = try {
+            loadImagePort.getImageInfos(LoadImagesRequest.valueOf(notification.groupInfo))
+        } catch(e: Exception) {
+            null
+        }
+        val thumbnail = response?.data?.firstOrNull()
+        return NotificationQueryModelDto.valueOf(notification, thumbnail?.url)
     }
 
     @Transactional(readOnly = true)
@@ -45,9 +53,20 @@ class NotificationQueryService(
         val member = loadMemberPort.findByGroupIdAndMemberId(groupId, memberId)
             ?: throw ForbiddenException(GroupServiceErrorCode.GROUP_MEMBER_NOT_MEMBER)
 
-        return loadNotificationPort.findNotificationsByGroupId(groupId, cursorId, PageRequest.of(0, size+1))
+        val notifications = loadNotificationPort.findNotificationsByGroupId(groupId, cursorId, PageRequest.of(0, size+1))
             .content
-            .map{ NotificationQueryModelDto.valueOf(it) }
+
+        val thumbnailIds = notifications.mapNotNull { it.groupInfo.imageId }
+        val thumbnailMap = try {
+            loadImagePort.getImageInfos(LoadImagesRequest(thumbnailIds))
+                .data
+                .associateBy({ it.id }, { it.url })
+        } catch(e: Exception) {
+            null
+        }
+
+        val result = notifications.map { NotificationQueryModelDto.valueOf(it, thumbnailMap?.get(it.groupInfo.imageId)) }
+        return result
     }
 
     @Transactional(readOnly = true)
@@ -56,9 +75,20 @@ class NotificationQueryService(
         cursorId: UUID?,
         size: Int
     ): List<NotificationQueryModelDto> {
-        return loadNotificationPort.findByMemberId(memberId, cursorId, PageRequest.of(0, size+1))
+        val notifications = loadNotificationPort.findByMemberId(memberId, cursorId, PageRequest.of(0, size+1))
             .content
-            .map { NotificationQueryModelDto.valueOf(it) }
+
+        val thumbnailIds = notifications.mapNotNull { it.groupInfo.imageId }
+        val thumbnailMap = try {
+            loadImagePort.getImageInfos(LoadImagesRequest(thumbnailIds))
+                .data
+                .associateBy({ it.id }, { it.url })
+        } catch(e: Exception) {
+            null
+        }
+
+        val result = notifications.map { NotificationQueryModelDto.valueOf(it, thumbnailMap?.get(it.groupInfo.imageId)) }
+        return result
     }
 
     @Transactional(readOnly = true)

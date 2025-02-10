@@ -26,13 +26,13 @@ class ImageEntity(
     val width: Int = 128,
     @Column
     val height: Int = 128,
+    accessPoint: MutableSet<ImageFileAccessPoint> = mutableSetOf()
 ): BaseEntity(id) {
 
     @OneToMany(fetch = FetchType.LAZY,
-        orphanRemoval = true,
         mappedBy = "image",
         cascade = [CascadeType.ALL])
-    var accessPoint: MutableSet<ImageFileAccessPoint> = mutableSetOf()
+    var accessPoint: MutableSet<ImageFileAccessPoint> = accessPoint
         protected set;
 
     fun addAccessPoint(accessPoint: ImageFileAccessPoint) {

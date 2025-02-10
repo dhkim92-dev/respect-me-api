@@ -21,10 +21,8 @@ data class GroupCreateRequest(
 //    @field: NotBlank(message = "Group type must not be null or empty.")
     val type: GroupType = GroupType.GROUP_PRIVATE,
 
-    @Schema(required = true, description = "그룹 썸네일 URL")
-    @field: NotBlank(message = "Group thumbnail must not be null or empty.")
-    @field: Length(max=255, message = "Group thumbnail must be less than 255 characters.")
-    val thumbnail: String? = null,
+    @Schema(required = true, description = "썸네일 이미지 파일 ID, File API를 통해 업로드 후 받은 이미지 파일 id를 입력 해야 합니다.", example = "1")
+    val thumbnail: Long? = null,
 
     @Schema(required=true, description = "그룹 소유자 닉네임")
     @field: NotBlank(message = "Group owner nickname must not be null or empty.")

@@ -15,4 +15,5 @@ data class NotificationGroupVo(
     @Schema(description = "그룹 이미지 URL")
     val thumbnail: String? = null
 ) {
+
 }

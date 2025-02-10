@@ -1,5 +1,6 @@
 package kr.respectme.group.adapter.out.persistence.entity
 
+import kr.respectme.group.adapter.out.persistence.GroupInfoVo
 import kr.respectme.group.domain.notifications.Notification
 import kr.respectme.group.domain.notifications.NotificationStatus
 import kr.respectme.group.domain.notifications.NotificationType
@@ -11,7 +12,7 @@ import java.util.UUID
 data class GroupNotificationQueryModel(
     val id: UUID= UUID.randomUUID(),
     val type: NotificationType = NotificationType.IMMEDIATE,
-    val groupInfo: NotificationGroupVo,
+    val groupInfo: GroupInfoVo,
     val status: NotificationStatus = NotificationStatus.PENDING,
     val writer: Writer = Writer(),
     val content: String="",

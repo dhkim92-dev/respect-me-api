@@ -10,7 +10,7 @@ data class NotificationGroupResponse(
     val groupName: String,
     val ownerId: UUID,
     val groupDescription: String,
-    val groupThumbnail: String? = null,
+    val groupThumbnail: Long? = null,
     val groupType: String,
 ) {
     companion object {
@@ -23,7 +23,7 @@ data class NotificationGroupResponse(
                 groupName = groupDto.name,
                 ownerId = groupDto.ownerId,
                 groupDescription = groupDto.description,
-                groupThumbnail = groupDto.imageUrl,
+                groupThumbnail = groupDto.thumbnail,
                 groupType = groupDto.groupType.name,
             )
         }

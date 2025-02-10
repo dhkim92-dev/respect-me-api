@@ -9,7 +9,7 @@ data class GroupCreateCommand(
     val groupDescription: String,
     val groupOwnerNickname: String,
     val groupPassword: String?=null,
-    val groupImageUrl: String?=null
+    val groupThumbnailId: Long? = null,
 ) {
 
     companion object {
@@ -20,7 +20,7 @@ data class GroupCreateCommand(
                 groupName = request.name,
                 groupDescription = request.description,
                 groupOwnerNickname = request.ownerNickname,
-                groupImageUrl = request.thumbnail,
+                groupThumbnailId = request.thumbnail,
             )
         }
     }

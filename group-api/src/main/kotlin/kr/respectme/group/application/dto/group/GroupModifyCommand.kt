@@ -7,7 +7,7 @@ import java.util.*
 data class GroupModifyCommand(
     val name: String?,
     val description: String?,
-    val thumbnail: String?,
+    val thumbnail: Long?,
     val type: GroupType?,
     val password: String?,
 ) {

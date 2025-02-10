@@ -33,7 +33,7 @@ class NotificationGroupCommandService(
             name = command.groupName,
             description = command.groupDescription,
             type = command.groupType,
-            thumbnail = command.groupImageUrl
+            thumbnail = command.groupThumbnailId
         )
 
         val owner = GroupMember(

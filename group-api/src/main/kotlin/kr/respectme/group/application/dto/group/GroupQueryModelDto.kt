@@ -22,7 +22,7 @@ data class GroupQueryModelDto(
 
     companion object {
 
-        fun valueOf(model: NotificationGroupQueryModel) = GroupQueryModelDto(
+        fun valueOf(model: NotificationGroupQueryModel, url: String?) = GroupQueryModelDto(
             id = model.id,
             name = model.name,
             type = model.type,
@@ -30,7 +30,7 @@ data class GroupQueryModelDto(
             ownerInfo = model.ownerInfo,
             memberCount = model.memberCount,
             createdAt = model.createdAt,
-            thumbnail = model.groupThumbnail,
+            thumbnail = url,
             myRole = model.myRole
         )
     }

@@ -7,15 +7,16 @@ import java.util.UUID
 class ImageFileAccessPoint(
     id: Long? = null,
     @Column
-    val uploadKey: UUID
+    val uploadKey: UUID,
+    image: ImageEntity? = null,
 ): BaseEntity(id) {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id")
-    lateinit var image: ImageEntity
+    var image: ImageEntity? = image
         protected set;
 
-    fun setImageFileEntity(imageFile: ImageEntity) {
+    fun setImageFileEntity(imageFile: ImageEntity?) {
         this.image = imageFile
     }
 }

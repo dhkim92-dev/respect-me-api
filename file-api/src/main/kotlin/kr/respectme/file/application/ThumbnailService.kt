@@ -2,15 +2,20 @@ package kr.respectme.file.application
 
 import kr.respectme.file.application.dto.ImageFileCommandModelDto
 import kr.respectme.file.application.dto.ImageFileCreateCommand
+import kr.respectme.file.application.dto.ImageQueryModelDto
+import kr.respectme.file.application.dto.ImagesQuery
 import kr.respectme.file.application.usecase.ThumbnailUseCase
+import kr.respectme.file.common.utility.CDNAccessPointBuilder
 import kr.respectme.file.common.utility.ThumbnailMaker
 import kr.respectme.file.domain.ImageEntity
 import kr.respectme.file.domain.ImageFileAccessPoint
+import kr.respectme.file.domain.ImageQueryModel
 import kr.respectme.file.domain.enum.ImageFormat
 import kr.respectme.file.domain.enum.ImageType
 import kr.respectme.file.port.`in`.events.event.FileUploadedEvent
 import kr.respectme.file.port.out.file.FileUploadWrapper
 import kr.respectme.file.port.out.file.TransferManager
+import kr.respectme.file.port.out.persistent.LoadImagePort
 import kr.respectme.file.port.out.persistent.SaveImagePort
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -24,7 +29,8 @@ class ThumbnailService(
     private val thumbnailMaker: ThumbnailMaker,
     private val transferManager: TransferManager,
     private val saveImagePort: SaveImagePort,
-    private val applicationEventPublisher: ApplicationEventPublisher
+    private val loadImagePort: LoadImagePort,
+    private val applicationEventPublisher: ApplicationEventPublisher,
 ): ThumbnailUseCase {
 
     private final val THUMBNAIL_ROOT_DIR_NAME = "thumbnails"
@@ -61,6 +67,16 @@ class ThumbnailService(
         publishFileUploadedEvent(uploadResult.storedPath)
 
         return ImageFileCommandModelDto.valueOf(command.image, imageFile, uploadResult)
+    }
+
+    override fun getThumbnails(query: ImagesQuery): List<ImageQueryModelDto> {
+        val result =  loadImagePort.findByImageIn(query.imageIds)
+        val modelDtos = result.map { it ->
+            val url = transferManager.getFileAccessUrl(THUMBNAIL_ROOT_DIR_NAME, it.accessKey)
+            ImageQueryModelDto.valueOf(it, url)
+        }
+
+        return modelDtos
     }
 
     private fun publishFileUploadedEvent(fullPath: String) {

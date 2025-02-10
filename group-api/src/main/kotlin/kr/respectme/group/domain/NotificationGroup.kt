@@ -44,14 +44,14 @@ class NotificationGroup(
     private var description: String,
     private var password: String? = null,
     private var type: GroupType = GroupType.GROUP_PRIVATE,
-    private var thumbnail: String? = null
+    private var thumbnail: Long? = null
 ): BaseDomainEntity<UUID>(id) {
 
-    fun changeThumbnail(thumbnail: String?) {
+    fun changeThumbnail(thumbnail: Long?) {
         this.thumbnail = thumbnail
     }
 
-    fun getThumbnail(): String? {
+    fun getThumbnail(): Long? {
         return thumbnail
     }
 
