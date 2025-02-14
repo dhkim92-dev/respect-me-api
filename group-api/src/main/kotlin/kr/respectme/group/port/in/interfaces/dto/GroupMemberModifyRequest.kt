@@ -9,7 +9,6 @@ import java.util.UUID
 data class GroupMemberModifyRequest(
     @field: NotBlank(message = "nickname must not be null or empty.")
     @Schema(required = false, example = "nickname", description = "닉네임")
-    @field: Length(max=12, message = "nickname must be less than 12 characters.")
     val nickname: String? = null
 ){
 

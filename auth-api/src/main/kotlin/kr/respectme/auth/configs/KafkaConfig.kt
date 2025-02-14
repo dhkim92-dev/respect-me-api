@@ -25,7 +25,7 @@ class KafkaConfig(
     @Bean
     fun authInfoDeleteSuccessTopic(): NewTopic {
         val topicConfiguration = mutableMapOf<String, String>()
-        topicConfiguration["cleanup.policy"] = "compact"
+        topicConfiguration["cleanup.policy"] = "delete"
         topicConfiguration["retention.ms"] = "604800000" // 이건 7일 회원 탈퇴 이벤트는 7일간 보관된다.
         return NewTopic(SagaDefinitions.MEMBER_DELETE_SAGA_AUTH_DELETE_COMPLETED, 1, 1).configs(topicConfiguration)
     }
@@ -33,7 +33,7 @@ class KafkaConfig(
     @Bean
     fun authInfoDeleteFailedTopic(): NewTopic {
         val topicConfiguration = mutableMapOf<String, String>()
-        topicConfiguration["cleanup.policy"] = "compact"
+        topicConfiguration["cleanup.policy"] = "delete"
         topicConfiguration["retention.ms"] = "604800000" // 이건 7일 회원 탈퇴 이벤트는 7일간 보관된다.
         return NewTopic(SagaDefinitions.MEMBER_DELETE_SAGA_AUTH_DELETE_FAILED, 1, 1).configs(topicConfiguration)
     }

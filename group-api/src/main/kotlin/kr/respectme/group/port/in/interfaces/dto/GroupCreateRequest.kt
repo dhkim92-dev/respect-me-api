@@ -2,6 +2,7 @@ package kr.respectme.group.port.`in`.interfaces.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
+import kr.respectme.group.common.validator.NullOrLength
 import kr.respectme.group.domain.GroupType
 import org.hibernate.validator.constraints.Length
 
@@ -18,12 +19,11 @@ data class GroupCreateRequest(
     val description: String = "",
 
     @Schema(required = true, example = "PRIVATE", description = "그룹 타입")
-//    @field: NotBlank(message = "Group type must not be null or empty.")
+    @field: NotBlank(message = "Group type must not be null or empty.")
     val type: GroupType = GroupType.GROUP_PRIVATE,
 
-    @Schema(required = true, description = "그룹 썸네일 URL")
-    @field: NotBlank(message = "Group thumbnail must not be null or empty.")
-    @field: Length(max=255, message = "Group thumbnail must be less than 255 characters.")
+    @Schema(required = false, description = "그룹 썸네일 URL, 미지정 시 null, 그 외 최대 255자")
+    @field: NullOrLength(max=255, message = "Group thumbnail must be null or less than 255 characters.")
     val thumbnail: String? = null,
 
     @Schema(required=true, description = "그룹 소유자 닉네임")

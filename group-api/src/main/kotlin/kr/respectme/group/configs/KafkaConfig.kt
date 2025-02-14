@@ -25,11 +25,19 @@ class KafkaConfig(
 
     @Bean
     fun memberDeleteSagaGroupServiceCompletedTopic(): NewTopic {
-        return NewTopic(SagaDefinitions.MEMBER_DELETE_SAGA_GROUP_SERVICE_COMPLETED, 1, 1.toShort())
+        val topicConfiguration = mutableMapOf<String, String>()
+        topicConfiguration["cleanup.policy"] = "delete"
+        topicConfiguration["retention.ms"] = "604800000"
+        return NewTopic(SagaDefinitions.MEMBER_DELETE_SAGA_GROUP_SERVICE_COMPLETED, 1, 1)
+            .configs(topicConfiguration)
     }
 
     @Bean
     fun memberDeleteSagaGroupServiceFailedTopic(): NewTopic {
-        return NewTopic(SagaDefinitions.MEMBER_DELETE_SAGA_GROUP_SERVICE_FAILED, 1, 1.toShort())
+        val topicConfiguration = mutableMapOf<String, String>()
+        topicConfiguration["cleanup.policy"] = "delete"
+        topicConfiguration["retention.ms"] = "604800000"
+        return NewTopic(SagaDefinitions.MEMBER_DELETE_SAGA_GROUP_SERVICE_FAILED, 1, 1)
+            .configs(topicConfiguration)
     }
 }
