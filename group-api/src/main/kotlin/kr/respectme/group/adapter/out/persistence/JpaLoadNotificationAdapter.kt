@@ -22,6 +22,7 @@ import org.springframework.data.domain.Slice
 import org.springframework.data.domain.SliceImpl
 import org.springframework.stereotype.Repository
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 @Repository
@@ -132,7 +133,7 @@ class JpaLoadNotificationAdapter(
             .from(notification)
             .where(notification.groupId.eq(groupId)
                 .and(notification.createdAt.between(
-                    today.truncatedTo(java.time.temporal.ChronoUnit.DAYS),
+                    today.truncatedTo(ChronoUnit.DAYS),
                     today.plusSeconds(86399)
                 ))
             )

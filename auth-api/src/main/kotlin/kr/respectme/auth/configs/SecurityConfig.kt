@@ -77,7 +77,7 @@ class SecurityConfig(
             .cors { it.configurationSource(corsConfigurationSource()) }
             .csrf { it.disable() }
             .authorizeHttpRequests{
-                it.requestMatchers("/auth/swagger-ui.html", "/auth/v3/api-docs", "/auth/swagger-ui/**", "/auth/v3/api-docs/**").permitAll()
+                it.requestMatchers("/swagger-ui.html", "/swagger-ui/**","/v3/**", "/v3/api-docs/**", "/auth/swagger-ui.html", "/auth/v3/api-docs", "/auth/swagger-ui/**", "/auth/v3/api-docs/**").permitAll()
                 it.anyRequest().permitAll()
             }
         return http.build()

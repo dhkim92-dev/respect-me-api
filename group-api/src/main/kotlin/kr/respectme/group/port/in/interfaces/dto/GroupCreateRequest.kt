@@ -18,8 +18,7 @@ data class GroupCreateRequest(
     @field: Length(max=500, message = "Group description must be less than 500 characters.")
     val description: String = "",
 
-    @Schema(required = true, example = "PRIVATE", description = "그룹 타입")
-    @field: NotBlank(message = "Group type must not be null or empty.")
+    @Schema(required = true, example = "GROUP_PRIVATE", description = "그룹 타입")
     val type: GroupType = GroupType.GROUP_PRIVATE,
 
     @Schema(required = false, description = "그룹 썸네일 URL, 미지정 시 null, 그 외 최대 255자")

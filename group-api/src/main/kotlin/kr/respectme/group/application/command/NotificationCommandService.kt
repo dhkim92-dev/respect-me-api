@@ -31,6 +31,7 @@ class NotificationCommandService(
 : NotificationCommandUseCase {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+    private final val MAX_NOTIFICATION_COUNT_PER_DAY = 5
 
     @Transactional
     override fun createNotification(
@@ -49,7 +50,7 @@ class NotificationCommandService(
 
         val leftNotificationCount = loadNotificationPort.countTodayGroupNotification(groupId)
 
-        if(leftNotificationCount <= 0) {
+        if(leftNotificationCount > MAX_NOTIFICATION_COUNT_PER_DAY) {
             throw ForbiddenException(GroupServiceErrorCode.GROUP_NOTIFICATION_EXCEED_LIMIT)
         }
 
@@ -58,7 +59,7 @@ class NotificationCommandService(
             senderId = loginId,
             content = command.content,
             type = command.type,
-            status = NotificationStatus.PENDING
+            status = NotificationStatus.PUBLISHED
         )
 
         saveNotificationPort.saveNotification(notification)
