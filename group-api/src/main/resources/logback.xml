@@ -7,14 +7,7 @@
     <include resource="console-appender.xml"/>
     <include resource="logstash-appender.xml"/>
 
-    <!--    <springProfile name="local">-->
-    <!--        <property name="APP_ENV" value="local"/>-->
-    <!--        <root level="DEBUG">-->
-    <!--            <appender-ref ref = "CONSOLE"/>-->
-    <!--        </root>-->
-    <!--    </springProfile>-->
-
-    <springProfile name="local">
+    <springProfile name="local, test">
         <root level="DEBUG">
             <appender-ref ref = "CONSOLE"/>
         </root>
@@ -25,11 +18,4 @@
             <appender-ref ref = "LOGSTASH-TEST"/>
         </root>
     </springProfile>
-    <!---->
-    <!--    <springProfile name="prod">-->
-    <!--        <property name="APP_ENV" value="prod"/>-->
-    <!--        <root level="INFO">-->
-    <!--            <appender-ref ref = "LOGSTASH-PROD"/>-->
-    <!--        </root>-->
-    <!--    </springProfile>-->
 </configuration>
