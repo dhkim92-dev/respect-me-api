@@ -12,7 +12,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.2.11"
+version = "0.2.12"
 
 repositories {
     mavenCentral()
@@ -93,8 +93,6 @@ tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
     archiveBaseName.set("${rootProject.group}.group-api")
     archiveVersion.set("latest")
 }
-
-
 
 tasks {
     bootRun {
