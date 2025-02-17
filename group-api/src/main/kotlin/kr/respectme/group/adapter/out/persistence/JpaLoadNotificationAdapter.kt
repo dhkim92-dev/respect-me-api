@@ -71,10 +71,11 @@ class JpaLoadNotificationAdapter(
             ))
             .from(notification)
             .join(group)
-            .on(notification.groupId.eq(group.id))
+                .on(notification.groupId.eq(group.id))
             .join(member)
-            .on(notification.memberId.eq(member.groupId))
+                .on(notification.memberId.eq(member.memberId).and(notification.groupId.eq(member.groupId)))
             .where(notification.id.eq(notificationId))
+            .distinct()
             .fetchOne()
     }
 
