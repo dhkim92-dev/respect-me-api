@@ -7,7 +7,7 @@
     <include resource="console-appender.xml"/>
     <include resource="logstash-appender.xml"/>
 
-    <springProfile name="local">
+    <springProfile name="local, test">
         <root level="DEBUG">
            <appender-ref ref = "CONSOLE"/>
         </root>
