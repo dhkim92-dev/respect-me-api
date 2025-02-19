@@ -64,6 +64,7 @@ class NotificationCommandService(
 
         saveNotificationPort.saveNotification(notification)
         val receivers = loadMemberPort.findMemberIdsByGroupId(groupId)
+            .filter { it != notification.getSenderId() }
         val event = NotificationCreateEvent.valueOf(group, notification, receivers)
         eventPublishPort.publish(NotificationCreateEvent.eventName, event)
 

@@ -57,10 +57,9 @@ class Notification(
     }
 
     fun updateContent(content: String?) {
-
-        if(status == NotificationStatus.PUBLISHED) {
-            throw BadRequestException(GroupServiceErrorCode.GROUP_NOTIFICATION_CANNOT_UPDATE_CONTENTS)
-        }
+//        if(status == NotificationStatus.PUBLISHED) {
+//            throw BadRequestException(GroupServiceErrorCode.GROUP_NOTIFICATION_CANNOT_UPDATE_CONTENTS)
+//        }
 
         if(content == null) return
         this.content = content

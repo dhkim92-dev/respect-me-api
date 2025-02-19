@@ -13,6 +13,7 @@ import kr.respectme.group.adapter.out.persistence.entity.QJpaNotificationGroup
 import kr.respectme.group.adapter.out.persistence.entity.notifications.*
 import kr.respectme.group.application.dto.member.GroupMemberDto
 import kr.respectme.group.domain.GroupMemberRole
+import kr.respectme.group.domain.GroupType
 import kr.respectme.group.domain.notifications.NotificationStatus
 import kr.respectme.group.port.`in`.interfaces.vo.GroupMemberVo
 import kr.respectme.group.port.`in`.interfaces.vo.NotificationGroupVo
@@ -30,6 +31,21 @@ class JpaQueryGroupAdapter(
 ): QueryGroupPort {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    override fun isPrivateGroup(groupId: UUID): Boolean {
+        val group = QJpaNotificationGroup.jpaNotificationGroup
+        val fetch = qf.select(group.type)
+            .from(group)
+            .where(group.id.eq(groupId))
+            .limit(1)
+            .fetch()
+
+        return if(fetch.isEmpty()) {
+            false
+        } else {
+            fetch[0] == GroupType.GROUP_PRIVATE
+        }
+    }
 
     override fun getGroup(loginId: UUID, groupId: UUID): NotificationGroupQueryModel? {
         val group = QJpaNotificationGroup.jpaNotificationGroup

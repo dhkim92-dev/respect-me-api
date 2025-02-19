@@ -210,7 +210,7 @@ class JpaLoadNotificationAdapter(
     ): ConstructorExpression<Writer> {
         return Projections.constructor(
             Writer::class.java,
-            member.id,
+            member.memberId,
             member.nickname,
             member.profileImageUrl
         )

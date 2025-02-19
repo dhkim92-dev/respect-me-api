@@ -8,6 +8,7 @@ import kr.respectme.group.application.query.useCase.NotificationQueryUseCase
 import kr.respectme.group.common.errors.GroupServiceErrorCode
 import kr.respectme.group.port.out.persistence.LoadMemberPort
 import kr.respectme.group.port.out.persistence.LoadNotificationPort
+import kr.respectme.group.port.out.persistence.QueryGroupPort
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -17,6 +18,7 @@ import java.util.*
 @Service
 class NotificationQueryService(
     private val loadNotificationPort: LoadNotificationPort,
+    private val queryGroupPort: QueryGroupPort,
     private val loadMemberPort: LoadMemberPort
 ): NotificationQueryUseCase {
 
@@ -42,8 +44,13 @@ class NotificationQueryService(
                                             groupId: UUID,
                                             cursorId: UUID?,
                                             size: Int): List<NotificationQueryModelDto> {
-        val member = loadMemberPort.findByGroupIdAndMemberId(groupId, memberId)
-            ?: throw ForbiddenException(GroupServiceErrorCode.GROUP_MEMBER_NOT_MEMBER)
+
+        val member = if(queryGroupPort.isPrivateGroup(groupId)) {
+            loadMemberPort.findByGroupIdAndMemberId(groupId, memberId)
+                ?: throw ForbiddenException(GroupServiceErrorCode.GROUP_MEMBER_NOT_MEMBER)
+        } else {
+            null
+        }
 
         return loadNotificationPort.findNotificationsByGroupId(groupId, cursorId, PageRequest.of(0, size+1))
             .content

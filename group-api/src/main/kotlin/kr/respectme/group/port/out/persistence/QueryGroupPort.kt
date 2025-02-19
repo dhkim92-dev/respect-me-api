@@ -38,4 +38,6 @@ interface QueryGroupPort {
      *
      */
     fun getGroupsByNameContainsKeyword(keyword: String, cursor: UUID?, size: Int): List<NotificationGroupQueryModel>
+
+    fun isPrivateGroup(groupId: UUID): Boolean
 }
