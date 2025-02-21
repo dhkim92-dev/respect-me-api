@@ -14,12 +14,11 @@ import org.springframework.kafka.core.*
 import org.springframework.kafka.support.converter.StringJsonMessageConverter
 
 @Configuration
-class KafkaConfig(
-){
+class KafkaConfig(@Value("\${respect-me.kafka.bootstrap-servers}") private val bootstrapServer: String) {
     @Bean
     fun kafkaAdmin(): KafkaAdmin {
         val configs: MutableMap<String, Any> = HashMap()
-        configs[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = "localhost:9092"
+        configs[ProducerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServer
         return KafkaAdmin(configs)
     }
 

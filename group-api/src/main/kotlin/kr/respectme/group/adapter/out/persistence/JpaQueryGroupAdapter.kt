@@ -93,7 +93,6 @@ class JpaQueryGroupAdapter(
      * @return List<NotificationGroupDto>
      */
     override fun getMemberGroups(loginId: UUID): List<NotificationGroupQueryModel> {
-        // TODO 페이지네이션 미적용 상태, 적용해야함
         logger.error("getMemberGroups loginId: $loginId")
         val group = QJpaNotificationGroup.jpaNotificationGroup
         val member = QJpaGroupMember.jpaGroupMember
@@ -135,8 +134,9 @@ class JpaQueryGroupAdapter(
                 group.id,
                 owner.id,
                 me.memberRole,
+                me.createdAt
             )
-            .orderBy(group.id.desc())
+            .orderBy(me.createdAt.desc())
             .fetch()
     }
 
