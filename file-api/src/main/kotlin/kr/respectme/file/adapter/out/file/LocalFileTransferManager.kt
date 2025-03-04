@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 import java.io.File
 
 @Service
-@Profile("local", "test")
+@Profile("dev")
 class LocalFileTransferManager(
     private val cdnAccessPointBuilder: CDNAccessPointBuilder
 )

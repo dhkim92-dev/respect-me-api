@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 class CDNAccessPointBuilder(private val config: CDNConfig) {
 
     fun buildStoragePath(rootDir: String, accessKey: String, fileFormat: String): String {
-        return "${config.storageOrigin}/$rootDir/${accessKey[0]}/${accessKey[1]}/$accessKey.$fileFormat"
+        return "$rootDir/${accessKey[0]}/${accessKey[1]}/$accessKey.$fileFormat"
     }
 
     fun buildAccessUrl(rootDir: String, accessKey: String, fileFormat: String): String {

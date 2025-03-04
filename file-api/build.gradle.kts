@@ -10,7 +10,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.1.0"
+version = "0.1.1"
 
 repositories {
     mavenCentral()
@@ -52,7 +52,12 @@ dependencies {
     // B3 Propagation 구현 라이브러리
     implementation("io.micrometer:micrometer-tracing-bridge-brave")
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
-
+    implementation("com.oracle.oci.sdk:oci-java-sdk:3.38.0")
+    implementation("com.oracle.oci.sdk:oci-java-sdk-common:3.38.0")
+    implementation("com.oracle.oci.sdk:oci-java-sdk-objectstorage:3.38.0")
+    implementation("com.oracle.oci.sdk:oci-java-sdk-common-httpclient:3.38.0")
+    implementation("com.oracle.oci.sdk:oci-java-sdk-common-httpclient-choices:3.38.0")
+    implementation("com.oracle.oci.sdk:oci-java-sdk-common-httpclient-jersey3:3.37.0")
     // query dsl
     implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
     implementation("com.querydsl:querydsl-apt:5.1.0:jakarta")

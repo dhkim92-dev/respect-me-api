@@ -9,7 +9,9 @@ class CDNConfig(
     @Value("\${respect-me.cdn.host}")
     val host: String,
     @Value("\${respect-me.cdn.storage-origin}")
-    val storageOrigin: String
+    val storageOrigin: String,
+    @Value("\${respect-me.cdn.namespace}")
+    val namespace: String,
 ) {
 
 }
