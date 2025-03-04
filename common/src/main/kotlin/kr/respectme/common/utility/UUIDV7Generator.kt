@@ -22,7 +22,7 @@ object UUIDV7Generator {
         val ts = (currentTimeMillis and 0xFFFFFFFFFFFFL) shl 16
         val version = ts or 0x7000L
         val randomHigh = random.nextLong(0, 1L shl 12)
-        val mostSigBits = ts or version or (random.nextLong(0, 1L shl 12))
+        val mostSigBits = ts or version or randomHigh
         val leastSigBits = (0b10L shl 62) or random.nextLong(0, 1L shl 62)
 
         return UUID(mostSigBits, leastSigBits)
