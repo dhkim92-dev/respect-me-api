@@ -18,7 +18,7 @@ allOpen {
     annotation("jakarta.persistence.Embeddable")
 }
 
-version = "0.1.1"
+version = "0.2.0"
 
 repositories {
     mavenCentral()
@@ -56,6 +56,18 @@ dependencies {
     testImplementation("com.ninja-squad:springmockk:4.0.2")
 }
 
+tasks.register<DockerBuildImage>("buildProdImage") {
+    dependsOn("bootJar")
+    inputDir.set(file(".")) // Dockerfile이 위치한 경로 (프로젝트 root 경로)
+    images.add("elensar92/respect-me-report-api:${version}-prod")
+    group = "docker"
+}
+
+tasks.register<DockerPushImage>("pushProdImage") {
+    dependsOn("buildProdImage")
+    images.add("elensar92/respect-me-report-api:${version}-prod")
+    group = "docker"
+}
 
 tasks.register<DockerBuildImage>("buildTestImage") {
     dependsOn("bootJar")

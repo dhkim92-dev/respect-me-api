@@ -9,6 +9,7 @@ import kr.respectme.auth.configs.JwtConfigs
 import kr.respectme.auth.port.out.persistence.member.dto.Member
 import kr.respectme.common.error.UnauthorizedException
 import org.springframework.stereotype.Service
+import java.time.Duration
 import java.time.Instant
 import java.util.*
 
@@ -28,9 +29,9 @@ class JwtService(
     fun createAccessToken(member: Member): String {
         val now = Instant.now()
         val expiry = if(member.role == "ROLE_SERVICE") {
-            now.plusMillis(365L*24L*60L*60L*1000L)
+            now.plus(Duration.ofMillis(365L*24L*60L*60L*1000L))
         } else {
-            now.plusMillis(jwtConfigs.accessTokenExpiry)
+            now.plus(Duration.ofMillis(jwtConfigs.accessTokenExpiry))
         }
 
         return JWT.create()
@@ -39,8 +40,8 @@ class JwtService(
             .withClaim("email", member.email)
             .withArrayClaim("roles", arrayOf(member.role))
             .withClaim("isActivated", !member.isBlocked)
-            .withExpiresAt(now.plusMillis(jwtConfigs.accessTokenExpiry))
-            .withIssuedAt(Instant.now())
+            .withExpiresAt(expiry)
+            .withIssuedAt(now)
             .sign(accessTokenAlgorithm)
     }
 
@@ -49,7 +50,7 @@ class JwtService(
         return JWT.create()
             .withIssuer(jwtConfigs.issuer)
             .withSubject(memberId.toString())
-            .withExpiresAt(now.plusMillis(jwtConfigs.refreshTokenExpiry))
+            .withExpiresAt(now.plus(Duration.ofMillis(jwtConfigs.refreshTokenExpiry)))
             .withIssuedAt(now)
             .sign(refreshTokenAlgorithm)
     }

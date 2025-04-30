@@ -1,0 +1,16 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+actor App
+App -> GroupFileUploadPort: Send FileUploadRequest
+GroupFileUploadPort -> GroupFileUploadUsecase: Call with UploadFileCommand
+GroupFileUploadUsecase -> FileTransferManager: Request File Upload
+FileTransferManager -> ObjectStorage: Upload File
+ObjectStorage -> FileTransferManager: return FileStoredResponse
+FileTransferManager -> GroupFileUploadUsecase: return FileUploadResult
+GroupFileUploadUsecase -> FileRepository: Save File Metadata
+FileRepository -> GroupFileUploadUsecase: return FileMetadataModel
+GroupFileUploadUsecase -> GroupFileUploadPort: return FileMetadataDto
+GroupFileUploadPort -> App : return FileMetadataResponse
+@enduml

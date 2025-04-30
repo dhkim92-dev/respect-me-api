@@ -10,7 +10,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.1.0"
+version = "0.2.0"
 
 repositories {
     mavenCentral()
@@ -42,6 +42,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("net.coobird:thumbnailator:0.4.20")
+    implementation("org.apache.tika:tika-core:2.9.0")
+
 //    implementation("org.springframework.kafka:spring-kafka")
 //    implementation("org.postgresql:postgresql:42.5.4"sssss
     runtimeOnly("org.postgresql:postgresql:42.5.4")
@@ -54,10 +56,14 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
 
     // query dsl
-    implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
-    implementation("com.querydsl:querydsl-apt:5.1.0:jakarta")
-    kapt("com.querydsl:querydsl-apt:5.1.0:jakarta")
+//    runtimeOnly("com.linecorp.kotlin-jdsl:kotlin-jdsl:3.5.5")
+    implementation("com.linecorp.kotlin-jdsl:spring-data-jpa-support:3.5.5")
+    implementation("com.linecorp.kotlin-jdsl:jpql-dsl:3.5.5")
+    implementation("com.linecorp.kotlin-jdsl:jpql-render:3.5.5")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
+
+    implementation(platform("software.amazon.awssdk:bom:2.27.21"))
+    implementation("software.amazon.awssdk:s3")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("com.h2database:h2:2.1.214")

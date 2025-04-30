@@ -6,7 +6,7 @@ import kr.respectme.file.port.out.persistent.SaveImagePort
 import org.springframework.stereotype.Repository
 
 @Repository
-class JpaSaveImagePort(private val imageFileRepository: ImageFileRepository):
+class JpaSaveImageAdapter(private val imageFileRepository: ImageFileRepository):
 SaveImagePort {
 
     override fun save(image: ImageEntity): ImageEntity {

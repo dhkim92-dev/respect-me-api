@@ -10,7 +10,7 @@ plugins {
     id("com.bmuschko.docker-remote-api") version "9.3.1"
 }
 
-version = "0.3.0"
+version = "0.4.1"
 
 repositories {
     mavenCentral()
@@ -57,6 +57,20 @@ dependencies {
 
 kapt {
     correctErrorTypes = true
+}
+
+
+tasks.register<DockerBuildImage>("buildProdImage") {
+    dependsOn("bootJar")
+    inputDir.set(file("."))
+    images.add("elensar92/respect-me-message-api:${version}-prod")
+    group = "docker"
+}
+
+tasks.register<DockerPushImage>("pushProdImage") {
+    dependsOn("buildProdImage")
+    images.add("elensar92/respect-me-message-api:${version}-prod")
+    group = "docker"
 }
 
 tasks.register<DockerBuildImage>("buildTestImage") {
