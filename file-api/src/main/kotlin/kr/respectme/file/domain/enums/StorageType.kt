@@ -1,4 +1,4 @@
-package kr.respectme.file.domain.enum
+package kr.respectme.file.domain.enums
 
 enum class StorageType {
 

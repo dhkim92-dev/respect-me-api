@@ -1,0 +1,119 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+enum ImageType{
+    + JPEG
+    + PNG
+}
+
+class GroupSharedImage {
+    - fileId: UUID
+    - uploaderId: UUID
+    - groupId: UUID
+    - name: String
+    - type: ImageType
+    - width: Int,
+    - height: Int,
+    - size: Long
+    - path: String
+    - createdAt: Instant
+}
+
+class GroupSharedImageDto {
+    - fileId: UUID,
+    - uploaderId: UUID
+    - groupId: UUID
+    - name: String
+    - type: ImageType
+    - width: Int
+    - height: Int
+    - url: String
+    - createdAt: Instant
+    + valueOf(entity: GroupSharedImage): GroupSharedImageDto
+}
+
+interface GroupSharedFilePort {
+    + create(request: GroupFileUploadRequest): GroupSharedImageMetadata
+    + get(fileId: UUID): GroupSharedImageMetadata
+}
+
+class RestGroupSharedFileAdapter {
+    - groupSharedFileService: GroupSharedFileService
+}
+
+class GroupSharedImageService {
+    - groupService: GroupServicePort
+    - groupSharedImageRepository: GroupSharedImageRepository
+    - fileTransferService: FileTransferService
+    + uploadFile(request: GroupFileUploadCommand): GroupSharedImageDto
+    + getMetadata(fileId: UUID): GroupSharedImageDto
+}
+
+interface GroupServicePort {
+    + checkPermission(groupId: UUID, memberId: UUID): Boolean
+}
+
+class HttpGroupServiceAdapter {
+    - feignClient: FeignClient
+}
+
+class GroupSharedImageRepository {
+    + save(image: GroupSharedImage): GroupSharedImage
+    + update(image: GroupSharedImage): GroupSharedImage
+    + delete(fileId: UUID): Boolean
+    + findById(fileId: UUID): GroupSharedImage?
+}
+
+interface FileTransferService {
+    + upload(inputStream: InputStream, size: Long): GroupFileUploadResponse
+    + delete(origin: String, root: String, path: String): Boolean
+}
+
+class S3FileTransferService {
+    - s3Client: S3Client
+}
+
+interface FileTransferResult {
+    + getOrigin(): String
+    + getRoot(): String
+    + getPath(): String
+    + toURL(): String
+}
+
+class S3FileTransferResult {
+}
+
+class AwsConfig {
+    + s3Client(): S3Client
+}
+
+class GroupSharedImageMetadata {
+    - fileId: UUID
+    - uploaderId: UUID
+    - groupId: UUID
+    - name: String
+    - type: ImageType
+    - createdAt: Instant
+    - width: Int
+    - height: Int
+    - url: String
+
+    + valueOf(dto: GroupSharedImageDto): GroupSharedImageMetadata
+}
+
+S3FileTransferService ..|> FileTransferService
+GroupSharedImage --> ImageType
+FileTransferService -.> FileTransferResult
+S3FileTransferResult ..|> FileTransferResult
+
+RestGroupSharedFileAdapter -.|> GroupSharedFilePort
+RestGroupSharedFileAdapter --> GroupSharedImageService
+GroupSharedImageService --> GroupServicePort
+GroupServicePort <|-- HttpGroupServiceAdapter
+GroupSharedImageService --> GroupSharedImageRepository
+GroupSharedImageService --> FileTransferService
+GroupSharedImageRepository -.> GroupSharedImage
+GroupSharedImageService ..> GroupSharedImageDto
+GroupSharedFilePort ..> GroupSharedImageMetadata
+
+@enduml

@@ -6,12 +6,13 @@ import kr.respectme.file.application.usecase.ThumbnailUseCase
 import kr.respectme.file.common.utility.ThumbnailMaker
 import kr.respectme.file.domain.ImageEntity
 import kr.respectme.file.domain.ImageFileAccessPoint
-import kr.respectme.file.domain.enum.ImageFormat
-import kr.respectme.file.domain.enum.ImageType
+import kr.respectme.file.domain.enums.FileFormat
+import kr.respectme.file.domain.enums.ImageType
 import kr.respectme.file.port.`in`.events.event.FileUploadedEvent
+import kr.respectme.file.port.out.file.FileTransferService
 import kr.respectme.file.port.out.file.FileUploadWrapper
-import kr.respectme.file.port.out.file.TransferManager
 import kr.respectme.file.port.out.persistent.SaveImagePort
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -22,9 +23,12 @@ import javax.imageio.ImageIO
 @Service
 class ThumbnailService(
     private val thumbnailMaker: ThumbnailMaker,
-    private val transferManager: TransferManager,
+    private val fileTransferService: FileTransferService,
+//    private val transferManager: TransferManager,
     private val saveImagePort: SaveImagePort,
-    private val applicationEventPublisher: ApplicationEventPublisher
+    private val applicationEventPublisher: ApplicationEventPublisher,
+    @Value("\${respect-me.cloud.aws.s3.bucket}")
+    private val storageOrigin: String
 ): ThumbnailUseCase {
 
     private final val THUMBNAIL_ROOT_DIR_NAME = "thumbnails"
@@ -40,7 +44,7 @@ class ThumbnailService(
 
         val imageFile = ImageEntity(
             memberId = loginId,
-            imageFormat = ImageFormat.JPEG,
+            imageFormat = FileFormat.JPEG,
             imageType = ImageType.THUMBNAIL,
             fileSize = size,
             width = thumbnail.width,
@@ -57,10 +61,19 @@ class ThumbnailService(
             accessKey = imageFileAccessPoint.uploadKey.toString(),
             file = outputStream.toByteArray()
         )
-        val uploadResult = transferManager.uploadFile(wrapper)
-        publishFileUploadedEvent(uploadResult.storedPath)
+        val uploadResult = fileTransferService.upload(
+            origin = storageOrigin,
+            root = wrapper.rootDir,
+            fileName = wrapper.accessKey,
+            contentType = "image/jpeg",
+            inputStream = wrapper.file.inputStream(),
+            size = size,
+        )
+        publishFileUploadedEvent(uploadResult.toURL())
 
-        return ImageFileCommandModelDto.valueOf(command.image, imageFile, uploadResult)
+        val dto = ImageFileCommandModelDto.valueOf(command.image, imageFile, uploadResult)
+        dto.accessUrl = fileTransferService.pathToCDNAccessURL(uploadResult.getPath())
+        return dto
     }
 
     private fun publishFileUploadedEvent(fullPath: String) {

@@ -1,33 +1,23 @@
 package kr.respectme.file.adapter.`in`.interfaces
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import kr.respectme.common.annotation.ApplicationResponse
 import kr.respectme.common.annotation.LoginMember
-import kr.respectme.common.error.NotFoundException
-import kr.respectme.common.error.UnsupportedMediaTypeException
 import kr.respectme.file.application.dto.ImageFileCreateCommand
 import kr.respectme.file.application.usecase.ThumbnailUseCase
-import kr.respectme.file.common.annotation.ImageBytes
-import kr.respectme.file.common.errors.FileErrorCode
-import kr.respectme.file.domain.enum.ImageFormat
-import kr.respectme.file.domain.enum.ImageType
 import kr.respectme.file.port.`in`.interfaces.ThumbnailPort
 import kr.respectme.file.port.`in`.interfaces.dto.ThumbnailUploadRequest
 import kr.respectme.file.port.`in`.interfaces.dto.ThumbnailUploadResponse
-import kr.respectme.file.port.`in`.interfaces.vo.FileOwner
-import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.multipart.MultipartFile
 import java.util.UUID
 
 @RestController
@@ -43,6 +33,10 @@ class RestImageFileUploadAdapter(
     ])
     @PutMapping("/images", consumes = ["multipart/form-data"], produces = ["application/json"])
     @SecurityRequirement(name = "bearer-jwt")
+    @ApplicationResponse(
+        status = HttpStatus.OK,
+        message = "업로드 성공"
+    )
     override fun createThumbnail(
         @LoginMember
         loginId: UUID,

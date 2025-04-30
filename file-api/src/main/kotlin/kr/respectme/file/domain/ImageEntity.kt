@@ -6,8 +6,8 @@ import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
-import kr.respectme.file.domain.enum.ImageFormat
-import kr.respectme.file.domain.enum.ImageType
+import kr.respectme.file.domain.enums.FileFormat
+import kr.respectme.file.domain.enums.ImageType
 import java.util.UUID
 
 @Entity
@@ -17,7 +17,7 @@ class ImageEntity(
     @Column
     val memberId: UUID,
     @Column
-    val imageFormat: ImageFormat = ImageFormat.JPEG,
+    val imageFormat: FileFormat = FileFormat.JPEG,
     @Column
     val imageType: ImageType = ImageType.THUMBNAIL,
     @Column
