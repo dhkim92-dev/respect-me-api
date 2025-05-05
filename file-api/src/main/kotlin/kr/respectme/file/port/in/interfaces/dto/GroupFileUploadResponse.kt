@@ -1,10 +1,37 @@
 package kr.respectme.file.port.`in`.interfaces.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import kr.respectme.common.advice.hateoas.AbstractHateoasConverter
+import kr.respectme.common.advice.hateoas.Hateoas
+import kr.respectme.common.advice.hateoas.HateoasLink
+import kr.respectme.common.advice.hateoas.HateoasResponse
 import kr.respectme.file.application.dto.GroupFileDto
+import kr.respectme.file.configs.MsaConfig
 import kr.respectme.file.domain.enums.FileFormat
+import org.springframework.stereotype.Component
 import java.util.UUID
 
+@Component
+class GroupFileUploadResponseConverter(
+    private val msaConfig: MsaConfig
+): AbstractHateoasConverter<GroupFileUploadResponse>() {
+
+    override fun translate(element: GroupFileUploadResponse) {
+        element._links.addAll(listOf(
+            HateoasLink(
+                rel = "self",
+                href = "${msaConfig.getGatewayUrl()}/api/v1/files/group-files/${element.fileId}"
+            ),
+
+            HateoasLink(
+                rel = "group-files",
+                href = "${msaConfig.getGatewayUrl()}/api/v1/files/group-files?groupId=${element.groupId}"
+            ),
+        ))
+    }
+}
+
+@Hateoas(converter = GroupFileUploadResponseConverter::class)
 @Schema(description = "그룹 파일 업로드 응답")
 data class GroupFileUploadResponse(
     @Schema(description = "업로드 된 이미지 식별자, 이미지 접근 URL 확보를 위해서는 해당 URL로 이미지 조회 요청 필요", example = "d67f4dfe-0d0f-406c-be67-71205404a013")
@@ -21,7 +48,7 @@ data class GroupFileUploadResponse(
     val fileFormat: FileFormat,
     @Schema(description = "업로드 된 파일의 접근 경로", example = "/private/d/6/d67f4dfe-0d0f-406c-be67-71205404a013.png")
     val path: String
-) {
+) : HateoasResponse(){
 
     companion object {
         fun of( dto: GroupFileDto ): GroupFileUploadResponse {

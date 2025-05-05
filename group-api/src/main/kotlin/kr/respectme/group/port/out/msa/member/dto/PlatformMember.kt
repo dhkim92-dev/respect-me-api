@@ -1,4 +1,4 @@
-package kr.respectme.group.port.`in`.msa.member.dto
+package kr.respectme.group.port.out.msa.member.dto
 
 class PlatformMember(
     val id: String,

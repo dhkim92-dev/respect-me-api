@@ -4,10 +4,16 @@ import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import kr.respectme.common.domain.BaseDomainEntity
 import kr.respectme.common.domain.annotations.DomainEntity
+import kr.respectme.common.domain.annotations.DomainRelation
 import kr.respectme.common.error.BadRequestException
 import kr.respectme.common.utility.UUIDV7Generator
+import kr.respectme.group.application.attachment.LinkAttachmentCommand
 import kr.respectme.group.common.errors.GroupServiceErrorCode
+import kr.respectme.group.domain.attachment.Attachment
 import kr.respectme.group.domain.notifications.NotificationType.*
+import kr.respectme.group.port.out.persistence.LoadAttachmentPort
+import kr.respectme.group.port.out.persistence.SaveAttachmentPort
+import org.springframework.security.config.BeanIds
 import java.time.Instant
 import java.util.*
 
@@ -21,8 +27,9 @@ class Notification(
     private var type: NotificationType = IMMEDIATE,
     private val createdAt: Instant = Instant.now(),
     private var updatedAt: Instant? = null,
-    private var lastSentAt: Instant? = null
+    private var lastSentAt: Instant? = null,
 ): BaseDomainEntity<UUID>(id) {
+
 
     fun getGroupId(): UUID {
         return groupId

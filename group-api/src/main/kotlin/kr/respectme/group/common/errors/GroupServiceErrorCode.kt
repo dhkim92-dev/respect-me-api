@@ -33,4 +33,8 @@ enum class GroupServiceErrorCode(
     GROUP_NOTIFICATION_NOT_EXISTS(HttpStatus.NOT_FOUND, "GRPN-010", "Group notification not exists"),
     GROUP_NOTIFICATION_EXCEED_LIMIT(HttpStatus.FORBIDDEN, "GRPN-011", "Group notification exceed today's limit"),
     GROUP_NOTIFICATION_MEMBER_ID_MISTMATCH(HttpStatus.FORBIDDEN, "GRPN-012", "Group notification member id mismatch"),
+    GROUP_NOTIFICATION_FILE_ATTACHMENT_EXCEED_LIMIT(HttpStatus.BAD_REQUEST, "GRPN-013", "Group notification file exceed limit, max 5 files"),
+    GROUP_NOTIFICATION_ATTACHMENT_NOT_EXISTS(HttpStatus.NOT_FOUND, "GRPN-014", "Group notification attachment not exists"),
+    GROUP_NOTIFICATION_NOT_SUPPORTED_ATTACHMENT_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "GRPN-015", "Attachment type not supported"),
+    GROUP_NOTIFICATION_ATTACHMENT_NOTIFICATION_ID_MISMATCH(HttpStatus.BAD_REQUEST, "GRNA-001", "Attachment's notification mismatch.")
 }

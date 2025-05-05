@@ -1,5 +1,6 @@
 package kr.respectme.group.application.dto.notification
 
+import kr.respectme.group.application.attachment.LinkAttachmentCommand
 import kr.respectme.group.domain.notifications.DayOfWeek
 import kr.respectme.group.domain.notifications.NotificationType
 import kr.respectme.group.port.`in`.interfaces.dto.NotificationCreateRequest
@@ -16,7 +17,7 @@ data class NotificationCreateCommand(
     val scheduledAt: Instant?,
 //    val triggerTime: OffsetTime?,
     val dayOfWeeks: List<DayOfWeek>?,
-    val dayInterval: Int?
+    val dayInterval: Int?,
 ) {
 
     companion object {
