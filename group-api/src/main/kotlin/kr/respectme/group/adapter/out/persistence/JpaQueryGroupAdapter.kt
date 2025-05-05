@@ -64,6 +64,7 @@ class JpaQueryGroupAdapter(
                     GroupMemberVo::class.java,
                     owner.memberId,
                     owner.nickname,
+                    owner.groupId,
                     owner.profileImageUrl,
                     owner.createdAt,
                     owner.memberRole
@@ -115,6 +116,7 @@ class JpaQueryGroupAdapter(
                     GroupMemberVo::class.java,
                     owner.memberId,
                     owner.nickname,
+                    owner.groupId,
                     owner.profileImageUrl,
                     owner.createdAt,
                     owner.memberRole
@@ -157,6 +159,7 @@ class JpaQueryGroupAdapter(
                     GroupMemberVo::class.java,
                     owner.memberId,
                     owner.nickname,
+                    owner.groupId,
                     owner.profileImageUrl,
                     owner.createdAt,
                     owner.memberRole
@@ -200,6 +203,7 @@ class JpaQueryGroupAdapter(
                     GroupMemberVo::class.java,
                     owner.memberId,
                     owner.nickname,
+                    owner.groupId,
                     owner.profileImageUrl,
                     owner.createdAt,
                     owner.memberRole

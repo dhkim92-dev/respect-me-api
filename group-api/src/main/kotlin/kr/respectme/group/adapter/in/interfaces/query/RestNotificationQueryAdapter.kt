@@ -9,7 +9,9 @@ import kr.respectme.common.annotation.ApplicationResponse
 import kr.respectme.common.annotation.CursorPagination
 import kr.respectme.common.annotation.CursorParam
 import kr.respectme.common.annotation.LoginMember
+//import kr.respectme.group.application.AttachedFileService
 import kr.respectme.group.application.dto.notification.NotificationCountDto
+import kr.respectme.group.application.query.useCase.NotificationGroupQueryUseCase
 import kr.respectme.group.application.query.useCase.NotificationQueryUseCase
 import kr.respectme.group.port.`in`.interfaces.NotificationQueryPort
 import kr.respectme.group.port.`in`.interfaces.dto.GroupNotificationQueryResponse
@@ -26,7 +28,8 @@ import java.util.*
 @RequestMapping("/api/v1/")
 @Tags(Tag(name = "Notification Query API", description = "그룹 알림 조회 API, 알림의 조회를 담당 합니다."))
 class RestNotificationQueryAdapter(
-    private val notificationQueryUsecase: NotificationQueryUseCase
+    private val notificationQueryUsecase: NotificationQueryUseCase,
+//    private val attachedFileUseCase: AttachedFileService
 ): NotificationQueryPort {
 
     @GetMapping("notification-groups/{groupId}/limit-status")
@@ -75,9 +78,14 @@ class RestNotificationQueryAdapter(
         @PathVariable groupId: UUID,
         @PathVariable notificationId: UUID
     ): GroupNotificationQueryResponse {
-        return GroupNotificationQueryResponse.valueOf(
+        val response =  GroupNotificationQueryResponse.valueOf(
             notificationQueryUsecase.retrieveNotification(loginId, groupId, notificationId)
         )
+
+//        response.attachedFiles = attachedFileUseCase.getAttachedFiles(notificationId)
+//            .map { it -> GroupNotificationQueryResponse.AttachedFile(it.fileId) }
+
+        return response
     }
 
     @GetMapping("group-members/me/notifications")

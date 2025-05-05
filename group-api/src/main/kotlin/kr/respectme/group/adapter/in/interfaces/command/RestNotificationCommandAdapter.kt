@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import kr.respectme.common.annotation.ApplicationResponse
 import kr.respectme.common.annotation.LoginMember
+import kr.respectme.group.application.attachment.AttachmentHandler
+import kr.respectme.group.application.attachment.LinkAttachmentCommand
+import kr.respectme.group.application.attachment.LinkAttachmentManager
 import kr.respectme.group.application.command.useCase.NotificationCommandUseCase
 import kr.respectme.group.application.dto.notification.NotificationCreateCommand
 import kr.respectme.group.application.dto.notification.NotificationModifyCommand
@@ -22,7 +25,8 @@ import java.util.*
 @RequestMapping("/api/v1/")
 @Tag(name = "Notification Command API", description = "그룹 알림 조작용 API, 생성, 수정, 삭제를 담당 합니다.")
 class RestNotificationCommandAdapter(
-    private val notificationCommandUseCase: NotificationCommandUseCase
+    private val notificationCommandUseCase: NotificationCommandUseCase,
+    private val attachmentManager: LinkAttachmentManager,
 ): NotificationCommandPort {
 
     @Operation(summary = "알림 생성", description = "알림 생성")
@@ -39,9 +43,14 @@ class RestNotificationCommandAdapter(
         @RequestBody @Valid request: NotificationCreateRequest
     ): NotificationCommandResponse {
         val command = NotificationCreateCommand.valueOf(groupId, loginId, request)
-        return NotificationCommandResponse.valueOf(
+        val notification = NotificationCommandResponse.valueOf(
             notificationCommandUseCase.createNotification(loginId, groupId, command)
         )
+        request.attachments.forEach { attachmentRequest ->
+            attachmentManager.link(loginId, LinkAttachmentCommand.of(groupId, notification.notificationId, attachmentRequest))
+        }
+
+        return notification
     }
 
     @Operation(summary = "알림의 본문을 수정한다.", description = "알림의 본문을 수정한다.")
@@ -49,6 +58,7 @@ class RestNotificationCommandAdapter(
         ApiResponse(responseCode = "200", description = "알림 본문 수정 성공"),
     ])
     @PatchMapping("notification-groups/{groupId}/notifications/{notificationId}/content")
+    @ApplicationResponse(status = HttpStatus.OK, message = "notification content updated.")
     override fun updateNotificationContent(
         @LoginMember loginId: UUID,
         @PathVariable groupId: UUID,
