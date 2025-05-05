@@ -1,3 +1,7 @@
 package kr.respectme.common.advice.hateoas
 
-annotation class Hateoas()
+import kotlin.reflect.KClass
+
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class Hateoas(val converter: KClass<out HateoasConverter>)

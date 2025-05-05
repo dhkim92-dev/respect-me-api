@@ -16,7 +16,7 @@ class DomainEntityAnnotationProcessorTest: AnnotationSpec() {
 
     @Test
     fun `BaseDomainEntity를 상속받지 않으면 에러가 발생한다`() {
-        val processor = DomainEntityAnnotationProcessor("kr.respectme.common.domain.entity.fail")
+        val processor = DomainEntityAnnotationProcessor()//"kr.respectme.common.domain.entity.fail")
         val beanFactory = mockk<ConfigurableListableBeanFactory>()
         shouldThrow<IllegalArgumentException> {
             processor.postProcessBeanFactory(beanFactory)
@@ -25,7 +25,7 @@ class DomainEntityAnnotationProcessorTest: AnnotationSpec() {
 
     @Test
     fun `BaseDomainEntity를 상속받으면 성공한다`() {
-        val processor = DomainEntityAnnotationProcessor("kr.respectme.common.domain.entity.success")
+        val processor = DomainEntityAnnotationProcessor()//"kr.respectme.common.domain.entity.success")
         val beanFactory = mockk<ConfigurableListableBeanFactory>()
         shouldNotThrowAny {
             processor.postProcessBeanFactory(beanFactory)

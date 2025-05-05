@@ -1,4 +1,6 @@
 package kr.respectme.common.advice.hateoas
 
-class HateoasConverter {
+interface HateoasConverter {
+
+    fun convert(element: Hateoasable): Hateoasable
 }

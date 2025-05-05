@@ -1,15 +1,19 @@
 package kr.respectme.common.domain
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import kr.respectme.common.domain.cache.InMemoryDomainEntityCache
 import kr.respectme.common.domain.entity.success.TestPassEntity
 import kr.respectme.common.domain.entity.success.TestPassUUIDEntity
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import java.util.*
 
 class InmemoryDomainEntityCacheTest(): AnnotationSpec() {
 
-    private val cacheStore = InMemoryDomainEntityCache()
+    private val objectMapper = Jackson2ObjectMapperBuilder.json()
+
+    private val cacheStore = InMemoryDomainEntityCache(objectMapper as ObjectMapper)
 
     private lateinit var entity: TestPassEntity
 

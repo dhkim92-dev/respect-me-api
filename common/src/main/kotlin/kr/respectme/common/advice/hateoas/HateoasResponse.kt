@@ -1,4 +1,7 @@
 package kr.respectme.common.advice.hateoas
 
-class HateoasResponse {
+abstract class HateoasResponse(
+    override val _links: MutableList<HateoasLink> = mutableListOf()
+) : Hateoasable {
+
 }

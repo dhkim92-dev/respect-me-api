@@ -1,4 +1,5 @@
 package kr.respectme.common.advice.hateoas
 
-class Hateoasable {
+interface Hateoasable {
+    val _links: MutableList<HateoasLink>
 }

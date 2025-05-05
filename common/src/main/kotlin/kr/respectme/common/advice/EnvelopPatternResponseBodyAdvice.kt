@@ -43,7 +43,8 @@ class EnvelopPatternResponseBodyAdvice: ResponseBodyAdvice<Any> {
     }
 
     override fun supports(returnType: MethodParameter, converterType: Class<out HttpMessageConverter<*>>): Boolean {
-        return converterType.isAssignableFrom(MappingJackson2HttpMessageConverter::class.java)
+//        return converterType.isAssignableFrom(MappingJackson2HttpMessageConverter::class.java)
+        return MappingJackson2HttpMessageConverter::class.java.isAssignableFrom(converterType)
                 && returnType.hasMethodAnnotation(ApplicationResponse::class.java)
     }
 }
