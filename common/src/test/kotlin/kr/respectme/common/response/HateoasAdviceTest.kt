@@ -1,15 +1,11 @@
 package kr.respectme.common.response
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import kr.respectme.common.advice.HateoasAdvice
-import kr.respectme.common.advice.hateoas.HateoasLink
-import kr.respectme.common.advice.hateoas.Hateoasable
+import kr.respectme.common.advice.hateoas.HateoasResponse
 import kr.respectme.common.support.response.*
 import org.springframework.context.ApplicationContext
 import org.springframework.core.MethodParameter
@@ -57,8 +53,8 @@ class HateoasAdviceTest : AnnotationSpec() {
         val element = SampleHateoasElement(id = UUID.randomUUID())
 
         val converted =  callAdvice(element)
-        (converted is Hateoasable) shouldBe true
-        converted as Hateoasable
+        (converted is HateoasResponse) shouldBe true
+        converted as HateoasResponse
         val link = converted._links[0]
         link.rel shouldBe "self"
         link.href shouldBe "https://www.noti-me.net/samples/${element.id}"
@@ -72,7 +68,7 @@ class HateoasAdviceTest : AnnotationSpec() {
 
         val converted = callAdvice(listElement)
         (converted is List<*>) shouldBe  true
-        converted as List<out Hateoasable>
+        converted as List<out HateoasResponse>
         converted.forEachIndexed { idx, elem ->
             val link = elem._links[0]
             link.rel shouldBe "self"

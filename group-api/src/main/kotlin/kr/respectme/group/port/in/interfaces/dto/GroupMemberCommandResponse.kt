@@ -22,7 +22,20 @@ class GroupMemberCommandResponseConverter(private val msaConfig: MsaConfig) : Ab
     }
 }
 
-@Schema(description = "그룹 멤버 커맨드 요청 응답 객체")
+@Schema(description = "그룹 멤버 커맨드 요청 응답 객체",
+    example = "{\n" +
+            "    \"id\": \"791763ca-5da8-4aca-9c94-aa9d22a5fd10\",\n" +
+            "    \"nickname\": \"주인장\",\n" +
+            "    \"profileImage\": \"https://cdn.noti-me.net/profile.jpg\",\n" +
+            "    \"createdAt\": \"2023-10-01T00:00:00Z\",\n" +
+            "    \"role\": \"MEMBER\",\n" +
+            "    \"_links\": [\n" +
+            "        {\n" +
+            "            \"rel\": \"self\",\n" +
+            "            \"href\": \"https://www.noti-me.net/api/v1/notification-groups/{groupId}\n" +
+            "        }\n" +
+            "    ]\n" +
+            "}")
 @Hateoas(converter = GroupMemberCommandResponseConverter::class)
 data class GroupMemberCommandResponse(
     @Schema(description = "그룹 멤버 식별자", example = "791763ca-5da8-4aca-9c94-aa9d22a5fd10")
