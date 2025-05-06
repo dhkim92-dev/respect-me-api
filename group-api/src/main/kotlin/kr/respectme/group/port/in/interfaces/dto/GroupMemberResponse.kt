@@ -24,7 +24,19 @@ class GroupMemberResponseConverter(private val msaConfig: MsaConfig) : AbstractH
 }
 
 @Hateoas(converter = GroupMemberResponseConverter::class)
-@Schema(description = "그룹 멤버 응답 객체")
+@Schema(description = "그룹 멤버 응답 객체",
+    example = "{\n" +
+            "    \"groupId\": \"791763ca-5da8-4aca-9c94-aa9d22a5fd10\",\n" +
+            "    \"memberId\": \"791763ca-5da8-4aca-9c94-aa9d22a5fd10\",\n" +
+            "    \"nickname\": \"주인장\",\n" +
+            "    \"role\": \"MEMBER\",\n" +
+            "    \"_links\": [\n" +
+            "        {\n" +
+            "            \"rel\": \"self\",\n" +
+            "            \"href\": \"https://www.noti-me.net/api/v1/notification-groups/{groupId}/members/{memberId}\"\n" +
+            "        }\n" +
+            "    ]\n" +
+            "}")
 data class GroupMemberResponse(
     @Schema(description = "그룹 ID")
     val groupId: UUID,

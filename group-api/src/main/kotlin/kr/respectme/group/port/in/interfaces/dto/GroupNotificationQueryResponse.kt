@@ -48,8 +48,44 @@ class GroupNotificationQueryResponseConverter(
     }
 }
 
-@Schema(description = "그룹 Notification 정보")
 @Hateoas(converter = GroupNotificationQueryResponseConverter::class)
+@Schema(description = "그룹 Notification 정보",
+    example = "{\n" +
+            "    \"notificationId\": \"791763ca-5da8-4aca-9c94-aa9d22a5fd10\",\n" +
+            "    \"groupInfo\": {\n" +
+            "        \"id\": \"791763ca-5da8-4aca-9c94-aa9d22a5fd10\",\n" +
+            "        \"name\": \"그룹 이름\"\n" +
+            "    },\n" +
+            "    \"writer\": {\n" +
+            "        \"id\": \"791763ca-5da8-4aca-9c94-aa9d22a5fd10\",\n" +
+            "        \"nickname\": \"주인장\"\n" +
+            "    },\n" +
+            "    \"content\": \"Notification Content\",\n" +
+            "    \"type\": \"IMMEDIATE\",\n" +
+            "    \"status\": \"PENDING\",\n" +
+            "    \"createdAt\": \"2023-10-01T00:00:00Z\",\n" +
+            "    \"updatedAt\": null,\n" +
+            "    \"scheduledAt\": null,\n" +
+            "    \"dayOfWeeks\": [],\n" +
+            "    \"dayInterval\": null,\n" +
+            "    \"lastSentAt\": null,\n" +
+            "    \"attachments\": [],\n" +
+            "    \"_links\": [\n" +
+            "        {\n" +
+            "            \"rel\": \"self\",\n" +
+            "            \"href\": \"https://www.noti-me.net/api/v1/notification-groups/791763ca-5da8-4aca-9c94-aa9d22a5fd10/notifications/791763ca-5da8-4aca-9c94-aa9d22a5fd10\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"rel\": \"group\",\n" +
+            "            \"href\": \"https://www.noti-me.net/api/v1/notification-groups/791763ca-5da8-4aca-9c94-aa9d22a5fd10\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"rel\": \"attachments\",\n" +
+            "            \"href\": \"https://www.noti-me.net/api/v1/notification-groups/791763ca-5da8-4aca-9c94-aa9d22a5fd10/notifications/791763ca-5da8-4aca-9c94-aa9d22a5fd10/attachments\"\n" +
+            "        }\n" +
+            "    ]\n" +
+        "}"
+)
 data class GroupNotificationQueryResponse(
     @Schema(description = "Notification ID")
     val notificationId: UUID,

@@ -1,7 +1,7 @@
 package kr.respectme.common.advice
 
 import kr.respectme.common.advice.hateoas.Hateoas
-import kr.respectme.common.advice.hateoas.Hateoasable
+import kr.respectme.common.advice.hateoas.HateoasResponse
 import org.springframework.context.ApplicationContext
 import org.springframework.core.MethodParameter
 import org.springframework.http.MediaType
@@ -48,7 +48,7 @@ class HateoasAdvice(private val applicationContext: ApplicationContext)
         val annotation = clazz.findAnnotation<Hateoas>()
             ?: return obj
 
-        if ( obj !is Hateoasable ) return obj
+        if ( obj !is HateoasResponse ) return obj
         val converterClass = annotation.converter
         val converter = applicationContext.getBean(converterClass.java)
         converter.convert(obj)

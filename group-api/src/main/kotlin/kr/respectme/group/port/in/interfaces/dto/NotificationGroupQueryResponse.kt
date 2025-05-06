@@ -37,7 +37,38 @@ class NotificationGroupQueryResponseConverter(
 }
 
 @Hateoas(converter = NotificationGroupQueryResponseConverter::class)
-@Schema(description = "그룹 정보")
+@Schema(description = "그룹 정보",
+    example = "{\n" +
+            "    \"id\": \"791763ca-5da8-4aca-9c94-aa9d22a5fd10\",\n" +
+            "    \"name\": \"그룹 이름\",\n" +
+            "    \"groupOwner\": {\n" +
+            "        \"id\": \"791763ca-5da8-4aca-9c94-aa9d22a5fd10\",\n" +
+            "        \"nickname\": \"주인장\"\n" +
+            "    },\n" +
+            "    \"description\": \"그룹 설명\",\n" +
+            "    \"thumbnail\": null,\n" +
+            "    \"groupType\": \"GROUP_PUBLIC\",\n" +
+            "    \"memberCount\": 10,\n" +
+            "    \"myRole\": \"MEMBER\",\n" +
+            "    \"_links\": [\n" +
+            "        {\n" +
+            "            \"rel\": \"self\",\n" +
+            "            \"href\": \"https://www.noti-me.net/api/v1/notification-groups/{groupId}\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"rel\": \"members\",\n" +
+            "            \"href\": \"https://www.noti-me.net/api/v1/notification-groups/{groupId}/members\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"rel\": \"notifications\",\n" +
+            "            \"href\": \"https://www.noti-me.net/api/v1/notification-groups/{groupId}/notifications\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"rel\": \"group files\",\n" +
+            "            \"href\": \"https://www.noti-me.net/api/v1/files/group-shared?groupId={groupId}\"\n" +
+            "        }\n" +
+            "    ]\n" +
+            "}")
 data class NotificationGroupQueryResponse(
     @Schema(description = "그룹 ID")
     val id: UUID,
